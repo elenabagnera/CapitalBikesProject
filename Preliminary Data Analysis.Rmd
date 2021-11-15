@@ -13,6 +13,8 @@ source("times.R")
 
 ## R Markdown
 
+[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+
 ```{r cars}
 data <- read_csv("data/202108-capitalbikeshare-tripdata.csv")
 
