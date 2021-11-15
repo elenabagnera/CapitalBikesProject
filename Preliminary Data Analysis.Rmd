@@ -7,22 +7,14 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+source("times.R")
 ```
 
 ## R Markdown
 
-### Boilerplate code below
-
-### Eric made changes
-
 ```{r cars}
-summary(cars)
+data <- read_csv("data/202108-capitalbikeshare-tripdata.csv")
+
+wider_data <- mutate_times(data)
 ```
-
-## Including Plots
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-add
