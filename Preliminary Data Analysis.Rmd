@@ -15,8 +15,33 @@ source("times.R")
 
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
-```{r cars}
-data <- read_csv("data/202108-capitalbikeshare-tripdata.csv")
+```{r cbs}
+# Run the code in the setup first
 
-wider_data <- mutate_times(data)
+# Separate out the data so that each departure and arrival has its own row.
+# Then change the columns so that there is only one station column
+# and remove the old station columns
+data <- read_csv("data/202108-capitalbikeshare-tripdata.csv") %>% 
+  pivot_longer(c("started_at", "ended_at"), names_to="time_type", values_to="time") %>% 
+  mutate(station = ifelse(time_type == "started_at", start_station_name, end_station_name)) %>% 
+  select(-start_station_name, -end_station_name)
+
+# Add a column for day of the month and hour of the day
+# If we expand this to multiple months, will need to add that column
+# This will output a table with the number of bikes that departed and arrived
+# a station for every hour of every day.
+result <- mutate_times(data) %>% 
+  arrange(time) %>% 
+  group_by(day, hour, station, time_type) %>% 
+  summarize(count = n())
+
+# The busiest hours for each station. started_at means it's a demand issue, 
+# ended_at means it's a supply issue. This could be graphed as is if we re-added 
+# the lat/lng of the station.
+# NA is an e-bike not at a station.
+result %>% 
+  filter(!is.na(station)) %>% 
+  arrange(-count) %>% 
+  
+
 ```

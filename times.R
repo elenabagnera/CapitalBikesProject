@@ -6,7 +6,8 @@ mutate_times <- function(x) {
   library(lubridate)
   
   result <- x %>% 
-    mutate(start_day_of_month = day(ymd_hms(started_at)))
+    mutate(day = day(ymd_hms(time)),
+           hour = hour(ymd_hms(time)))
   
   return(result)
 }
