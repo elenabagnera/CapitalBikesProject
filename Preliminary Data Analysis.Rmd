@@ -41,7 +41,7 @@ result <- mutate_times(data) %>%
 # NA is an e-bike not at a station.
 result %>% 
   filter(!is.na(station)) %>% 
-  arrange(-count) %>% 
+  arrange(-count)
   
 
 ```
