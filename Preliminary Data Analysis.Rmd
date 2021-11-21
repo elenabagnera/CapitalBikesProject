@@ -108,7 +108,7 @@ for (year in 2020:2021) {
             hour_data$type == "arrivals")
           
           if (length(arr_index_future) > 0) {
-            ridership_data$ridership[arr_index_future] <- ridership_data$lincoln_memorial[arr_index_prev]
+            ridership_data$ridership[arr_index_prev] <- ridership_data$lincoln_memorial[arr_index_future]
           }
         }
       }
