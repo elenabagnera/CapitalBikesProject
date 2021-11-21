@@ -16,32 +16,135 @@ source("times.R")
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
 ```{r cbs}
-# Run the code in the setup first
 
-# Separate out the data so that each departure and arrival has its own row.
-# Then change the columns so that there is only one station column
-# and remove the old station columns
-data <- read_csv("data/202108-capitalbikeshare-tripdata.csv") %>% 
+## Loop through all the files and merge them into one tibble
+file_list <- list.files("data/", pattern="tripdata.csv")
+rm(cbs_data)
+
+for(file_name in file_list) {
+  path <- paste("data/", file_name, sep="")
+
+  new_data <- read_csv(path)
+  
+  if (exists("cbs_data")){
+    cbs_data <- bind_rows(cbs_data, new_data)
+  } else {
+    cbs_data <- new_data
+  }
+}
+
+## Mutate the data so that it 
+data <- cbs_data %>% 
   pivot_longer(c("started_at", "ended_at"), names_to="time_type", values_to="time") %>% 
   mutate(station = ifelse(time_type == "started_at", start_station_name, end_station_name)) %>% 
   select(-start_station_name, -end_station_name)
 
-# Add a column for day of the month and hour of the day
-# If we expand this to multiple months, will need to add that column
-# This will output a table with the number of bikes that departed and arrived
-# a station for every hour of every day.
-result <- mutate_times(data) %>% 
-  arrange(time) %>% 
-  group_by(day, hour, station, time_type) %>% 
-  summarize(count = n())
-
-# The busiest hours for each station. started_at means it's a demand issue, 
-# ended_at means it's a supply issue. This could be graphed as is if we re-added 
-# the lat/lng of the station.
-# NA is an e-bike not at a station.
-result %>% 
-  filter(!is.na(station)) %>% 
-  arrange(-count)
+# Add a column for multiple time metrics
+# Then group rows to show total arrivals and departure per hour
+# Then pivot the table wider so that each hour has its own row with every station on it
+# Then remove all NAs and replace with zero.
+# Made them all lowercase and used underscores, the number of spaces could get confusing
+# I tried making them all valid variable names, but it created duplicates.
+hour_data <- mutate_times(data) %>% 
+  # If you only want certain stations data, filter here
+  group_by(year, month, day, hour, station, time_type) %>% 
+  summarize(count = n()) %>% 
+  pivot_wider(names_from="station", values_from = "count") %>% 
+  mutate(type = ifelse(time_type == "started_at", "departures", "arrivals")) %>% 
+  select(-time_type) %>% 
+  mutate_all(~ifelse(is.na(.), 0, .)) %>% 
+  rename_with(~ tolower(str_replace_all(., pattern = " ", replacement = "_")))
   
+# Just a graph to show one station's departures over time
+hour_data %>% 
+  mutate(date = make_datetime(year,match(month, month.abb),day,hour)) %>% 
+  ggplot() +
+  geom_point(aes(x=date, y=lincoln_memorial, color=type))
+
+# Create a new field called ridership that will be the actual riders on the 
+# Lincoln memorial stop
+ridership_data <- hour_data %>% 
+  mutate(ridership = NA)
+
+# This loop gets the values from the Lincoln memorial and puts it into the ridership
+# ridership column 14 days into the future. The goal is to couple lincoln memorial rides
+# with every station from 14 days ago for predictions.
+# When this is done running, the dates now represent future ridership, we need to shift
+# them 14 days into the future, so all the stations will be 14 day historic data.
+for (year in 2020:2021) {
+  for (month in month.abb) {
+    for (day in 1:31) {
+      for (hour in 0:23) {
+        dep_index_prev <- which(hour_data$year == year &
+          hour_data$month == month &
+          hour_data$day == day &
+          hour_data$hour == hour &
+          hour_data$type == "departures")
+
+        if (length(dep_index_prev) > 0) {
+          future_time <- make_datetime(year, match(month, month.abb), day, hour) + days(14)
+          dep_index_future <- which(hour_data$year == year(future_time) &
+            hour_data$month == (month.abb[month(future_time)]) &
+            hour_data$day == day(future_time) &
+            hour_data$hour == hour(future_time) &
+            hour_data$type == "departures")
+          if (length(dep_index_future) > 0) {
+            ridership_data$ridership[dep_index_prev] <- ridership_data$lincoln_memorial[dep_index_future]
+          }
+        }
+
+        arr_index_prev <- which(hour_data$year == year &
+          hour_data$month == month &
+          hour_data$day == day &
+          hour_data$hour == hour &
+          hour_data$type == "arrivals")
+
+        if (length(arr_index_prev) > 0) {
+          future_time <- make_datetime(year, match(month, month.abb), day, hour) + days(14)
+          arr_index_future <- which(hour_data$year == year(future_time) &
+            hour_data$month == (month.abb[month(future_time)]) &
+            hour_data$day == day(future_time) &
+            hour_data$hour == hour(future_time) &
+            hour_data$type == "arrivals")
+          
+          if (length(arr_index_future) > 0) {
+            ridership_data$ridership[arr_index_future] <- ridership_data$lincoln_memorial[arr_index_prev]
+          }
+        }
+      }
+    }
+  }
+}
+
+# Shift the dates 14 days into the future
+# I tried to do this with a map function, but ran into issues.
+for (index in 1:nrow(ridership_data)) {
+  date <- make_datetime(ridership_data$year[index], 
+                        match(ridership_data$month[index], month.abb), 
+                        ridership_data$day[index])
+  
+  future_date <- date + days(14)
+
+  ridership_data$year[index] = year(future_date)
+  ridership_data$month[index] = month.abb[month(future_date)]
+  ridership_data$day[index] = day(future_date)
+}
+
+# Just testing one data point, should probably test this is working as intended more
+# ridership_data's lincoln_memorial column should match the hour_data's 
+#  lincoln memorial from 14 days prior.
+# Ridership_data's ridership should match hour_data's lincoln memorial from the same date.
+hour_data %>% 
+  select(lincoln_memorial, year, month, day, hour) %>% 
+  filter(year == 2021, month == "Jul", day == 3, hour == 12)
+  
+hour_data %>% 
+  select(lincoln_memorial, year, month, day, hour, type) %>% 
+  filter(year == 2021, month == "Jul", day == 17, hour == 12)
+  
+ridership_data %>% 
+  select(ridership, lincoln_memorial, year, month, day, hour, type) %>% 
+  filter(year == 2021, month == "Jul", day == 17, hour == 12)
+
 
 ```
