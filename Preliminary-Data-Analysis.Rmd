@@ -51,7 +51,6 @@ source("times.R")
 ## Loop through all the files and merge them into one tibble
 file_list <- list.files("data/", pattern="tripdata.csv")
 rm(cbs_data)
-print(file_list)
 
 for(file_name in file_list) {
   path <- paste("data/", file_name, sep="")
@@ -165,22 +164,20 @@ write_csv(ridership_data, 'data/ridership.csv')
 
 ```{r test_ridership}
 # Just testing one data point, should probably test this is working as intended more
-
-ridership_data %>% 
-  select(ridership, lincoln_memorial, year, month, day, hour, type) %>% 
-  filter(year == 2021, month == "Jul", day == 17, hour == 12)
-
 # ridership_data's lincoln_memorial column should match the hour_data's 
 #  lincoln memorial from 14 days prior.
+# Ridership_data's ridership should match hour_data's lincoln memorial from the same date.
 hour_data %>% 
   select(lincoln_memorial, year, month, day, hour) %>% 
   filter(year == 2021, month == "Jul", day == 3, hour == 12)
-
-# ridership_data's ridership should match hour_data's lincoln memorial from the same date.
+  
 hour_data %>% 
   select(lincoln_memorial, year, month, day, hour, type) %>% 
   filter(year == 2021, month == "Jul", day == 17, hour == 12)
   
+ridership_data %>% 
+  select(ridership, lincoln_memorial, year, month, day, hour, type) %>% 
+  filter(year == 2021, month == "Jul", day == 17, hour == 12)
 
 ```
 
@@ -189,6 +186,7 @@ hour_data %>%
 Amount of rides at the lincoln memorial over all the time, and by various metrics
 
 ```{r}
+
 hour_data_date <- hour_data %>% 
   mutate(date = make_datetime(year,match(month, month.abb),day,hour))
 
@@ -267,7 +265,7 @@ l_metrics <- l_tune_results %>%
   )
 ```
 
-#### Results from the tuning
+#### Results to better tune the mtry and min_n
 
 ```{r l_graphs}
 l_metrics %>%  
