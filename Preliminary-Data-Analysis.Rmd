@@ -40,6 +40,7 @@ library(vip)
 library(lubridate)
 library(workflows)
 library(ranger)
+doParallel::registerDoParallel()
 ```
 
 
@@ -236,8 +237,6 @@ l_recipe <-
   step_dummy(all_nominal_predictors()) %>% 
   #step_center(all_numeric_predictors()) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"))
-
-doParallel::registerDoParallel(cores = 8)
 ```
 
 
