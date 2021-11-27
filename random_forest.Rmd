@@ -1,0 +1,182 @@
+---
+title: "random_forest"
+author: "Elena Bagnera"
+date: "11/13/2021"
+output: html_document
+---
+
+```{r include = FALSE}
+def.chunk.hook <- knitr::knit_hooks$get("chunk")
+knitr::opts_chunk$set(cache = FALSE)
+knitr::knit_hooks$set(
+  chunk = function(x, options) {
+    x <- def.chunk.hook(x, options)
+    ifelse(options$size != "normalsize", paste0("\n \\", options$size, "\n\n", x, "\n\n \\normalsize"), x)
+  }
+)
+# knitr::knit_hooks$set(inline = function(x) {
+#   prettyNum(round(x, 2), big.mark = ",")
+# })
+options(scipen=999)
+```
+
+
+\begin{center}
+\Huge{PPOL 670 | Final Project}
+
+\Huge{Random Forest}
+\end{center}
+
+\vspace{0.1in}
+
+[GitHub](https://github.com/elenabagnera/CapitalBikesProject)
+
+## Setup
+```{r setup, message=FALSE}
+library(tidyverse)
+library(tidymodels)
+library(recipes)
+library(vip)
+library(lubridate)
+library(workflows)
+library(ranger)
+source("times.R")
+source("io.R")
+source("manipulate_data.R")
+doParallel::registerDoParallel()
+```
+
+[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+
+```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
+
+cbs_data <- read_files('data/')
+data <- sep_departures_from_arrivals(cbs_data)
+hour_data <- get_station_hourly(data)
+
+ridership_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+```
+
+
+## Implementation
+
+```{r setup_data}
+ridership_data <- ridership_data %>% 
+  mutate(date = make_datetime(year,match(month, month.abb),day,hour)) %>% 
+  mutate(weekday = wday(date, label=TRUE)) %>% 
+  filter(type == "departures", !is.na(ridership)) %>% 
+  select(-type)
+
+# create a split object
+data_split <- initial_split(ridership_data, prop = 0.8)
+
+# create the training and testing data
+train <- training(x = data_split)
+test  <- testing(x = data_split)
+
+folds <- vfold_cv(data = train, v = 10)
+
+recipe <-
+  recipe(formula = ridership ~ ., data = train) %>%
+  step_dummy(alnominal_predictors()) %>% 
+  #step_center(all_numeric_predictors()) %>%
+  step_holiday(date, holidays = timeDate::listHolidays("US"))
+```
+
+
+```{r tuning, cache=TRUE}
+mod <- rand_forest(mtry = tune(), trees = 5, min_n = tune()) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+wf <- workflow() %>%
+  add_recipe(recipe) %>%
+  add_model(mod) 
+
+tune_results <- tune_grid(
+  wf,
+  resamples = folds,
+  grid = 2,
+  metrics = metric_set(rmse, mae)
+)
+
+metrics <- tune_results %>%
+  collect_metrics() %>% 
+  pivot_longer(min_n:mtry,
+    values_to = "value",
+    names_to = "parameter"
+  )
+```
+
+#### Results to better tune the mtry and min_n
+
+```{r graphs}
+metrics %>%  
+  filter(.metric == "rmse") %>% 
+  ggplot(aes(x = value, y = mean, color = parameter)) + 
+  geom_point() + 
+  labs(title = "RMSE")
+
+metrics %>%  
+  filter(.metric == "mae") %>% 
+  ggplot(aes(x = value, y = mean, color = parameter)) + 
+  geom_point() +
+  labs(title = "MAE")
+```
+
+Pick the results.
+
+```{r ft_results}
+best_rmse <- tune_results %>% 
+  select_best("rmse")
+
+best_rmse
+
+best_mae <-tune_results %>% 
+  select_best("mae")
+
+best_mae
+
+final_rf <- finalize_model(
+  mod,
+  best_rmse
+)
+
+collect_metrics(tune_results, summarize = FALSE) %>%
+  filter(.metric == "rmse" || .metric == "mae") %>%
+  ggplot(aes(x = id, y = .estimate, group = .estimator)) +
+  geom_point(aes(color=.metric)) +
+  scale_y_continuous(limits = c(0, 5)) +
+  labs(title = "Calculated MAE and RMSE Across the 10 Folds",
+     y = "RMSE_hat") +
+  theme_minimal()
+
+collect_metrics(tune_results, summarize = FALSE) %>%
+  filter(.metric == "rmse") %>%
+  summarize(mean(.estimate))
+```
+
+```{r chosen_one}
+final_wf <- workflow() %>%
+  add_recipe(recipe) %>%
+  add_model(final_rf) %>% 
+  fit(train)
+
+p_test <- bind_cols(
+  test,
+  predict(object = final_wf, new_data = test))
+```
+
+Out of sample RMSE
+```{r OOS_RMSE_lincoln}
+sqrt(mean((p_test$ridership - p_test$.pred)^2))
+```
+
+```{r lincoln_final_vip, warning=FALSE}
+final_rf %>%
+  set_engine("ranger", importance = "permutation") %>%
+  fit(ridership ~ .,
+    data = train
+  ) %>%
+  vip(geom = "point")
+```

@@ -1,0 +1,81 @@
+---
+title: "visualizations"
+author: "Elena Bagnera"
+date: "11/13/2021"
+output: html_document
+---
+
+```{r include = FALSE}
+def.chunk.hook <- knitr::knit_hooks$get("chunk")
+knitr::opts_chunk$set(cache = FALSE)
+knitr::knit_hooks$set(
+  chunk = function(x, options) {
+    x <- def.chunk.hook(x, options)
+    ifelse(options$size != "normalsize", paste0("\n \\", options$size, "\n\n", x, "\n\n \\normalsize"), x)
+  }
+)
+# knitr::knit_hooks$set(inline = function(x) {
+#   prettyNum(round(x, 2), big.mark = ",")
+# })
+options(scipen=999)
+```
+
+
+\begin{center}
+\Huge{PPOL 670 | Final Project}
+
+\Huge{Visualizations}
+\end{center}
+
+\vspace{0.1in}
+
+[GitHub](https://github.com/elenabagnera/CapitalBikesProject)
+
+## Setup
+```{r setup, message=FALSE}
+library(tidyverse)
+source("times.R")
+source("io.R")
+source("manipulate_data.R")
+```
+
+
+[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+
+```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
+cbs_data <- read_files('data/')
+data <- sep_departures_from_arrivals(cbs_data)
+hour_data <- get_station_hourly(data)
+```
+
+## Visualizations and Explorations
+
+Amount of rides at the lincoln memorial over all the time, and by various metrics
+
+```{r visualizations}
+# The grouped data does not have the original date column, but it can be nice
+#  for visualizations. There is a function to do this in times.R
+hour_data_date <- add_date_column(hour_data)
+
+hour_data_date %>% 
+  ggplot() +
+  geom_point(aes(x=date, y=lincoln_memorial, color=type))
+
+hour_data_date %>% 
+  mutate(weekday = wday(date, label=TRUE)) %>% 
+  ggplot() +
+  geom_point(aes(x=weekday, y=lincoln_memorial, color=type))
+
+hour_data_date %>% 
+  ggplot() +
+  geom_point(aes(x=day, y=lincoln_memorial, color=type))
+
+hour_data_date %>% 
+  ggplot() +
+  geom_point(aes(x=hour, y=lincoln_memorial, color=type))
+
+hour_data_date %>% 
+  filter(year == 2021, month == "Aug", day == 15) %>% 
+  ggplot() +
+  geom_line(aes(x=hour, y=lincoln_memorial, color=type))
+```
