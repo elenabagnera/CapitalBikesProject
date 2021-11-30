@@ -44,12 +44,13 @@ source("manipulate_data.R")
 
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
-```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
-# get data through API
+```{r get_data, cache = TRUE, warning = FALSE, message = FALSE}
+
+### get real-time data through API
 url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/5/query?where=1%3D1&outFields=*&outSR=4326&f=json"
 
 # 1) use the URL to make a request from the API
-data_json <- GET(url = url, 
+data_json <- GET(url = url,
                  user_agent("Georgetown University Assignment"))
 # 2) Check for a server error in the response
 http_status(data_json)
@@ -64,6 +65,9 @@ cbs_data <- as_tibble(data_matrix[2:nrow(data_matrix)],
 names(cbs_data) <- data_matrix[1, ]
 #check the data form - now is data.frame
 class(cbs_data)
+
+### get historical data through API
+
 
 #cbs_data <- read_files('data/')
 data <- sep_departures_from_arrivals(cbs_data)
@@ -81,23 +85,28 @@ hour_data_date <- add_date_column(hour_data)
 
 hour_data_date %>% 
   ggplot() +
-  geom_point(aes(x=date, y=lincoln_memorial, color=type))
+  geom_point(aes(x = date, y = lincoln_memorial,
+                 color = type))
 
 hour_data_date %>% 
   mutate(weekday = wday(date, label=TRUE)) %>% 
   ggplot() +
-  geom_point(aes(x=weekday, y=lincoln_memorial, color=type))
+  geom_point(aes(x = weekday, y = lincoln_memorial,
+                 color=type))
 
 hour_data_date %>% 
   ggplot() +
-  geom_point(aes(x=day, y=lincoln_memorial, color=type))
+  geom_point(aes(x = day, y = lincoln_memorial,
+                 color=type))
 
 hour_data_date %>% 
   ggplot() +
-  geom_point(aes(x=hour, y=lincoln_memorial, color=type))
+  geom_point(aes(x = hour, y = lincoln_memorial,
+                 color=type))
 
 hour_data_date %>% 
   filter(year == 2021, month == "Aug", day == 15) %>% 
   ggplot() +
-  geom_line(aes(x=hour, y=lincoln_memorial, color=type))
+  geom_line(aes(x  =hour, y = lincoln_memorial,
+                color=type))
 ```
