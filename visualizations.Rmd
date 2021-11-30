@@ -59,17 +59,12 @@ data_json <- content(data_json, as = "text")
 # 4) create a character matrix from the JSON
 data_matrix <- fromJSON(data_json)
 # 5) turn the body of the character matrix into a tibble
-cbs_data <- as_tibble(data_matrix[2:nrow(data_matrix)],
-                      .name_repair = "minimal")
-#6) add variable names to the tibble
-names(cbs_data) <- data_matrix[1, ]
-#check the data form - now is data.frame
-class(cbs_data)
+realtime_data <- as_tibble(data_matrix$features$attributes)
+#help needed: how to use lower case for var names?
 
 ### get historical data through API
+cbs_data <- read_files('data/')
 
-
-#cbs_data <- read_files('data/')
 data <- sep_departures_from_arrivals(cbs_data)
 hour_data <- get_station_hourly(data)
 ```
