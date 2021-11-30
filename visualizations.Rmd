@@ -34,6 +34,8 @@ options(scipen=999)
 ## Setup
 ```{r setup, message=FALSE}
 library(tidyverse)
+library(httr)
+library(jsonlite)
 source("times.R")
 source("io.R")
 source("manipulate_data.R")
@@ -43,14 +45,34 @@ source("manipulate_data.R")
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
 ```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
-cbs_data <- read_files('data/')
+# get data through API
+url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/5/query?where=1%3D1&outFields=*&outSR=4326&f=json"
+
+# 1) use the URL to make a request from the API
+data_json <- GET(url = url, 
+                 user_agent("Georgetown University Assignment"))
+# 2) Check for a server error in the response
+http_status(data_json)
+# 3) get the contents of the response as a text string
+data_json <- content(data_json, as = "text")
+# 4) create a character matrix from the JSON
+data_matrix <- fromJSON(data_json)
+# 5) turn the body of the character matrix into a tibble
+cbs_data <- as_tibble(data_matrix[2:nrow(data_matrix)],
+                      .name_repair = "minimal")
+#6) add variable names to the tibble
+names(cbs_data) <- data_matrix[1, ]
+#check the data form - now is data.frame
+class(cbs_data)
+
+#cbs_data <- read_files('data/')
 data <- sep_departures_from_arrivals(cbs_data)
 hour_data <- get_station_hourly(data)
 ```
 
 ## Visualizations and Explorations
 
-Amount of rides at the lincoln memorial over all the time, and by various metrics
+Amount of rides at the Lincoln memorial over all the time, and by various metrics
 
 ```{r visualizations}
 # The grouped data does not have the original date column, but it can be nice

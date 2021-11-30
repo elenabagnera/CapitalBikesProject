@@ -10,7 +10,7 @@ sep_departures_from_arrivals <- function(x) {
     # Creates a new column named station, to replace start_station_name and end_station_name
     mutate(station = ifelse(type == "started_at", start_station_name, end_station_name)) %>%
     select(-start_station_name, -end_station_name) %>% 
-    # Rnames the values from "started_at" and "ended_at" to "departure" and "arrival"
+    # Rename the values from "started_at" and "ended_at" to "departure" and "arrival"
     mutate(type = ifelse(type == "started_at", "departure", "arrival"))
   
   return(data_temp)
@@ -23,7 +23,7 @@ sep_departures_from_arrivals <- function(x) {
 #' All NAs are replaced with zero since they have zero departures or arrivals
 #' All stations renamed to lowercase and used underscores,
 #'
-#' @param x The  data pivoted to sep arrivals from departures
+#' @param x The data pivoted to sep arrivals from departures
 #' @return Wide tibble with stations on columns grouped by hour.
 get_station_hourly <- function(x) {
   source("times.R")
@@ -31,7 +31,7 @@ get_station_hourly <- function(x) {
     group_by(year, month, day, hour, station, type) %>% 
     summarize(count = n()) %>% 
     # Each station has its own row, this puts all the stations on one row
-    pivot_wider(names_from="station", values_from = "count") %>% 
+    pivot_wider(names_from = "station", values_from = "count") %>% 
     # Renames the type to make it plural since it is a count now
     mutate(type = ifelse(type == "departure", "departures", "arrivals")) %>% 
     # Replace NAs with 0
@@ -66,37 +66,38 @@ setup_for_time_prediction  <- function(x, station_name) {
       for (day in 1:31) {
         for (hour in 0:23) {
           dep_index_prev <- which(hour_data$year == year &
-                                    hour_data$month == month &
-                                    hour_data$day == day &
-                                    hour_data$hour == hour &
-                                    hour_data$type == "departures")
+                                  hour_data$month == month &
+                                  hour_data$day == day &
+                                  hour_data$hour == hour &
+                                  hour_data$type == "departures")
           
           if (length(dep_index_prev) > 0) {
             future_time <- make_datetime(year, match(month, month.abb), day, hour) + days(14)
             dep_index_future <- which(hour_data$year == year(future_time) &
-                                        hour_data$month == (month.abb[month(future_time)]) &
-                                        hour_data$day == day(future_time) &
-                                        hour_data$hour == hour(future_time) &
-                                        hour_data$type == "departures")
-            if (length(dep_index_future) > 0) {
-              # Get future ridership and pair it with 14 day ago rides.
-              ridership_data$ridership[dep_index_prev] <- ridership_data[[station_name]][dep_index_future]
+                                      hour_data$month == (month.abb[month(future_time)]) &
+                                      hour_data$day == day(future_time) &
+                                      hour_data$hour == hour(future_time) &
+                                      hour_data$type == "departures")
+          
+          if (length(dep_index_future) > 0) {
+            # Get future ridership and pair it with 14 day ago rides.
+            ridership_data$ridership[dep_index_prev] <- ridership_data[[station_name]][dep_index_future]
             }
           }
           
           arr_index_prev <- which(hour_data$year == year &
-                                    hour_data$month == month &
-                                    hour_data$day == day &
-                                    hour_data$hour == hour &
-                                    hour_data$type == "arrivals")
+                                  hour_data$month == month &
+                                  hour_data$day == day &
+                                  hour_data$hour == hour &
+                                  hour_data$type == "arrivals")
           
           if (length(arr_index_prev) > 0) {
             future_time <- make_datetime(year, match(month, month.abb), day, hour) + days(14)
             arr_index_future <- which(hour_data$year == year(future_time) &
-                                        hour_data$month == (month.abb[month(future_time)]) &
-                                        hour_data$day == day(future_time) &
-                                        hour_data$hour == hour(future_time) &
-                                        hour_data$type == "arrivals")
+                                      hour_data$month == (month.abb[month(future_time)]) &
+                                      hour_data$day == day(future_time) &
+                                      hour_data$hour == hour(future_time) &
+                                      hour_data$type == "arrivals")
             
             if (length(arr_index_future) > 0) {
               ridership_data$ridership[arr_index_prev] <- ridership_data[[station_name]][arr_index_future]
@@ -123,3 +124,4 @@ setup_for_time_prediction  <- function(x, station_name) {
   
   return(ridership_data)
 }
+
