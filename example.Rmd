@@ -38,11 +38,14 @@ source("manipulate_data.R")
 ```
 
 
-[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+[Direct link to datasets](https://s3.amazonaws.com/capitalbikeshare-data/)
 
 ```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
 cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data)
+data <- sep_departures_from_arrivals(cbs_data) %>% 
+  filter_by_distance(from_station = 'lincoln_memorial', distance = 5000)
+
+
 hour_data <- get_station_hourly(data)
 
 # Stop here to work with current data. This is all you need! The below code sets up the data for time predictions

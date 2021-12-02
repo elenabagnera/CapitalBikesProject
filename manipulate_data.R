@@ -5,15 +5,48 @@
 #' @param x The CBS original data
 #' @return Tibble with longer data_set separating departures and arrivals
 sep_departures_from_arrivals <- function(x) {
-  data_temp <- x %>% 
-    pivot_longer(c("started_at", "ended_at"), names_to="type", values_to="time") %>% 
+  data_temp <- x %>%
+    pivot_longer(c("started_at", "ended_at"), names_to = "type", values_to = "time") %>%
     # Creates a new column named station, to replace start_station_name and end_station_name
-    mutate(station = ifelse(type == "started_at", start_station_name, end_station_name)) %>%
-    select(-start_station_name, -end_station_name) %>% 
+    # and it creates new columns likewise for coordinates and id.
+    # Mutates the station name to be more readable.
+    mutate(
+      station = tolower(str_replace_all(ifelse(type == "started_at", start_station_name, end_station_name), pattern = " ", replacement = "_")),
+      lat = ifelse(type == "started_at", start_lat, end_lat),
+      lng = ifelse(type == "started_at", start_lng, end_lng),
+      station_id = ifelse(type == "started_at", start_station_id, end_station_id),
+    ) %>%
+    select(-start_station_name, 
+           -end_station_name, 
+           -start_lat, 
+           -end_lat, 
+           -start_station_id, 
+           -end_station_id, 
+           -start_lng, 
+           -end_lng) %>%
     # Rename the values from "started_at" and "ended_at" to "departure" and "arrival"
-    mutate(type = ifelse(type == "started_at", "departure", "arrival"))
-  
+    mutate(type = ifelse(type == "started_at", "departure", "arrival")) %>% 
+
   return(data_temp)
+}
+
+#' Filters out all stations outside a given distance from a station
+#'
+#' @param x The long-data set produced by set_departures_from_arrivals
+#' @param from_station The station name you want to filter by
+#' @param distance The distance in meters
+#' @return The dataset with the stations removed
+filter_by_distance <- function(x, from_station, distance) {
+  
+  library(geosphere)
+  
+  station_row <- which(data$station == from_station)[1]
+  from_lat = data$lat[station_row]
+  from_lng = data$lng[station_row]
+  
+  return(x %>% 
+    filter(distm(c(from_lng, from_lat), cbind(lng, lat)) < distance_m)
+  )
 }
 
 #' Groups by station and by hour.
@@ -36,7 +69,6 @@ get_station_hourly <- function(x) {
     mutate(type = ifelse(type == "departure", "departures", "arrivals")) %>% 
     # Replace NAs with 0
     mutate_all(~ifelse(is.na(.), 0, .)) %>% 
-    rename_with(~ tolower(str_replace_all(., pattern = " ", replacement = "_")))
   
   return(hour_data_temp)
 }
