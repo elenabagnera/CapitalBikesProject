@@ -62,7 +62,7 @@ data_matrix <- fromJSON(data_json)
 realtime_data <- as_tibble(data_matrix$features$attributes)
 #help needed: how to use lower case for var names?
 
-### get historical data through API
+### get historical data through CSVs
 cbs_data <- read_files('data/')
 
 data <- sep_departures_from_arrivals(cbs_data)
@@ -104,4 +104,44 @@ hour_data_date %>%
   ggplot() +
   geom_line(aes(x  =hour, y = lincoln_memorial,
                 color=type))
+
+# The below data can be used for a heat map.
+coord_data <- data %>% 
+  select(station, lat, lng) %>% 
+  filter(duplicated(station) == FALSE)
+
+heat_map_data <- data %>% 
+  # filter() %>% Filter here if you want a certain date range
+  group_by(station, type) %>% 
+  summarize(count = n()) %>% 
+  pivot_wider(names_from = type, values_from = count) %>% 
+  left_join(coord_data) %>% 
+  filter(!is.na(lat), !is.na(lng))
+  
+
+library(sf)
+library(tigris)
+
+states <- tigris::states(cb = TRUE, progress_bar = FALSE) %>% 
+    st_crop(xmin = -77.4, xmax = -76.8,
+    ymin = 38.75, ymax = 39.15)
+
+dep_sf <- heat_map_data %>% 
+  st_as_sf(coords=c("lng", "lat"), remove = FALSE) %>% 
+  st_set_crs(value = 4326)
+
+dep_sf %>% 
+  ggplot() + 
+  geom_sf(data = states, fill = NA ) +
+  geom_sf(aes(color = departure), alpha = 0.3)
+
+dep_sf %>% 
+  ggplot() + 
+  geom_sf(data = states, fill = NA ) +
+  geom_sf(aes(color = arrival), alpha = 0.3)
+
+dep_sf %>% 
+  ggplot() + 
+  geom_sf(data = states, fill = NA ) +
+  geom_sf(aes(color = departure - arrival), alpha = 0.3)
 ```
