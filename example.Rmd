@@ -46,6 +46,7 @@ data <- sep_departures_from_arrivals(cbs_data)
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
 hour_data <- get_station_hourly(filtered_data) %>% 
+  ## Make hour_data wider here. This will require an update to setup_for_time_prediction
   get_historic_weather()
 
 # Stop here to work with current data. This is all you need! The below code sets up the data for time predictions at a given station and adds other predictors
