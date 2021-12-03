@@ -40,21 +40,24 @@ source("manipulate_data.R")
 
 [Direct link to datasets](https://s3.amazonaws.com/capitalbikeshare-data/)
 
-```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
+```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
 cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data) %>% 
-  filter_by_distance(from_station = 'lincoln_memorial', distance = 5000)
+data <- sep_departures_from_arrivals(cbs_data)
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
+hour_data <- get_station_hourly(filtered_data) %>% 
+  get_historic_weather()
 
-hour_data <- get_station_hourly(data)
-
-# Stop here to work with current data. This is all you need! The below code sets up the data for time predictions
-# at a given station.
+# Stop here to work with current data. This is all you need! The below code sets up the data for time predictions at a given station and adds other predictors
 ```
 
 
-```{r ridership, cache=TRUE, warning=FALSE, message=FALSE}
+```{r ridership, cache=FALSE, warning=FALSE, message=FALSE}
+# This lags all the data that is currently in hour_data, so weather is also 14 day
+# lagged
 ridership_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+
+glimpse(ridership_data)
 ```
 
 
