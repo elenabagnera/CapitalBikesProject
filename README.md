@@ -14,8 +14,12 @@ This should produce two new columns to replace the column for each station. `exa
 
 This will require a minor update for ridership when complete.
 
-3. Create models on the new data
+3. Clean up weather predictors.
 
-4. Analyze results of models
+Delete columns that have missing data or find out how to fill in that data. Some data is likely not needed (wind_direction for example)
 
-5. Create final website to present results
+4. Create models on the new data
+
+5. Analyze results of models
+
+6. Create final website to present results
