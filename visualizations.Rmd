@@ -44,7 +44,7 @@ source("manipulate_data.R")
 
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
-```{r get_data, cache = TRUE, warning = FALSE, message = FALSE}
+```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
 
 ### get real-time data through API
 url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/5/query?where=1%3D1&outFields=*&outSR=4326&f=json"
