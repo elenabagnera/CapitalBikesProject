@@ -3,6 +3,8 @@
 debug.R
 git branch -M main
 secrets.json
+*.DS_Store
+data/untracked_data
 
 # Template from https://github.com/github/gitignore
 
@@ -28,8 +30,6 @@ secrets.json
 # RStudio files
 .Rproj.user/
 
-*.DS_Store 
-
 # knitr and R markdown default cache directories
 *_cache/
 /cache/
@@ -43,5 +43,3 @@ secrets.json
 
 # translation temp files
 po/*~
-
-.DS_Store
