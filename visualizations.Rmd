@@ -83,30 +83,57 @@ Amount of rides at the Lincoln memorial over all the time, and by various metric
 #  for visualizations. There is a function to do this in times.R
 hour_data_date <- add_date_column(hour_data)
 
-# by date
 hour_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
   ggplot() +
   geom_point(aes(x = date, y = lincoln_memorial,
                  color = type))
+```
 
+```{r day}
 # by weekday
 hour_data_date %>% 
   mutate(weekday = wday(date, label=TRUE)) %>% 
   ggplot() +
   geom_point(aes(x = weekday, y = lincoln_memorial,
-                 color=type))
+                 color=type)) # clearly people cycle more on saturdays and sundays
 
-# by day
+# by day of the month
 hour_data_date %>% 
   ggplot() +
   geom_point(aes(x = day, y = lincoln_memorial,
-                 color=type))
+                 color=type)) # there is no clear pattern across days of the month - aka probably not a good predictor
+
+
+```
+
+```{r hour}
 
 # by hour
 hour_data_date %>% 
   ggplot() +
   geom_point(aes(x = hour, y = lincoln_memorial,
-                 color=type))
+                 color=type)) # people cycle more in the middle of the day, like between 1 and 7PM
+
+```
+
+```{r month}
+
+hour_data_date %>% 
+  ggplot() +
+  geom_point(aes(x = month, y = lincoln_memorial,
+                 color=type)) # people cycle most in Spring, summer and fall. SUprised that there is no big spike in summer months
+
+```
+```{r year}
+
+hour_data_date %>% # something is off with the year variable
+  ggplot() +
+  geom_point(aes(x = year, y = lincoln_memorial,
+                 color=type)) # overall, more people use the service in 2021 than in 2020
+
+```
+
+```{r specific day}
 
 # for a specific month and day, seeing variance by hour
 hour_data_date %>% 
