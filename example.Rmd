@@ -41,24 +41,20 @@ source("manipulate_data.R")
 [Direct link to datasets](https://s3.amazonaws.com/capitalbikeshare-data/)
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
+
+# Read all the data
 cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data)
-filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
+
+# Read one month for testing
+# cbs_data <- read_csv("data/202107-capitalbikeshare-tripdata.csv")
+
+data <- sep_departures_from_arrivals(cbs_data) %>% 
+  filter(!is.na(station)) # Remove electric bikes not going to / from a station
+
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 800)
 
 hour_data <- get_station_hourly(filtered_data) %>% 
-  ## Make hour_data wider here. This will require an update to setup_for_time_prediction
-  get_historic_weather() 
-
-# Eric, could you kindly integrate this to the main code structure?
-library(reshape)
-data <- data %>% 
-  mutate(
-      day = day(ymd_hms(time)),
-      hour = hour(ymd_hms(time)),
-      month = month(ymd_hms(time), label = TRUE),
-      year = year(ymd_hms(time)))
-
-data1 <- cast(data, hour ~ type + station)
+  get_historic_weather()
 
 # Stop here to work with current data. This is all you need! The below code sets up the data for time predictions at a given station and adds other predictors
 ```
@@ -67,9 +63,12 @@ data1 <- cast(data, hour ~ type + station)
 ```{r ridership, cache=FALSE, warning=FALSE, message=FALSE}
 # This lags all the data that is currently in hour_data, so weather is also 14 day
 # lagged
-ridership_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+glimpse(lagged_data)
 
-glimpse(ridership_data)
+# Recommended next steps before modeling
+lagged_data %>% 
+  filter(!is.na(departures) & !is.na(arrivals))
 ```
 
 
