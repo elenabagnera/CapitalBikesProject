@@ -1,6 +1,6 @@
 ---
 title: "visualizations"
-author: "Elena Bagnera"
+author: "Capital Bikes Team"
 date: "11/13/2021"
 output: html_document
 ---
@@ -69,7 +69,7 @@ data <- sep_departures_from_arrivals(cbs_data)
 hour_data <- get_station_hourly(data)
 ```
 
-## Visualizations and Explorations
+## Visualizations by time at Lincoln Memorial
 
 Amount of rides at the Lincoln memorial over all the time, and by various metrics
 
@@ -105,6 +105,11 @@ hour_data_date %>%
   geom_line(aes(x  =hour, y = lincoln_memorial,
                 color=type))
 
+```
+
+## Heat maps
+
+```{r heat}
 # The below data can be used for a heat map.
 coord_data <- data %>% 
   select(station, lat, lng) %>% 
@@ -144,4 +149,13 @@ dep_sf %>%
   ggplot() + 
   geom_sf(data = states, fill = NA ) +
   geom_sf(aes(color = departure - arrival), alpha = 0.3)
+```
+
+
+## Visualizations by weather at Lincoln Memorial
+
+```{r weather}
+
+
+
 ```
