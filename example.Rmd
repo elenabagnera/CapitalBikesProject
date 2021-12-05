@@ -47,7 +47,18 @@ filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', dis
 
 hour_data <- get_station_hourly(filtered_data) %>% 
   ## Make hour_data wider here. This will require an update to setup_for_time_prediction
-  get_historic_weather()
+  get_historic_weather() 
+
+# Eric, could you kindly integrate this to the main code structure?
+library(reshape)
+data <- data %>% 
+  mutate(
+      day = day(ymd_hms(time)),
+      hour = hour(ymd_hms(time)),
+      month = month(ymd_hms(time), label = TRUE),
+      year = year(ymd_hms(time)))
+
+data1 <- cast(data, hour ~ type + station)
 
 # Stop here to work with current data. This is all you need! The below code sets up the data for time predictions at a given station and adds other predictors
 ```
