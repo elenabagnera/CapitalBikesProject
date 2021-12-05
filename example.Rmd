@@ -79,15 +79,15 @@ lagged_data %>%
 #  lincoln memorial from 14 days prior.
 # Ridership_data's ridership should match hour_data's lincoln memorial from the same date.
 hour_data %>% 
-  select(lincoln_memorial, year, month, day, hour) %>% 
+  select(lincoln_memorial_departures, year, month, day, hour) %>% 
   filter(year == 2021, month == "Jul", day == 3, hour == 12)
   
 hour_data %>% 
-  select(lincoln_memorial, year, month, day, hour, type) %>% 
+  select(lincoln_memorial_departures, year, month, day, hour) %>% 
   filter(year == 2021, month == "Jul", day == 17, hour == 12)
   
 ridership_data %>% 
-  select(ridership, lincoln_memorial, year, month, day, hour, type) %>% 
+  select(departures, lincoln_memorial_departures, year, month, day, hour) %>% 
   filter(year == 2021, month == "Jul", day == 17, hour == 12)
 
 ```

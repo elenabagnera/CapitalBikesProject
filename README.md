@@ -8,7 +8,7 @@ This is for a group project for POL706 at Georgetown University
 
 This could graph weather verses departures, temperature vs departues, heat maps, and the other examples in `visualizations.Rmd`.
 
-~~2. Widen hour_data on the column type for each station.~~
+2. ~~Widen hour_data on the column type for each station.~~
 
 3. Clean up weather predictors.
 

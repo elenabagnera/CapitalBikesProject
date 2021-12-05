@@ -121,8 +121,8 @@ setup_for_time_prediction <- function(x, station_name) {
               # Get future departures and arrivals and pair it with 14 day ago rides.
               dep_column_name <- paste(station_name, "departures", sep = "_")
               arr_column_name <- paste(station_name, "arrivals", sep = "_")
-              lagged_data$departures[index_prev] <- lagged_data[[dep_column_name]][index_future]
-              lagged_data$arrivals[index_prev] <- lagged_data[[arr_column_name]][index_future]
+              lagged_data$departures[index_prev[1]] <- lagged_data[[dep_column_name]][index_future[1]]
+              lagged_data$arrivals[index_prev[1]] <- lagged_data[[arr_column_name]][index_future[1]]
             }
           }
         }
