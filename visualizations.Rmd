@@ -44,6 +44,7 @@ source("manipulate_data.R")
 
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
+
 ```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
 
 ### get real-time data through API
@@ -65,8 +66,12 @@ realtime_data <- as_tibble(data_matrix$features$attributes)
 ### get historical data through CSVs
 cbs_data <- read_files('data/')
 
-data <- sep_departures_from_arrivals(cbs_data)
-hour_data <- get_station_hourly(data)
+data <- sep_departures_from_arrivals(cbs_data) %>%
+  filter_by_distance(from_station = 'lincoln_memorial', distance_m = 1600) # added filtering
+
+hour_data <- get_station_hourly(data) %>% 
+  get_historic_weather() # added weather
+
 ```
 
 ## Visualizations by time at Lincoln Memorial
@@ -78,27 +83,32 @@ Amount of rides at the Lincoln memorial over all the time, and by various metric
 #  for visualizations. There is a function to do this in times.R
 hour_data_date <- add_date_column(hour_data)
 
-hour_data_date %>% 
+# by date
+hour_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
   ggplot() +
   geom_point(aes(x = date, y = lincoln_memorial,
                  color = type))
 
+# by weekday
 hour_data_date %>% 
   mutate(weekday = wday(date, label=TRUE)) %>% 
   ggplot() +
   geom_point(aes(x = weekday, y = lincoln_memorial,
                  color=type))
 
+# by day
 hour_data_date %>% 
   ggplot() +
   geom_point(aes(x = day, y = lincoln_memorial,
                  color=type))
 
+# by hour
 hour_data_date %>% 
   ggplot() +
   geom_point(aes(x = hour, y = lincoln_memorial,
                  color=type))
 
+# for a specific month and day, seeing variance by hour
 hour_data_date %>% 
   filter(year == 2021, month == "Aug", day == 15) %>% 
   ggplot() +
