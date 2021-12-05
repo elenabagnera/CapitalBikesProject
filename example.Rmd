@@ -72,12 +72,11 @@ lagged_data %>%
 ```
 
 
-```{r test_ridership, warning=FALSE, message=FALSE}
-# Just testing one data point to make sure ridership is corret.
-#  Should test this is working as intended.
-# ridership_data's lincoln_memorial column should match the hour_data's 
+```{r test_lag, warning=FALSE, message=FALSE}
+# Just testing one data point to make sure lag is correct.
+# lagged_data's lincoln_memorial column should match the hour_data's 
 #  lincoln memorial from 14 days prior.
-# Ridership_data's ridership should match hour_data's lincoln memorial from the same date.
+# lagged_data's departures should match hour_data's lincoln memorial departures from the same date.
 hour_data %>% 
   select(lincoln_memorial_departures, year, month, day, hour) %>% 
   filter(year == 2021, month == "Jul", day == 3, hour == 12)
@@ -86,7 +85,7 @@ hour_data %>%
   select(lincoln_memorial_departures, year, month, day, hour) %>% 
   filter(year == 2021, month == "Jul", day == 17, hour == 12)
   
-ridership_data %>% 
+lagged_data %>% 
   select(departures, lincoln_memorial_departures, year, month, day, hour) %>% 
   filter(year == 2021, month == "Jul", day == 17, hour == 12)
 
