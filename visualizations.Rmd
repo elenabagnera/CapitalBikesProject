@@ -199,7 +199,6 @@ dep_sf %>%
 
 ## Visualizations by weather at Lincoln Memorial
 
-<<<<<<< Updated upstream
 ```{r temperature1}
 
 hour_data_date %>%
