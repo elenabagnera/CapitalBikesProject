@@ -30,9 +30,10 @@ add_predictor_times <- function(x) {
   result <- x %>%
     mutate(
       weekday =
-        day(make_datetime(year, match(month, month.abb), day, hour), label = TRUE),
+        wday(make_datetime(year, match(month, month.abb), day, hour), label = TRUE),
       yearday =
         yday(make_datetime(year, match(month, month.abb), day, hour)),
+      date = make_datetime(year, match(month, month.abb), day, hour)
     )
 
   return(result)

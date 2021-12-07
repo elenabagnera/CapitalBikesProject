@@ -62,18 +62,17 @@ hour_data <- get_station_hourly(filtered_data) %>%
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
 ```
 
-
 ## Implementation
 
 ```{r setup_data}
-lagged_data <- lagged_data %>% 
+model_data <- lagged_data %>% 
   add_predictor_times() %>% 
   filter(!is.na(departures) & !is.na(arrivals)) %>% 
   # Having real time arrival data would be cheating
-  select(-arrivals)
+  select(-arrivals, -wind_chill, -heat_index, -wind_direction, -wind_gust)
 
 # create a split object
-data_split <- initial_split(ridership_data, prop = 0.8)
+data_split <- initial_split(model_data, prop = 0.8)
 
 # create the training and testing data
 train <- training(x = data_split)
@@ -82,15 +81,15 @@ test  <- testing(x = data_split)
 folds <- vfold_cv(data = train, v = 10)
 
 recipe <-
-  recipe(formula = ridership ~ ., data = train) %>%
+  recipe(formula = departures ~ ., data = train) %>%
   step_dummy(all_nominal_predictors()) %>% 
-  #step_center(all_numeric_predictors()) %>%
+  step_center(all_numeric_predictors()) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"))
 ```
 
 
 ```{r tuning, cache=TRUE}
-mod <- rand_forest(mtry = tune(), trees = 5, min_n = tune()) %>%
+mod <- rand_forest(mtry = tune(), trees = 200, min_n = tune()) %>%
   set_mode("regression") %>%
   set_engine("ranger")
 
@@ -101,7 +100,7 @@ wf <- workflow() %>%
 tune_results <- tune_grid(
   wf,
   resamples = folds,
-  grid = 2,
+  grid = 10,
   metrics = metric_set(rmse, mae)
 )
 
@@ -174,13 +173,13 @@ p_test <- bind_cols(
 
 Out of sample RMSE
 ```{r OOS_RMSE_lincoln}
-sqrt(mean((p_test$ridership - p_test$.pred)^2))
+sqrt(mean((p_test$departures - p_test$.pred)^2))
 ```
 
 ```{r lincoln_final_vip, warning=FALSE}
 final_rf %>%
   set_engine("ranger", importance = "permutation") %>%
-  fit(ridership ~ .,
+  fit(departures ~ .,
     data = train
   ) %>%
   vip(geom = "point")
