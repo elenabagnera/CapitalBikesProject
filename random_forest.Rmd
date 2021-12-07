@@ -51,21 +51,26 @@ doParallel::registerDoParallel()
 ```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
 
 cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data)
-hour_data <- get_station_hourly(data)
+data <- sep_departures_from_arrivals(cbs_data) %>% 
+  filter(!is.na(station)) # Remove electric bikes not going to / from a station
 
-ridership_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 5000)
+
+hour_data <- get_station_hourly(filtered_data) %>% 
+  get_historic_weather()
+
+lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
 ```
 
 
 ## Implementation
 
 ```{r setup_data}
-ridership_data <- ridership_data %>% 
-  mutate(date = make_datetime(year,match(month, month.abb),day,hour)) %>% 
-  mutate(weekday = wday(date, label=TRUE)) %>% 
-  filter(type == "departures", !is.na(ridership)) %>% 
-  select(-type)
+lagged_data <- lagged_data %>% 
+  add_predictor_times() %>% 
+  filter(!is.na(departures) & !is.na(arrivals)) %>% 
+  # Having real time arrival data would be cheating
+  select(-arrivals)
 
 # create a split object
 data_split <- initial_split(ridership_data, prop = 0.8)
