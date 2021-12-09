@@ -65,6 +65,9 @@ lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memo
 ## Implementation
 
 ```{r setup_data}
+
+set.seed(28021995)
+
 model_data <- lagged_data %>% 
   add_predictor_times() %>% 
   filter(!is.na(departures) & !is.na(arrivals)) %>% 
@@ -82,8 +85,8 @@ folds <- vfold_cv(data = train, v = 10)
 
 recipe <-
   recipe(formula = departures ~ ., data = train) %>%
-  step_dummy(all_nominal_predictors()) %>% 
-  step_center(all_numeric_predictors()) %>%
+  step_dummy(all_nominal_predictors()) %>% # note: apparently aaron said that this won't affect random forest
+  step_center(all_numeric_predictors()) %>% # note: apparently aaron said that this won't affect random forest
   step_holiday(date, holidays = timeDate::listHolidays("US"))
 ```
 
