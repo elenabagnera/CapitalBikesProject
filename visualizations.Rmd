@@ -113,6 +113,24 @@ train_date_date %>%
 
 ```
 
+```{r stats_dependent1}
+
+train_date_date %>%
+  filter(type != "arrivals") %>%
+  ggplot(aes(x=lincoln_memorial))+
+  geom_density()
+```
+
+```{r stats_dependent2}
+
+train_date_date %>%
+  filter(lincoln_memorial != 0) %>% # notice that we here are dropping 0s because then the visualization will be much clearer
+  filter(type != "arrivals") %>%
+  ggplot(aes(x=lincoln_memorial))+
+  geom_density() # this is showing that it is heavily skewed and we might want to transform our dependent variable in our random forest. Aaron said we should look at Box Cox or Eon Johnson transfomation. Or simple log
+```
+
+
 ## Visualizations by time at Lincoln Memorial
 
 Amount of rides at the Lincoln memorial over all the time, and by various metrics
@@ -120,18 +138,20 @@ Amount of rides at the Lincoln memorial over all the time, and by various metric
 ```{r visualizations}
 
 train_date_date %>%  # for me here there is a weird gap after July 2020, not sure why?
-  ggplot() +
-  geom_point(aes(x = date, y = lincoln_memorial,
-                 color = type))
+  filter(type != "arrivals") %>%
+  ggplot(aes(x = date, y = lincoln_memorial)) +
+  geom_point(alpha= 0.1, color="orange") + 
+  geom_smooth()
 ```
 
 ```{r weekday}
 # by weekday
 train_date_date %>% 
+  filter(type != "arrivals") %>%
   mutate(weekday = wday(date, label=TRUE)) %>% 
-  ggplot() +
-  geom_point(aes(x = weekday, y = lincoln_memorial,
-                 color=type)) # clearly people cycle more on saturdays and sundays
+  ggplot(aes(x = weekday, y = lincoln_memorial)) +
+  geom_point(alpha=0.1) + # clearly people cycle more on saturdays and sundays
+  geom_smooth()
 
 # farah's code here although similar to first one here?
 #hour_data_date %>%
@@ -147,38 +167,55 @@ train_date_date %>%
 ```{r dayofmonth}
 # by day of the month
 train_date_date %>% 
-  ggplot() +
-  geom_point(aes(x = day, y = lincoln_memorial,
-                 color=type)) # there is no clear pattern across days of the month - aka probably not a good predictor
+  filter(type != "arrivals") %>%
+  ggplot(aes(x = day, y = lincoln_memorial)) +
+  geom_point(alpha=0.1, color="salmon") + # there is no clear pattern across days of the month - aka probably not a good predictor
+  geom_smooth()
 
 ```
 
 ```{r hour}
 
 # by hour
-train_date_date %>% 
-  ggplot() +
-  geom_point(aes(x = hour, y = lincoln_memorial,
-                 color=type)) # people cycle more in the middle of the day, like between 1 and 7PM
+train_date_date %>%
+  filter(type != "arrivals") %>%
+  ggplot(aes(x = hour, y = lincoln_memorial)) +
+  geom_point(alpha= 0.1, color="blue") + # people cycle more in the middle of the day, like between 1 and 7PM
+  geom_smooth()
 
 ```
+
+```{r color}
+
+# by hour & month
+train_date_date %>%
+  filter(type != "arrivals") %>%
+  ggplot(aes(x = hour, y = lincoln_memorial)) +
+  geom_point(alpha= 0.1, color="dark green") + # people cycle more in the middle of the day, like between 1 and 7PM
+  geom_smooth() +
+  facet_wrap(~month)
+
+```
+
 
 ```{r month}
 
 train_date_date %>% 
-  ggplot() +
-  geom_point(aes(x = month, y = lincoln_memorial,
-                 color=type)) # people cycle most in Spring, summer and fall. Suprised that there is no big spike in summer months
+  filter(type != "arrivals") %>%
+  ggplot(aes(x = month, y = lincoln_memorial)) +
+  geom_point(alpha=0.1, color="dark red") + # people cycle most in Spring, summer and fall. Suprised that there is no big spike in summer months
+  geom_smooth() # why does the smooth line not work here
 
 ```
 
 
 ```{r year}
 
-train_date_date %>% # something is off with the year variable
-  ggplot() +
-  geom_point(aes(x = year, y = lincoln_memorial,
-                 color=type)) # overall, more people use the service in 2021 than in 2020
+train_date_date %>% # something is off with the year variable, how can we remove the space in the middle?
+  filter(type != "arrivals") %>%
+  ggplot(aes(x = year, y = lincoln_memorial)) +
+  geom_point(alpha=0.1) + # overall, more people use the service in 2021 than in 2020
+  geom_smooth()
 
 ```
 
@@ -186,17 +223,17 @@ train_date_date %>% # something is off with the year variable
 
 # for a specific month and day, seeing variance by hour
 train_date_date %>% 
+  filter(type != "arrivals") %>%
   filter(year == 2021, month == "Aug", day == 15) %>% 
-  ggplot() +
-  geom_line(aes(x  =hour, y = lincoln_memorial,
-                color=type))
+  ggplot(aes(x  =hour, y = lincoln_memorial)) +
+  geom_line(color="Red")
 
 ```
 
 ## Heat maps
 
 ```{r heat}
-# The below data can be used for a heat map.
+# The below data can be used for a heat map - not sure what we want to show though?
 coord_data <- data %>% 
   select(station, lat, lng) %>% 
   filter(duplicated(station) == FALSE)
@@ -243,35 +280,37 @@ dep_sf %>%
 ```{r temperatures}
 
 train_date_date %>%
+  filter(type != "arrivals") %>%
   ggplot(aes(x=temperature,y=lincoln_memorial))+
   geom_point(alpha=0.07,color='orange')+
   labs(x='Temperature', y= 'Hourly Departures and Arrivals')+
-  geom_smooth(method='lm',color= 'red') # as the temperature goes up, departures and arrivals go up
+  geom_smooth() # as the temperature goes up, departures and arrivals go up
 
 ```
 
 ```{r wind}
 
 train_date_date %>%
+  filter(type != "arrivals") %>%
   ggplot(aes(x=wind_speed,y=lincoln_memorial))+
-  geom_point(alpha=0.07,color='blue')+
-  labs(x='Wind Speed', y= 'Hourly Departures and Arrivals') 
-  #geom_smooth(method='lm',color= 'red') # when I add this I get an upward trend, which is weird since it's a negative relationship?
+  geom_point(alpha=0.1,color='blue')+
+  labs(x='Wind Speed', y= 'Hourly Departures and Arrivals') +
+  geom_smooth() # data is sparse hence why we get this weird trend
 
-
-# also notice that there is missing data
 
 ```
 
 ```{r rain}
 
 train_date_date %>%
+  filter(type != "arrivals") %>%
+  filter(precipitation != 0) %>% #removing 0 to better show relationship
   ggplot(aes(x=precipitation,y=lincoln_memorial))+
-  geom_point(alpha=0.07,color='blue')+
-  labs(x='Precipiation', y= 'Hourly Departures and Arrivals') +
-  geom_smooth(method='lm',color= 'red') # Negative relationship between bike usage and precipitation as expected
+  geom_point(alpha=0.1,color='blue')+
+  labs(x='Precipitation', y= 'Hourly Departures and Arrivals') +
+  geom_smooth() # Negative relationship between bike usage and precipitation as expected
 
-# definitely need to do some transformations to the rain variable as there doesn't seem to be a lot of variation?
+# data very sparse hence why weird trend. Aaron recommended also creating a variable that dychotomizes rain. 1 if it rains 0 if it doesn't
 
 ```
 
@@ -281,8 +320,9 @@ train_date_date %>%
 train_date_date %>%
   ggplot(aes(x=cloud_cover,y=lincoln_memorial))+
   geom_point(alpha=0.07,color='blue')+
-  labs(x='Cloud Cover', y= 'Hourly Departures and Arrivals') 
+  labs(x='Cloud Cover', y= 'Hourly Departures and Arrivals') +
+  geom_smooth()
 
-# doesn't seem like a good predictor?
+# not sure why the data looks like this?
 
 ```
