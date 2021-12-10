@@ -240,26 +240,17 @@ dep_sf %>%
 
 ## Visualizations by weather at Lincoln Memorial
 
-```{r temperature1}
+```{r temperatures}
 
 train_date_date %>%
-  ggplot(aes(x=maximum_temperature,y=lincoln_memorial))+
-  geom_point(alpha=0.07,color='yellow')+
-  labs(x='Temperature', y= 'Hourly Departures and Arrivals')+
-  geom_smooth(method='lm',color= 'red')
-
-train_date_date %>%
-  ggplot(aes(x=maximum_temperature,y=lincoln_memorial))+
+  ggplot(aes(x=temperature,y=lincoln_memorial))+
   geom_point(alpha=0.07,color='orange')+
   labs(x='Temperature', y= 'Hourly Departures and Arrivals')+
-  geom_smooth(method='lm',color= 'red') # as the maximum temperature goes up, departures and arrivals go up
-
-# I got this code online so still want to improve this a little bit
-# also notice that there is missing data
+  geom_smooth(method='lm',color= 'red') # as the temperature goes up, departures and arrivals go up
 
 ```
 
-```{r temperature}
+```{r wind}
 
 train_date_date %>%
   ggplot(aes(x=wind_speed,y=lincoln_memorial))+
@@ -267,7 +258,7 @@ train_date_date %>%
   labs(x='Wind Speed', y= 'Hourly Departures and Arrivals') 
   #geom_smooth(method='lm',color= 'red') # when I add this I get an upward trend, which is weird since it's a negative relationship?
 
-# I got this code online so still want to improve this a little bit
+
 # also notice that there is missing data
 
 ```
@@ -281,5 +272,17 @@ train_date_date %>%
   geom_smooth(method='lm',color= 'red') # Negative relationship between bike usage and precipitation as expected
 
 # definitely need to do some transformations to the rain variable as there doesn't seem to be a lot of variation?
+
+```
+
+
+```{r clouds}
+
+train_date_date %>%
+  ggplot(aes(x=cloud_cover,y=lincoln_memorial))+
+  geom_point(alpha=0.07,color='blue')+
+  labs(x='Cloud Cover', y= 'Hourly Departures and Arrivals') 
+
+# doesn't seem like a good predictor?
 
 ```
