@@ -6,16 +6,19 @@ This is for a group project for POL706 at Georgetown University
 
 1. ~~Prepare data + adding weather (EK) ~~ 
 
-2. Create visualizations on the current data in `visualizations.Rmd`. (EB)
-
-Here if anyone has any ideas on how to make the visualizations better - feel free to go ahead and change them! I haven't made any maps because I am not sure what their purpose would be but if anyone has any ideas please go ahead!
+2. Create visualizations on the current data in `visualizations.Rmd`. 
+	a. make initial viz (EB)
+	b. improve/add to any existing visualizations
+	c. think of whether we can do any maps?
+	d. think of ways of showing the correlation with departures in other stations?
 
 3. ~~Widen hour_data on the column type for each station (QX & FK)~~ 
 
 4. Clean up weather predictors.
 	a. delete variables we don't need (e.g. temperature max and min are the same as temperature so we don't need them)
 	b. figure out a way to being in sunlight as a variable?
-	c. also I think we should try this thing where for hours, month and weekday, we transform the variables so that 1 is the month/hour with lowest departures. This way, the numbers e.g. 1-12 for months have meaning. Happy to explain this, also more info here, which is exactly what this person did: https://towardsdatascience.com/predicting-no-of-bike-share-users-machine-learning-data-visualization-project-using-r-71bc1b9a7495 
+	c. create a variable for whether it rains or not (binary)
+	d. also I think we should try this thing where for hours, month and weekday, we transform the variables so that 1 is the month/hour with lowest departures. This way, the numbers e.g. 1-12 for months have meaning. Happy to explain this, also more info here, which is exactly what this person did: https://towardsdatascience.com/predicting-no-of-bike-share-users-machine-learning-data-visualization-project-using-r-71bc1b9a7495 
 
 5. feature engeneering 
 	i. figure out what transformation to use for dependent variable for random forest (EB) - look into Box Cox transformation
