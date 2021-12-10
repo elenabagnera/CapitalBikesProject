@@ -87,12 +87,16 @@ recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_dummy(all_nominal_predictors()) %>% # note: apparently aaron said that this won't affect random forest
   step_center(all_numeric_predictors()) %>% # note: apparently aaron said that this won't affect random forest
-  step_holiday(date, holidays = timeDate::listHolidays("US"))
+  step_holiday(date, holidays = timeDate::listHolidays("US")) %>% # aaron said we should put more weight on some holidays rather than other, for example 4th of july and inauguration day especially since we are looking at lincoln memorial
+  step_nzv() %>% # aaron suggested adding this
+  
+  #notice that we also need to add some transformation of the dependent variable
+
 ```
 
 
 ```{r tuning, cache=TRUE}
-mod <- rand_forest(mtry = tune(), trees = 200, min_n = tune()) %>%
+mod <- rand_forest(mtry = tune(), trees = 200, min_n = tune()) %>% # we should have anywhere between 100 and 1000 trees
   set_mode("regression") %>%
   set_engine("ranger")
 
