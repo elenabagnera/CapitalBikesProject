@@ -288,6 +288,21 @@ train_date_date %>%
 
 ```
 
+```{r temperatures_month}
+
+train_date_date %>%
+  filter(type != "arrivals") %>%
+  ggplot(aes(x=temperature,y=lincoln_memorial))+
+  geom_point(alpha=0.07,color='orange')+
+  labs(x='Temperature', y= 'Hourly Departures and Arrivals')+
+  geom_smooth() + #super confused as to why november and december have hot temperature?
+  facet_wrap(~month)
+
+
+```
+
+
+
 ```{r wind}
 
 train_date_date %>%
