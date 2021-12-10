@@ -4,20 +4,32 @@ This is for a group project for POL706 at Georgetown University
 
 ## Tasks 
 
-1. Create visualizations on the current data in `visualizations.Rmd`. 
+1. ~~Prepare data + adding weather (EK) ~~ 
 
-This could graph weather verses departures, temperature vs departues, heat maps, and the other examples in `visualizations.Rmd`.
+2. Create visualizations on the current data in `visualizations.Rmd`. (EB)
 
-2. ~~Widen hour_data on the column type for each station.~~
+Here if anyone has any ideas on how to make the visualizations better - feel free to go ahead and change them! I haven't made any maps because I am not sure what their purpose would be but if anyone has any ideas please go ahead!
 
-3. Clean up weather predictors.
+3. ~~Widen hour_data on the column type for each station (QX & FK)~~ 
 
-Delete columns that have missing data or find out how to fill in that data. Some data is likely not needed (wind_direction for example)
+4. Clean up weather predictors.
+	a. delete variables we don't need (e.g. temperature max and min are the same as temperature so we don't need them)
+	b. figure out a way to being in sunlight as a variable?
+	c. also I think we should try this thing where for hours, month and weekday, we transform the variables so that 1 is the month/hour with lowest departures. This way, the numbers e.g. 1-12 for months have meaning. Happy to explain this, also more info here, which is exactly what this person did: https://towardsdatascience.com/predicting-no-of-bike-share-users-machine-learning-data-visualization-project-using-r-71bc1b9a7495 
 
-4. feature engeneering - decide based on data cisualizations, what feature engeneering is needed
+5. feature engeneering 
+	i. figure out what transformation to use for dependent variable for random forest (EB) - look into Box Cox transformation
+	ii. understand how to select specific holidays in step holiday
+	iii. also look at chapter he assigned for class hat talks about feature engeneering for 
 
-5. Create models on the new data
+6. Run models on the new data
+	a. random forest (can try first with parameter tuning and then without)
+		i. try a version where we  first do a random forest model to predict a binary variable of whether bikes are departing or not. Then use the predictions 		to create a new variable and estimate a random forest model that uses that variable as a predictor
+	b. either Lasso, Ridge or Glymet (or multiple of these)
+	c. xg boost (no idea what it is)
 
-6. Analyze results of models
+7. Analyze results of models
 
-7. Create final website to present results
+8. Create final website to present results
+	a.  ~~  create website with index (EB) ~~ 
+	b. set up structure and bare bones of template (EB)
