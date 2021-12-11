@@ -48,13 +48,13 @@ doParallel::registerDoParallel()
 
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
-```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
+```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
 
 cbs_data <- read_files('data/')
 data <- sep_departures_from_arrivals(cbs_data) %>% 
   filter(!is.na(station)) # Remove electric bikes not going to / from a station
 
-filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 5000)
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
 hour_data <- get_station_hourly(filtered_data) %>% 
   get_historic_weather()
@@ -64,12 +64,16 @@ lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memo
 
 ## Implementation
 
-```{r setup_data}
+```{r setup_data, cache=FALSE}
+# add_predictor_times adds date as well as other times. This becomes a heavily
+# weighted variable which I would like to remove, but I need it for step_holiday
+# Does step_holiday modify date and that is why it matters?
 model_data <- lagged_data %>% 
   add_predictor_times() %>% 
   filter(!is.na(departures) & !is.na(arrivals)) %>% 
   # Having real time arrival data would be cheating
-  select(-arrivals, -wind_chill, -heat_index, -wind_direction, -wind_gust)
+  select(-arrivals) %>% 
+  format_weather()
 
 # create a split object
 data_split <- initial_split(model_data, prop = 0.8)
@@ -83,13 +87,14 @@ folds <- vfold_cv(data = train, v = 10)
 recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_dummy(all_nominal_predictors()) %>% 
-  step_center(all_numeric_predictors()) %>%
-  step_holiday(date, holidays = timeDate::listHolidays("US"))
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
+  step_nzv(all_predictors())
 ```
 
 
-```{r tuning, cache=TRUE}
-mod <- rand_forest(mtry = tune(), trees = 200, min_n = tune()) %>%
+```{r tuning, cache=FALSE}
+# Tuning min_n doesn't seem to help
+mod <- rand_forest(mtry = tune(), trees = tune()) %>%
   set_mode("regression") %>%
   set_engine("ranger")
 
@@ -100,19 +105,19 @@ wf <- workflow() %>%
 tune_results <- tune_grid(
   wf,
   resamples = folds,
-  grid = 10,
+  grid = 8,
   metrics = metric_set(rmse, mae)
 )
 
 metrics <- tune_results %>%
   collect_metrics() %>% 
-  pivot_longer(min_n:mtry,
+  pivot_longer(trees:mtry,
     values_to = "value",
     names_to = "parameter"
   )
 ```
 
-#### Results to better tune the mtry and min_n
+#### Results to better tune the mtry and trees
 
 ```{r graphs}
 metrics %>%  
@@ -126,6 +131,18 @@ metrics %>%
   ggplot(aes(x = value, y = mean, color = parameter)) + 
   geom_point() +
   labs(title = "MAE")
+
+metrics %>%  
+  filter(.metric == "rmse", parameter == "mtry") %>% 
+  ggplot(aes(x = value, y = mean)) + 
+  geom_point() + 
+  labs(title = "RMSE")
+
+metrics %>%  
+  filter(.metric == "rmse", parameter == "trees") %>% 
+  ggplot(aes(x = value, y = mean)) + 
+  geom_point() + 
+  labs(title = "RMSE")
 ```
 
 Pick the results.

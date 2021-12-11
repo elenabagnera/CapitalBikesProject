@@ -166,3 +166,25 @@ get_historic_weather <- function(x) {
   return(x %>%
     left_join(weather, by = c("year", "month", "day", "hour")))
 }
+
+format_weather <- function(x) {
+  x %>% 
+    mutate(conditions = case_when(
+      grepl("Rain", conditions, fixed = TRUE) ~ 0,
+      grepl("Snow", conditions, fixed = TRUE) ~ 0,
+      conditions == "Overcast" ~ 0.75,
+      TRUE ~ 1
+    )) %>% 
+    select(-cloud_cover, 
+           -visibility, 
+           -snow_depth, 
+           -snow, 
+           -precipitation, 
+           -minimum_temperature, 
+           -maximum_temperature, 
+           -relative_humidity, 
+           -wind_chill, 
+           -heat_index, 
+           -wind_direction, 
+           -wind_gust)
+}
