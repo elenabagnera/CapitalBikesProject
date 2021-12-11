@@ -35,4 +35,4 @@ This is for a group project for POL706 at Georgetown University
 
 8. Create final website to present results
 	a.  ~~  create website with index (EB) ~~ 
-	b. set up structure and bare bones of template (EB)
+	b. set up structure and bare bones of template - I cannot update template anyone has ideas?
