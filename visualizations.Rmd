@@ -17,9 +17,8 @@ knitr::knit_hooks$set(
 # knitr::knit_hooks$set(inline = function(x) {
 #   prettyNum(round(x, 2), big.mark = ",")
 # })
-options(scipen=999)
+options(scipen = 999)
 ```
-
 
 \begin{center}
 \Huge{PPOL 670 | Final Project}
@@ -44,7 +43,6 @@ library(tidymodels)
 
 
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
-
 
 ```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
 
@@ -73,33 +71,31 @@ data <- sep_departures_from_arrivals(cbs_data) %>%
 hour_data <- get_station_hourly(data) %>% 
   get_historic_weather() # added weather
 
-
 # The grouped data does not have the original date column, but it can be nice
 #  for visualizations. There is a function to do this in times.R
-hour_date_date <- add_date_column(hour_data)
-
+hour_data_date <- add_date_column(hour_data)
 ```
 
 ## Splitting training vs testing data
-
 
 ```{r split}
 set.seed(28021995)
 
 # create a split object
-data_split <- initial_split(hour_date_date, prop = 0.8)
+data_split <- initial_split(hour_data_date, prop = 0.8)
 
 # create the training and testing data
-train_date_date <- training(x = data_split)
-test_date_date  <- testing(x = data_split)
+train_data_date <- training(x = data_split)
+test_data_date  <- testing(x = data_split)
 ```
 
 ## Summary stats
 
 ```{r stats_dependent}
 
-train_date_date%>%
-  summarize(mean(lincoln_memorial_departures), max(lincoln_memorial_departures), min(lincoln_memorial_departures), sd(lincoln_memorial_departures)) # how can we get better summary stats? maybe not split by hour?
+train_data_date %>%
+  summarize(
+    mean(lincoln_memorial_departures), max(lincoln_memorial_departures), min(lincoln_memorial_departures), sd(lincoln_memorial_departures)) # how can we get better summary stats? maybe not split by hour?
 
 ```
 
