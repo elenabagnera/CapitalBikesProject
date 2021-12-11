@@ -20,7 +20,6 @@ knitr::knit_hooks$set(
 options(scipen=999)
 ```
 
-
 \begin{center}
 \Huge{PPOL 670 | Final Project}
 
@@ -32,6 +31,7 @@ options(scipen=999)
 [GitHub](https://github.com/elenabagnera/CapitalBikesProject)
 
 ## Setup
+
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(tidymodels)
@@ -51,12 +51,12 @@ doParallel::registerDoParallel()
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
 
 cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data) %>% 
+data <- sep_departures_from_arrivals(cbs_data) %>%
   filter(!is.na(station)) # Remove electric bikes not going to / from a station
 
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
-hour_data <- get_station_hourly(filtered_data) %>% 
+hour_data <- get_station_hourly(filtered_data) %>%
   get_historic_weather()
 
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
@@ -64,15 +64,15 @@ lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memo
 
 ## Implementation
 
-```{r setup_data, cache=FALSE}
-# add_predictor_times adds date as well as other times. This becomes a heavily
-# weighted variable which I would like to remove, but I need it for step_holiday
-# Does step_holiday modify date and that is why it matters?
-model_data <- lagged_data %>% 
-  add_predictor_times() %>% 
-  filter(!is.na(departures) & !is.na(arrivals)) %>% 
+```{r setup_data}
+
+set.seed(28021995)
+
+model_data <- lagged_data %>%
+  add_predictor_times() %>%
+  filter(!is.na(departures) & !is.na(arrivals)) %>%
   # Having real time arrival data would be cheating
-  select(-arrivals) %>% 
+  select(-arrivals) %>%
   format_weather()
 
 # create a split object
@@ -86,21 +86,22 @@ folds <- vfold_cv(data = train, v = 10)
 
 recipe <-
   recipe(formula = departures ~ ., data = train) %>%
-  step_dummy(all_nominal_predictors()) %>% 
-  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
-  step_nzv(all_predictors())
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% # aaron said we should put more weight on some holidays rather than other, for example 4th of july and inauguration day especially since we are looking at lincoln memorial
+  step_nzv(all_predictors()) %>% # aaron suggested adding this
+  step_other() # add this for any categorical predictors
+
+  #notice that we also need to add some transformation of the dependent variable
 ```
 
-
-```{r tuning, cache=FALSE}
+```{r tuning, cache=TRUE}
 # Tuning min_n doesn't seem to help
-mod <- rand_forest(mtry = tune(), trees = tune()) %>%
+mod <- rand_forest(mtry = tune(), trees = 200, min_n = tune()) %>% # we should have anywhere between 100 and 1000 trees
   set_mode("regression") %>%
   set_engine("ranger")
 
 wf <- workflow() %>%
   add_recipe(recipe) %>%
-  add_model(mod) 
+  add_model(mod)
 
 tune_results <- tune_grid(
   wf,
@@ -110,7 +111,7 @@ tune_results <- tune_grid(
 )
 
 metrics <- tune_results %>%
-  collect_metrics() %>% 
+  collect_metrics() %>%
   pivot_longer(trees:mtry,
     values_to = "value",
     names_to = "parameter"
@@ -120,40 +121,40 @@ metrics <- tune_results %>%
 #### Results to better tune the mtry and trees
 
 ```{r graphs}
-metrics %>%  
-  filter(.metric == "rmse") %>% 
-  ggplot(aes(x = value, y = mean, color = parameter)) + 
-  geom_point() + 
+metrics %>%
+  filter(.metric == "rmse") %>%
+  ggplot(aes(x = value, y = mean, color = parameter)) +
+  geom_point() +
   labs(title = "RMSE")
 
-metrics %>%  
-  filter(.metric == "mae") %>% 
-  ggplot(aes(x = value, y = mean, color = parameter)) + 
+metrics %>%
+  filter(.metric == "mae") %>%
+  ggplot(aes(x = value, y = mean, color = parameter)) +
   geom_point() +
   labs(title = "MAE")
 
-metrics %>%  
-  filter(.metric == "rmse", parameter == "mtry") %>% 
-  ggplot(aes(x = value, y = mean)) + 
-  geom_point() + 
+metrics %>%
+  filter(.metric == "rmse", parameter == "mtry") %>%
+  ggplot(aes(x = value, y = mean)) +
+  geom_point() +
   labs(title = "RMSE")
 
-metrics %>%  
-  filter(.metric == "rmse", parameter == "trees") %>% 
-  ggplot(aes(x = value, y = mean)) + 
-  geom_point() + 
+metrics %>%
+  filter(.metric == "rmse", parameter == "trees") %>%
+  ggplot(aes(x = value, y = mean)) +
+  geom_point() +
   labs(title = "RMSE")
 ```
 
 Pick the results.
 
 ```{r ft_results}
-best_rmse <- tune_results %>% 
+best_rmse <- tune_results %>%
   select_best("rmse")
 
 best_rmse
 
-best_mae <-tune_results %>% 
+best_mae <-tune_results %>%
   select_best("mae")
 
 best_mae
@@ -180,7 +181,7 @@ collect_metrics(tune_results, summarize = FALSE) %>%
 ```{r chosen_one}
 final_wf <- workflow() %>%
   add_recipe(recipe) %>%
-  add_model(final_rf) %>% 
+  add_model(final_rf) %>%
   fit(train)
 
 p_test <- bind_cols(
@@ -189,6 +190,7 @@ p_test <- bind_cols(
 ```
 
 Out of sample RMSE
+
 ```{r OOS_RMSE_lincoln}
 sqrt(mean((p_test$departures - p_test$.pred)^2))
 ```
