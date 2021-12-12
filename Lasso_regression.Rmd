@@ -1,0 +1,169 @@
+---
+title: "Lasso_regression"
+author: "Qi Xue"
+date: "12/11/2021"
+output: html_document
+---
+
+```{r include = FALSE}
+def.chunk.hook <- knitr::knit_hooks$get("chunk")
+knitr::opts_chunk$set(cache = FALSE)
+knitr::knit_hooks$set(
+  chunk = function(x, options) {
+    x <- def.chunk.hook(x, options)
+    ifelse(options$size != "normalsize", paste0("\n \\", options$size, "\n\n", x, "\n\n \\normalsize"), x)
+  }
+)
+# knitr::knit_hooks$set(inline = function(x) {
+#   prettyNum(round(x, 2), big.mark = ",")
+# })
+options(scipen = 999)
+```
+
+\begin{center}
+\Huge{PPOL 670 | Final Project}
+
+\Huge{Lasso Regression}
+\end{center}
+
+\vspace{0.1in}
+
+[GitHub](https://github.com/elenabagnera/CapitalBikesProject)
+
+## Setup
+
+```{r setup, message = FALSE, warnings = FALSE}
+
+library(tidyverse)
+library(tidymodels)
+library(recipes)
+library(vip)
+library(lubridate)
+library(workflows)
+library(ranger)
+
+source("times.R")
+source("io.R")
+source("manipulate_data.R")
+```
+
+[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+
+```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
+
+cbs_data <- read_files('data/')
+data <- sep_departures_from_arrivals(cbs_data) %>%
+  filter(!is.na(station)) # Remove electric bikes not going to / from a station
+
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
+
+hour_data <- get_station_hourly(filtered_data) %>%
+  get_historic_weather()
+
+lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+```
+
+## Implementation
+
+```{r setup_data}
+
+# to run the three models, we only need this chunk once?
+
+set.seed(28021995)
+
+lasso_data <- lagged_data %>%
+  add_predictor_times() %>%
+  filter(!is.na(departures) & !is.na(arrivals)) %>%
+  # Having real time arrival data would be cheating
+  select(-arrivals) %>%
+  format_weather()
+
+# create a split object
+lasso_data_split <- initial_split(lasso_data, prop = 0.8)
+
+# create the training and testing data
+lasso_train <- training(x = lasso_data_split)
+lasso_test  <- testing(x = data_split)
+
+# create 10-fold
+folds <- vfold_cv(data = lasso_train, v = 10)
+```
+
+```{r recipe}
+
+# create a recipe
+lasso_recipe <-
+  recipe(formula = departures ~ ., data = lasso_train) %>%
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% # aaron said we should put more weight on some holidays rather than other, for example 4th of july and inauguration day especially since we are looking at lincoln memorial
+  step_nzv(all_predictors()) %>% # aaron suggested adding this
+  step_other() %>% # add this for any categorical predictors
+  step_BoxCox(all_outcomes()) %>% 
+  step_dummy(all_nominal_predictors())
+
+# see the outcome data
+bake(prep(lasso_recipe, training = lasso_train), new_data = lasso_test)
+```
+
+```{r run the model}
+
+# create a model
+lasso_mod <- linear_reg(
+  penalty = tune(), 
+  mixture = 1) %>%
+  set_engine("glmnet")
+
+# create a workflow
+lasso_workflow  <- 
+  workflow() %>% 
+  add_model(spec = lasso_mod) %>% 
+  add_recipe(recipe = lasso_recipe)
+
+# create a tuning grid
+lasso_grid <- grid_regular(penalty(), levels = 10)
+
+# estimate with resampling
+lasso_res <- 
+  lasso_workflow %>% 
+  tune_grid(resample = folds,
+            grid = lasso_grid,
+            control = control_grid(save_pred = TRUE),
+            metrics = metric_set(rmse))
+
+# select best model
+lasso_best <- lasso_res %>% 
+            select_best("rmse")
+
+### create a new model ###
+lasso_final <- finalize_workflow(
+  lasso_wf,
+  parameters = lasso_best
+)
+
+# fit to the training data and extract coefficients
+lasso_coefs <- lasso_final %>%
+  fit(data = lasso_train) %>%
+  extract_fit_parsnip() %>%
+  vi(lambda = lasso_best$penalty) 
+
+lasso_coefs
+
+# fit resample
+lasso_fit_rs <-
+  lasso_final %>% 
+  fit_resamples(resample = folds)
+
+# collect metrics
+collect_metrics(lasso_fit_rs)
+
+# plot rmse
+collect_metrics(lasso_fit_rs, summarize = FALSE) %>% 
+  filter(.metric == "rmse") %>% 
+  ggplot(aes(id, .estimate, group = .estimator)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(title = "Calculated RMSE Across the 10 Folds",
+       y = "RMSE_hat") +
+  theme_minimal()
+```
+
