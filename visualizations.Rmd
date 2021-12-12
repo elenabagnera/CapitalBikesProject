@@ -114,8 +114,8 @@ train_data_date %>%
 
 ```{r stats_weather}
 # check how much NA in temperature variable
-sum(is.na(train_data_date$temperature)) 
-# 9374, we might want to do imputation on this
+sum(is.na(train_data_date$temperature)) #0
+sum(is.na(train_data_date$cloud_cover)) #0
 
 train_data_date %>%
  # mutate(weekday = wday(date, label=TRUE)) %>%
