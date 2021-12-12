@@ -70,7 +70,8 @@ data <- sep_departures_from_arrivals(cbs_data) %>%
   filter_by_distance(from_station = 'lincoln_memorial', distance_m = 1600) # added filtering
 
 hour_data <- get_station_hourly(data) %>% 
-  get_historic_weather() # added weather
+  get_historic_weather() %>% # added weather
+  add_sun_is_out() 
 
 # The grouped data does not have the original date column, but it can be nice
 #  for visualizations. There is a function to do this in times.R
