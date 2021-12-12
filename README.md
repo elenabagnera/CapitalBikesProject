@@ -8,9 +8,10 @@ This is for a group project for POL706 at Georgetown University
 
 2. Create visualizations on the current data in `visualizations.Rmd`. 
 	a. make initial viz (EB)
-	b. improve/add to any existing visualizations
+	b. improve/add to any existing visualizations (QX)
 	c. think of whether we can do any maps?
 	d. think of ways of showing the correlation with departures in other stations?
+	(comment: This may be difficult to realize. There are too many stations to form a correlation matrix)
 
 3. ~~Widen hour_data on the column type for each station (QX & FK)~~ 
 
