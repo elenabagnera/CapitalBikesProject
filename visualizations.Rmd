@@ -95,14 +95,16 @@ test_data_date  <- testing(x = data_split)
 
 train_data_date %>%
   summarize(
-    mean(lincoln_memorial_departures), max(lincoln_memorial_departures), min(lincoln_memorial_departures), sd(lincoln_memorial_departures)) # how can we get better summary stats? maybe not split by hour?
-
+    mean(lincoln_memorial_departures),
+    max(lincoln_memorial_departures),
+    min(lincoln_memorial_departures),
+    sd(lincoln_memorial_departures)) 
+# how can we get better summary stats? maybe not split by hour?
 ```
 
 
 ```{r stats_weather}
-
-# check how much NA in temprature variable
+# check how much NA in temperature variable
 sum(is.na(train_date_date$temperature)) 
 # 9374, we might want to do imputation on this
 
@@ -110,7 +112,6 @@ train_date_date %>%
  # mutate(weekday = wday(date, label=TRUE)) %>%
   group_by(month) %>%
   summarize(mean(temperature), max(temperature), min(temperature), sd(temperature)) 
-
 ```
 
 ```{r stats_dependent1}
