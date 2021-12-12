@@ -335,3 +335,35 @@ train_data_date %>%
   geom_smooth()
 # not sure why the data looks like this?
 ```
+
+
+```{r heatmap}
+
+
+heatmap <- train_data_date %>%
+  select (hour, lincoln_memorial_departures)  %>%
+    group_by (hour) %>%
+  summarize (sum_rider =sum(lincoln_memorial_departures))
+
+data_melt <- melt(heatmap, id= "hour")
+  
+
+data_melt %>%
+ ggplot( aes(hour, variable)) +
+    geom_tile(aes(fill = value)) +
+    labs(x = NULL,
+         y = NULL) + 
+  scale_fill_gradientn(colors = "blue") +
+   # scale_fill_gradientn(colours = rainbow(10)) +
+ # scale_fill_gradient(low = "white", mid = "blue", high = "black")+
+  scale_fill_gradient(low = "#FFFFFFFF",
+                    high = "#012345")  +
+    theme(legend.position = "right",
+          legend.direction = "vertical",
+          axis.line.x = element_blank(),
+          panel.grid.major.y = element_blank()) 
+
+
+
+```
+
