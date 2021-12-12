@@ -12,6 +12,9 @@ This is for a group project for POL706 at Georgetown University.
 	c. think of whether we can do any maps?
 	d. think of ways of showing the correlation with departures in other stations?
 	(QX: This may be difficult to realize. There are too many stations to form a correlation matrix)
+	e. add viz with binary rain predictor
+	f. add viz with weather conditions (categorical)
+	g. add viz with sun is out
 
 3. ~~Widen hour_data on the column type for each station (QX & FK)~~ 
 
