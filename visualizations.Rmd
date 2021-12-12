@@ -90,9 +90,12 @@ test_data_date  <- testing(x = data_split)
 ```
 
 ## Summary stats
-
 ```{r stats_dependent}
 
+# summary entire train dataset
+summary(train_data_date)
+
+# summary lincoln_memorial_departures
 train_data_date %>%
   summarize(
     mean(lincoln_memorial_departures),
@@ -116,17 +119,19 @@ train_date_date %>%
 
 ```{r stats_dependent1}
 
-train_date_date %>%
-  ggplot(aes(x=lincoln_memorial_departures))+
+# density plot
+train_data_date %>%
+  ggplot(aes(x = lincoln_memorial_departures))+
   geom_density()
+# What does the number 50 entail?
 ```
 
 ```{r stats_dependent2}
 
-train_date_date %>%
+train_data_date %>%
   filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s because then the visualization will be much clearer
-  ggplot(aes(x=lincoln_memorial_departures))+
-  geom_density() # this is showing that it is heavily skewed and we might want to transform our dependent variable in our random forest. Aaron said we should look at Box Cox or Eon Johnson transfomation. Or simple log
+  ggplot(aes(x = lincoln_memorial_departures))+
+  geom_density() # this is showing that it is heavily skewed and we might want to transform our dependent variable in our random forest. Aaron said we should look at Box Cox or Eon Johnson transformation. Or simple log
 ```
 
 
