@@ -39,6 +39,7 @@ source("times.R")
 source("io.R")
 source("manipulate_data.R")
 library(tidymodels)
+library(corrplot)
 ```
 
 
@@ -104,13 +105,19 @@ train_data_date %>%
 # how can we get better summary stats? maybe not split by hour?
 ```
 
+```{r correlation, eval = FALSE}
+# plot_data <- ?data %>% 
+#   select()
+# 
+# corrplot(plot_data)
+```
 
 ```{r stats_weather}
 # check how much NA in temperature variable
-sum(is.na(train_date_date$temperature)) 
+sum(is.na(train_data_date$temperature)) 
 # 9374, we might want to do imputation on this
 
-train_date_date %>%
+train_data_date %>%
  # mutate(weekday = wday(date, label=TRUE)) %>%
   group_by(month) %>%
   summarize(mean(temperature), max(temperature), min(temperature), sd(temperature)) 
