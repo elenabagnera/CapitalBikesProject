@@ -98,7 +98,10 @@ lasso_recipe <-
   step_nzv(all_predictors()) %>% # aaron suggested adding this
   step_other() %>% # add this for any categorical predictors
   step_BoxCox(all_outcomes()) %>% 
-  step_dummy(all_nominal_predictors())
+  step_dummy(all_nominal_predictors()) %>%
+  step_center() %>% # definitely need to add these too
+  step_scale() %>% # definitely need to add these too
+  step_dummy() # definitely need to add these too
 
 # see the outcome data
 bake(prep(lasso_recipe, training = lasso_train), new_data = lasso_test)
