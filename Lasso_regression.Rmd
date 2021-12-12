@@ -58,7 +58,8 @@ data <- sep_departures_from_arrivals(cbs_data) %>%
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
 hour_data <- get_station_hourly(filtered_data) %>%
-  get_historic_weather()
+  get_historic_weather() %>%
+  add_sun_is_out()
 
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
 ```
