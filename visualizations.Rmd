@@ -130,29 +130,30 @@ train_data_date %>%
 
 train_data_date %>%
   filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s because then the visualization will be much clearer
-  ggplot(aes(x = lincoln_memorial_departures))+
+  ggplot(aes(x = log(lincoln_memorial_departures))) +
   geom_density() # this is showing that it is heavily skewed and we might want to transform our dependent variable in our random forest. Aaron said we should look at Box Cox or Eon Johnson transformation. Or simple log
+# add log to fix skewness
 ```
 
 
 ## Visualizations by time at Lincoln Memorial
-
 Amount of rides at the Lincoln memorial over all the time, and by various metrics
 
 ```{r visualizations}
 
-train_date_date %>%  # for me here there is a weird gap after July 2020, not sure why?
+train_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
   ggplot(aes(x = date, y = lincoln_memorial_departures)) +
-  geom_point(alpha= 0.1, color="orange") + 
+  geom_point(alpha = 0.1, color = "orange") + 
   geom_smooth()
 ```
 
 ```{r weekday}
+
 # by weekday
-train_date_date %>% 
+train_data_date %>% 
   mutate(weekday = wday(date, label=TRUE)) %>% 
   ggplot(aes(x = weekday, y = lincoln_memorial_departures)) +
-  geom_point(alpha=0.1) + # clearly people cycle more on saturdays and sundays
+  geom_point(alpha = 0.1) + # clearly people cycle more on Saturdays and Sundays
   geom_smooth()
 
 # farah's code here although similar to first one here?
@@ -162,74 +163,69 @@ train_date_date %>%
   #geom_point(alpha = 0.25) +
   #labs(title = "Capital bikeshare Ridership on Week days") +
   #theme_minimal()
-
-
 ```
 
 ```{r dayofmonth}
 # by day of the month
-train_date_date %>% 
+train_data_date %>% 
   ggplot(aes(x = day, y = lincoln_memorial_departures)) +
-  geom_point(alpha=0.1, color="salmon") + # there is no clear pattern across days of the month - aka probably not a good predictor
+  geom_point(alpha = 0.1, color = "salmon") + # there is no clear pattern across days of the month - aka probably not a good predictor
   geom_smooth()
-
 ```
 
 ```{r hour}
-
 # by hour
-train_date_date %>%
+train_data_date %>%
   ggplot(aes(x = hour, y = lincoln_memorial_departures)) +
-  geom_point(alpha= 0.1, color="blue") + # people cycle more in the middle of the day, like between 1 and 7PM
+  geom_col(alpha = 0.1, color = "lightblue") + # people cycle more in the middle of the day, like between 1 and 7PM
   geom_smooth()
-
 ```
 
 ```{r color}
 
 # by hour & month
-train_date_date %>%
+train_data_date %>%
   ggplot(aes(x = hour, y = lincoln_memorial_departures)) +
-  geom_point(alpha= 0.1, color="dark green") + # people cycle more in the middle of the day, like between 1 and 7PM
+  geom_point(alpha = 0.1, color = "dark green") + # people cycle more in the middle of the day, like between 1 and 7PM
   geom_smooth() +
   facet_wrap(~month)
-
 ```
 
 
 ```{r month}
-
-train_date_date %>% 
+# by month
+train_data_date %>% 
   ggplot(aes(x = month, y = lincoln_memorial_departures)) +
-  geom_point(alpha=0.1, color="dark red") + # people cycle most in Spring, summer and fall. Suprised that there is no big spike in summer months
-  geom_smooth() # why does the smooth line not work here
-
+  geom_point(alpha = 0.1, color="dark red") + 
+  # people cycle most in Spring, summer and fall. Surprised that there is no big spike in summer months
+  geom_smooth()
 ```
 
 
 ```{r year}
 
-train_date_date %>% # something is off with the year variable, how can we remove the space in the middle?
-  ggplot(aes(x = year, y = lincoln_memorial_departures)) +
-  geom_point(alpha=0.1) + # overall, more people use the service in 2021 than in 2020
+# by year
+train_data_date %>% 
+  # something is off with the year variable, how can we remove the space in the middle? #add factor()
+  ggplot(aes(x = factor(year), y = lincoln_memorial_departures)) +
+  geom_col(width = 0.5, color = "salmon") + 
+  # overall, more people use the service in 2021 than in 2020
   geom_smooth()
-
 ```
 
 ```{r specific day}
-
 # for a specific month and day, seeing variance by hour
-train_date_date %>% 
+train_data_date %>% 
   filter(year == 2021, month == "Aug", day == 15) %>% 
-  ggplot(aes(x  =hour, y = lincoln_memorial_departures)) +
-  geom_line(color="Red")
-
+  ggplot(aes(x= hour, y = lincoln_memorial_departures)) +
+  geom_line(color = "Red")
 ```
 
 ## Heat maps
-
 ```{r heat}
 # The below data can be used for a heat map - not sure what we want to show though?
+# Why only a very small area is shown in the map?
+
 coord_data <- data %>% 
   select(station, lat, lng) %>% 
   filter(duplicated(station) == FALSE)
@@ -241,7 +237,6 @@ heat_map_data <- data %>%
   pivot_wider(names_from = type, values_from = count) %>% 
   left_join(coord_data) %>% 
   filter(!is.na(lat), !is.na(lng))
-  
 
 library(sf)
 library(tigris)
@@ -274,39 +269,33 @@ dep_sf %>%
 ## Visualizations by weather at Lincoln Memorial
 
 ```{r temperatures}
-
-
-train_date_date %>%
-  ggplot(aes(x=temperature,y=lincoln_memorial_departures))+
-  geom_point(alpha=0.07,color='orange')+
-  labs(x='Temperature', y= 'Hourly Departures and Arrivals')+
+# weather viz
+train_data_date %>%
+  ggplot(aes(x = temperature, y = lincoln_memorial_departures))+
+  geom_point(alpha = 0.07,color = 'orange')+
+  labs(x ='Temperature', y = 'Hourly Departures and Arrivals')+
   geom_smooth() # as the temperature goes up, departures and arrivals go up
-
 ```
 
 ```{r temperatures_month}
-
-train_date_date %>%
-  ggplot(aes(x=temperature,y=lincoln_memorial_departures))+
-  geom_point(alpha=0.07,color='orange')+
-  labs(x='Temperature', y= 'Hourly Departures and Arrivals')+
-  geom_smooth() + #super confused as to why november and december have hot temperature?
+# temperature in each month
+train_data_date %>%
+  ggplot(aes(x = temperature, y = lincoln_memorial_departures))+
+  geom_point(alpha = 0.07, color = 'orange') +
+  labs(x= 'Temperature', y = 'Hourly Departures and Arrivals')+
+  geom_smooth() + #super confused as to why November and December have hot temperature?
   facet_wrap(~month)
-
-
 ```
 
 
 
 ```{r wind}
-
-train_date_date %>%
-  ggplot(aes(x=wind_speed,y=lincoln_memorial_departures))+
-  geom_point(alpha=0.1,color='blue')+
-  labs(x='Wind Speed', y= 'Hourly Departures and Arrivals') +
+# wind viz
+train_data_date %>%
+  ggplot(aes(x = wind_speed,y = lincoln_memorial_departures))+
+  geom_point(alpha = 0.1,color = 'blue')+
+  labs(x = 'Wind Speed', y = 'Hourly Departures and Arrivals') +
   geom_smooth() # data is sparse hence why we get this weird trend
-
-
 ```
 
 ```{r rain}
