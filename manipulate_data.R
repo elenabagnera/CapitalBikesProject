@@ -170,18 +170,13 @@ get_historic_weather <- function(x) {
 format_weather <- function(x) {
   x %>% 
     mutate(conditions = case_when(
-      grepl("Rain", conditions, fixed = TRUE) ~ 0,
-      grepl("Snow", conditions, fixed = TRUE) ~ 0,
-      conditions == "Overcast" ~ 0.75,
-      TRUE ~ 1
+      grepl("Rain", conditions, fixed = TRUE) ~ "Bad",
+      grepl("Snow", conditions, fixed = TRUE) ~ "Bad",
+      conditions == "Overcast" ~ "Okay",
+      TRUE ~ "Good"
     )) %>% 
     select(-cloud_cover, 
            -visibility, 
-           -snow_depth, 
-           -snow, 
-           -precipitation, 
-           -minimum_temperature, 
-           -maximum_temperature, 
            -relative_humidity, 
            -wind_chill, 
            -heat_index, 
@@ -190,7 +185,7 @@ format_weather <- function(x) {
 }
 
 # Will modify the date column
-add_sunset <- function(x) {
+add_sun_is_out <- function(x) {
   library(lubridate)
   # Copy to a new dataframe to not modify the original
   y <- x
@@ -206,6 +201,9 @@ add_sunset <- function(x) {
       select(year, month, day, dawn, dusk)
   
   result <- left_join(x, y_with_times, by = c("year", "month", "day")) %>% 
-    mutate(temp_date = make_datetime(year, match(month, month.abb), day, hour))
-    mutate(sun_out = ifelse(temp_date > ymd_hms(dawn) & temp_date < ymd_hms(dusk))) 
+    mutate(temp_date = make_datetime(year, match(month, month.abb), day, hour)) %>% 
+    mutate(sun_is_out = ifelse(temp_date > ymd_hms(dawn) & temp_date < ymd_hms(dusk), 1, 0)) %>% 
+    select(-temp_date, -dusk, -dawn)
+  
+  return(result)
 }
