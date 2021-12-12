@@ -50,18 +50,18 @@ library(corrplot)
 ### get real-time data through API
 url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/5/query?where=1%3D1&outFields=*&outSR=4326&f=json"
 
-# 1) use the URL to make a request from the API
-data_json <- GET(url = url,
-                 user_agent("Georgetown University Assignment"))
-# 2) Check for a server error in the response
-http_status(data_json)
-# 3) get the contents of the response as a text string
-data_json <- content(data_json, as = "text")
-# 4) create a character matrix from the JSON
-data_matrix <- fromJSON(data_json)
-# 5) turn the body of the character matrix into a tibble
-realtime_data <- as_tibble(data_matrix$features$attributes)
-#help needed: how to use lower case for var names?
+# # 1) use the URL to make a request from the API
+# data_json <- GET(url = url,
+#                  user_agent("Georgetown University Assignment"))
+# # 2) Check for a server error in the response
+# http_status(data_json)
+# # 3) get the contents of the response as a text string
+# data_json <- content(data_json, as = "text")
+# # 4) create a character matrix from the JSON
+# data_matrix <- fromJSON(data_json)
+# # 5) turn the body of the character matrix into a tibble
+# realtime_data <- as_tibble(data_matrix$features$attributes)
+# #help needed: how to use lower case for var names?
 
 ### get historical data through CSVs
 cbs_data <- read_files('data/')
