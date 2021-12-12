@@ -158,7 +158,7 @@ get_historic_weather <- function(x) {
 
   weather <- read_csv("weather.csv") %>%
     rename_with(~ tolower(str_replace_all(., pattern = " ", replacement = "_"))) %>%
-    mutate(time = mdy_hms(date_time)) %>%
+    mutate(time = mdy_hms(paste(date_time, "00", sep = ":"))) %>%
     add_grouping_times() %>%
     select(-date_time, -name, -time)
   # Filter out / mutate data here for NAs
@@ -187,4 +187,25 @@ format_weather <- function(x) {
            -heat_index, 
            -wind_direction, 
            -wind_gust)
+}
+
+# Will modify the date column
+add_sunset <- function(x) {
+  library(lubridate)
+  # Copy to a new dataframe to not modify the original
+  y <- x
+  mod_y <- y %>% 
+    mutate(lat = 38.8893, 
+           lon = -77.0502, 
+           date = as.Date(paste(year, match(month, month.abb),day,sep="-"))) %>% 
+    select(lat, lon, date)
+
+  y_with_times <- getSunlightTimes(data = mod_y, keep = c("dawn", "dusk"), tz = "America/New_York") %>% 
+      mutate(time = paste(date, "00:00:00", sep= " ")) %>% 
+      add_grouping_times() %>% 
+      select(year, month, day, dawn, dusk)
+  
+  result <- left_join(x, y_with_times, by = c("year", "month", "day")) %>% 
+    mutate(temp_date = make_datetime(year, match(month, month.abb), day, hour))
+    mutate(sun_out = ifelse(temp_date > ymd_hms(dawn) & temp_date < ymd_hms(dusk))) 
 }
