@@ -41,6 +41,7 @@ source("manipulate_data.R")
 library(tidymodels)
 library(corrplot)
 library(suncalc)
+library(lubridate)
 ```
 
 
@@ -235,48 +236,78 @@ train_data_date %>%
   geom_line(color = "Red")
 ```
 
+```{r holidays}
+
+# this is an example
+step_holiday(
+  recipe,
+  ...,
+  role = "predictor",
+  trained = FALSE,
+  holidays = c("LaborDay", "NewYearsDay", "ChristmasDay"), ## this could be inserted instead of timeDate::listHolidays("US")
+  columns = NULL,
+  keep_original_cols = TRUE,
+  skip = FALSE,
+  id = rand_id("holiday")
+)
+
+train_data_date %>%
+  table(is.holiday(date))
+      
+## to check what we did!
+holiday_rec <- prep(holiday_rec, training = examples)
+holiday_values <- bake(holiday_rec, new_data = examples)
+holiday_values
+
+# Unlike some other steps, step_holiday does not remove the original date variables by default. Set keep_original_cols to FALSE to remove them.
+
+  #notice that we also need to add some transformation of the dependent variable
+```
+
+```
+
 ## Heat maps
 ```{r heat}
 # The below data can be used for a heat map - not sure what we want to show though?
 # Why only a very small area is shown in the map?
 
-coord_data <- data %>% 
-  select(station, lat, lng) %>% 
-  filter(duplicated(station) == FALSE)
-
-heat_map_data <- data %>% 
-  # filter() %>% Filter here if you want a certain date range
-  group_by(station, type) %>% 
-  summarize(count = n()) %>% 
-  pivot_wider(names_from = type, values_from = count) %>% 
-  left_join(coord_data) %>% 
-  filter(!is.na(lat), !is.na(lng))
-
-library(sf)
-library(tigris)
-
-states <- tigris::states(cb = TRUE, progress_bar = FALSE) %>% 
-    st_crop(xmin = -77.4, xmax = -76.8,
-    ymin = 38.75, ymax = 39.15)
-
-dep_sf <- heat_map_data %>% 
-  st_as_sf(coords=c("lng", "lat"), remove = FALSE) %>% 
-  st_set_crs(value = 4326)
-
-dep_sf %>% 
-  ggplot() + 
-  geom_sf(data = states, fill = NA ) +
-  geom_sf(aes(color = departure), alpha = 0.3)
-
-dep_sf %>% 
-  ggplot() + 
-  geom_sf(data = states, fill = NA ) +
-  geom_sf(aes(color = arrival), alpha = 0.3)
-
-dep_sf %>% 
-  ggplot() + 
-  geom_sf(data = states, fill = NA ) +
-  geom_sf(aes(color = departure - arrival), alpha = 0.3)
+# coord_data <- data %>% 
+#   select(station, lat, lng) %>% 
+#   filter(duplicated(station) == FALSE)
+# 
+# heat_map_data <- data %>% 
+#   # filter() %>% Filter here if you want a certain date range
+#   group_by(station, type) %>% 
+#   summarize(count = n()) %>% 
+#   pivot_wider(names_from = type, values_from = count) %>% 
+#   left_join(coord_data) %>% 
+#   filter(!is.na(lat), !is.na(lng))
+# 
+# library(sf)
+# library(tigris)
+# 
+# states <- tigris::states(cb = TRUE, progress_bar = FALSE) %>% 
+#     st_crop(xmin = -77.4, xmax = -76.8,
+#     ymin = 38.75, ymax = 39.15)
+# 
+# dep_sf <- heat_map_data %>% 
+#   st_as_sf(coords=c("lng", "lat"), remove = FALSE) %>% 
+#   st_set_crs(value = 4326)
+# 
+# dep_sf %>% 
+#   ggplot() + 
+#   geom_sf(data = states, fill = NA ) +
+#   geom_sf(aes(color = departure), alpha = 0.3)
+# 
+# dep_sf %>% 
+#   ggplot() + 
+#   geom_sf(data = states, fill = NA ) +
+#   geom_sf(aes(color = arrival), alpha = 0.3)
+# 
+# dep_sf %>% 
+#   ggplot() + 
+#   geom_sf(data = states, fill = NA ) +
+#   geom_sf(aes(color = departure - arrival), alpha = 0.3)
 ```
 
 
