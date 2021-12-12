@@ -88,8 +88,12 @@ recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% # aaron said we should put more weight on some holidays rather than other, for example 4th of july and inauguration day especially since we are looking at lincoln memorial
   step_nzv(all_predictors()) %>% # aaron suggested adding this
-  step_other() # add this for any categorical predictors
-
+  step_other() %>% # add this for any categorical predictors
+  step_BoxCox(all_outcomes())
+  
+  
+  
+  
 ## this is an example
 # step_holiday(
 #   recipe,
