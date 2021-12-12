@@ -46,6 +46,9 @@ source("manipulate_data.R")
 doParallel::registerDoParallel()
 ```
 
+
+## Preparing the data
+
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
@@ -62,13 +65,6 @@ hour_data <- get_station_hourly(filtered_data) %>%
   #filter(conditions != "Bad") # To test if bad weather really hurts RMSE that much
 
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
-```
-
-## Implementation
-
-```{r setup_data}
-
-set.seed(28021995)
 
 model_data <- lagged_data %>%
   add_predictor_times() %>%
@@ -76,6 +72,13 @@ model_data <- lagged_data %>%
   # Having real time arrival data would be cheating
   select(-arrivals) %>%
   format_weather()
+
+```
+
+
+```{r setup_data}
+
+set.seed(28021995)
 
 # create a split object
 data_split <- initial_split(model_data, prop = 0.8)
@@ -86,14 +89,18 @@ test  <- testing(x = data_split)
 
 folds <- vfold_cv(data = train, v = 10)
 
+```
+
+## Implementation
+
+
+```{r recipe}
 recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
   step_nzv(all_predictors()) %>% # aaron suggested adding this
   step_other() %>% # add this for any categorical predictors
   step_BoxCox(all_outcomes())  ## only works with positve vars, no problem in our case
-  
-  
   
   
 ## this is an example
@@ -119,6 +126,7 @@ recipe <-
 
   #notice that we also need to add some transformation of the dependent variable
 ```
+
 
 ```{r tuning, cache=TRUE}
 # Tuning min_n doesn't seem to help
@@ -173,7 +181,7 @@ metrics %>%
   labs(title = "RMSE")
 ```
 
-Pick the results.
+## Picking results
 
 ```{r ft_results}
 best_rmse <- tune_results %>%

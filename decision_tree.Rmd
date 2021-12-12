@@ -1,0 +1,117 @@
+---
+title: "Decision tree"
+author: "Elena Bagnera"
+date: "12/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r include = FALSE}
+def.chunk.hook <- knitr::knit_hooks$get("chunk")
+knitr::opts_chunk$set(cache = FALSE)
+knitr::knit_hooks$set(
+  chunk = function(x, options) {
+    x <- def.chunk.hook(x, options)
+    ifelse(options$size != "normalsize", paste0("\n \\", options$size, "\n\n", x, "\n\n \\normalsize"), x)
+  }
+)
+# knitr::knit_hooks$set(inline = function(x) {
+#   prettyNum(round(x, 2), big.mark = ",")
+# })
+options(scipen=999)
+```
+
+\begin{center}
+\Huge{PPOL 670 | Final Project}
+
+\Huge{Random Forest}
+\end{center}
+
+\vspace{0.1in}
+
+[GitHub](https://github.com/elenabagnera/CapitalBikesProject)
+
+## Setup
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(tidymodels)
+library(recipes)
+library(vip)
+library(lubridate)
+library(workflows)
+library(ranger)
+source("times.R")
+source("io.R")
+source("manipulate_data.R")
+doParallel::registerDoParallel()
+```
+
+
+## Preparing the data
+
+[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+
+```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
+
+cbs_data <- read_files('data/')
+data <- sep_departures_from_arrivals(cbs_data) %>%
+  filter(!is.na(station)) # Remove electric bikes not going to / from a station
+
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
+
+hour_data <- get_station_hourly(filtered_data) %>%
+  get_historic_weather() %>% 
+  add_sun_is_out() %>% 
+  #filter(conditions != "Bad") # To test if bad weather really hurts RMSE that much
+
+lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+
+model_data <- lagged_data %>%
+  add_predictor_times() %>%
+  filter(!is.na(departures) & !is.na(arrivals)) %>%
+  # Having real time arrival data would be cheating
+  select(-arrivals) %>%
+  format_weather()
+
+```
+
+
+
+```{r setup_data}
+
+set.seed(28021995)
+
+# create a split object
+data_split <- initial_split(model_data, prop = 0.8)
+
+# create the training and testing data
+train <- training(x = data_split)
+test  <- testing(x = data_split)
+
+folds <- vfold_cv(data = train, v = 10)
+
+
+```
+
+## Model Implementation
+  
+```{r dec}
+
+recipe <-
+  recipe(formula = departures ~ ., data = train) %>%
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
+  step_nzv(all_predictors()) %>% 
+  step_other() %>% 
+  step_BoxCox(all_outcomes()) 
+  
+
+
+
+```
+  

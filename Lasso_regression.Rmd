@@ -58,7 +58,8 @@ data <- sep_departures_from_arrivals(cbs_data) %>%
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
 hour_data <- get_station_hourly(filtered_data) %>%
-  get_historic_weather()
+  get_historic_weather() %>%
+  add_sun_is_out()
 
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
 ```
@@ -98,7 +99,10 @@ lasso_recipe <-
   step_nzv(all_predictors()) %>% # aaron suggested adding this
   step_other() %>% # add this for any categorical predictors
   step_BoxCox(all_outcomes()) %>% 
-  step_dummy(all_nominal_predictors())
+  step_dummy(all_nominal_predictors()) %>%
+  step_center(all_numeric_predictors()) %>% # definitely need to add these too
+  step_scale(all_numeric_predictors()) %>% # definitely need to add these too
+  step_dummy(all_nominal_predictors()) # definitely need to add these too
 
 # see the outcome data
 bake(prep(lasso_recipe, training = lasso_train), new_data = lasso_test)
