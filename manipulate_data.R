@@ -186,6 +186,7 @@ format_weather <- function(x) {
 
 # Will modify the date column
 add_sun_is_out <- function(x) {
+  library(suncalc)
   library(lubridate)
   # Copy to a new dataframe to not modify the original
   y <- x
