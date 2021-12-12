@@ -238,30 +238,29 @@ train_data_date %>%
 
 ```{r holidays}
 
-# this is an example
-step_holiday(
-  recipe,
-  ...,
-  role = "predictor",
-  trained = FALSE,
-  holidays = c("LaborDay", "NewYearsDay", "ChristmasDay"), ## this could be inserted instead of timeDate::listHolidays("US")
-  columns = NULL,
-  keep_original_cols = TRUE,
-  skip = FALSE,
-  id = rand_id("holiday")
-)
+holidays <- generated_holidays %>%
+  filter(country=="US") 
 
-train_data_date %>%
-  table(is.holiday(date))
-      
-## to check what we did!
-holiday_rec <- prep(holiday_rec, training = examples)
-holiday_values <- bake(holiday_rec, new_data = examples)
-holiday_values
+holidays$ds <- as_date(ymd(holidays$ds)) 
 
-# Unlike some other steps, step_holiday does not remove the original date variables by default. Set keep_original_cols to FALSE to remove them.
+holidays <- holidays %>%
+  mutate(
+    day=day(ymd(ds)),
+    month=month(ymd(ds), label = TRUE)
+                     ) %>%
+  filter(year==2020 | year==2021) 
 
-  #notice that we also need to add some transformation of the dependent variable
+holidays_date <- left_join(train_data_date, holidays, by= c('year', 'month', 'day'))
+
+ bar <- holidays_date %>%
+   filter(year==2020) %>%
+   group_by(day, month) %>%
+   select(holiday, lincoln_memorial_departures, day, month) %>%
+   summarise(lincoln_memorial = sum(lincoln_memorial_departures)) %>%
+   na.omit() %>%
+   
+  ggplot() +
+  geombar()
 ```
 
 ```
