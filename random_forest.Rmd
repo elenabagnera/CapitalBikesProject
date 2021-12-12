@@ -90,6 +90,27 @@ recipe <-
   step_nzv(all_predictors()) %>% # aaron suggested adding this
   step_other() # add this for any categorical predictors
 
+## this is an example
+# step_holiday(
+#   recipe,
+#   ...,
+#   role = "predictor",
+#   trained = FALSE,
+#   holidays = c("LaborDay", "NewYearsDay", "ChristmasDay"), ## this could be inserted instead of timeDate::listHolidays("US")
+#   columns = NULL,
+#   keep_original_cols = TRUE,
+#   skip = FALSE,
+#   id = rand_id("holiday")
+# )
+
+
+## to check what we did!
+# holiday_rec <- prep(holiday_rec, training = examples)
+# holiday_values <- bake(holiday_rec, new_data = examples)
+# holiday_values
+
+# Unlike some other steps, step_holiday does not remove the original date variables by default. Set keep_original_cols to FALSE to remove them.
+
   #notice that we also need to add some transformation of the dependent variable
 ```
 
