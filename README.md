@@ -40,8 +40,8 @@ This is for a group project for POL706 at Georgetown University.
 
 6. Run models on the new data
 	a. random forest (can try first with parameter tuning and then without) - FK
-		i. try a version where we first do a random forest model to predict a binary variable of whether bikes are departing or not.     Then use the predictions to create a new variable and estimate a random forest model that uses that variable as a predictor
-	b. either Lasso, Ridge or Glymet (or multiple of these) - QX 
+		i. try a version where we first do a random forest model to predict a binary variable of whether bikes are departing or not. Then use the predictions to create a new variable and estimate a random forest model that uses that variable as a predictor
+	b. either Lasso, Ridge or Glymet (or multiple of these) - QX (Lasso & Ridge) DONE
 	c. decision tree - EB - DONE (although with a smaller dataset)
 	c. xg boost (no idea what it is) - SB TO LOOK INTO IT- EB [optional]
 	d. compares the models and writes explanation of results - FK
