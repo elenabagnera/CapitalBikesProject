@@ -25,10 +25,10 @@ DC's Capital Bikeshare service has been increasing in popularity, especially dur
 
 We chose predictors that vary by the hour that we believe are relevant to individuals' choices of taking a capital Bikeshare bike. They are of three types:
 
-* weather: this includes general weather conditions (categorical variable), rain, temperature. 
+* weather: this includes general weather conditions (categorical variable), rain, temperature, snow. 
 * sunlight: this is a dummy variable for whether there is sunlight or not
-* time: this includes day of the week, weekday, month, year, as well as holiday days.
-* other stations: this includes stations by an [ADD] mile radius
+* time: this includes day of the week, weekday, month, year, as well as selected holiday days.
+* other stations: this includes departures from stations in an [ADD] mile radius
 
 
 Being able to predict Capital Bikeshare demand, could result in a more efficient allocation of bikes when stations are re-stocked at night. It could also inform and it could inform the eventual expansion of stations across strategic locations across the city to improve the experience of Washingtonians.
@@ -69,9 +69,8 @@ We also had to add data on weather and sunlight predictors in the following way:
 * Creating a categorical variable for good, bad and "okay" weather
 * To add sunlight predictors, we had to... [ADD - I DO NOT UNDERSTAND THIS FULLY]
 
-The cleaned dataset includes the following variables:
+The cleaned dataset includes 81 [ADD - DEPENDS ON HOW MANY STATIONS] predictors
 
-[ADD]
 
 ## Overall method
 
