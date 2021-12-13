@@ -61,19 +61,23 @@ doParallel::registerDoParallel()
 # 
 # hour_data <- get_station_hourly(filtered_data) %>%
 #   get_historic_weather() %>% 
-#   add_sun_is_out()
-# 
-# lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+#   add_sun_is_out() %>% 
 
-lagged_data <- read_csv('lagged_data.csv') %>% 
+hour_data <- read_csv('hour_data.csv') %>% 
+  format_weather() %>% 
   filter(conditions != 'Bad')
+
+
+lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+
+#lagged_data <- read_csv('lagged_data.csv') %>% 
 
 model_data <- lagged_data %>%
   add_predictor_times() %>%
   filter(!is.na(departures) & !is.na(arrivals)) %>%
   # Having real time arrival data would be cheating
-  select(-arrivals) %>%
-  format_weather()
+  select(-arrivals)
+  #format_weather()
 
 ```
 
@@ -101,7 +105,7 @@ recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
   step_nzv(all_predictors()) %>% # aaron suggested adding this
-  step_BoxCox(all_outcomes())  ## only works with positve vars, no problem in our case
+  step_BoxCox(all_outcomes())  ## only works with positive vars, no problem in our case
   
   
 ## this is an example
@@ -129,7 +133,7 @@ recipe <-
 ```
 
 
-```{r tuning, cache=TRUE}
+```{r tuning, cache=FALSE}
 # Tuning min_n doesn't seem to help
 mod <- rand_forest(mtry = tune(), trees = 200, min_n = tune()) %>% # we should have anywhere between 100 and 1000 trees
   set_mode("regression") %>%
