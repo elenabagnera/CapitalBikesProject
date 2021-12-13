@@ -116,53 +116,53 @@ bake(prep(ridge_recipe, training = ridge_train), new_data = ridge_test)
 ```{r run the model}
 
 # create a model
-lasso_mod <- linear_reg(
+ridge_mod <- linear_reg(
   penalty = tune(), 
   mixture = 0) %>%
   set_engine("glmnet")
 
 # create a workflow
-lasso_workflow  <- 
+ridge_workflow  <- 
   workflow() %>% 
-  add_model(spec = lasso_mod) %>% 
-  add_recipe(recipe = lasso_recipe)
+  add_model(spec = ridge_mod) %>% 
+  add_recipe(recipe = ridge_recipe)
 
 # create a tuning grid
-lasso_grid <- grid_regular(penalty(), levels = 10)
+ridge_grid <- grid_regular(penalty(), levels = 10)
 
 # estimate with resampling
-lasso_res <- 
-  lasso_workflow %>% 
+ridge_res <- 
+  ridge_workflow %>% 
   tune_grid(resample = folds,
-            grid = lasso_grid,
+            grid = ridge_grid,
             control = control_grid(save_pred = TRUE),
             metrics = metric_set(rmse))
 
 # select best model
-lasso_best <- lasso_res %>% 
+ridge_best <- ridge_res %>% 
             select_best("rmse")
 
 ### create a new model ###
-lasso_final <- finalize_workflow(
-  lasso_workflow,
-  parameters = lasso_best
+ridge_final <- finalize_workflow(
+  ridge_workflow,
+  parameters = ridge_best
 )
 
 # fit to the training data and extract coefficients
-lasso_coefs <- lasso_final %>%
-  fit(data = lasso_train) %>%
+ridge_coefs <- ridge_final %>%
+  fit(data = ridge_train) %>%
   extract_fit_parsnip() %>%
-  vi(lambda = lasso_best$penalty) 
+  vi(lambda = ridge_best$penalty) 
 
-lasso_coefs
+ridge_coefs
 
 # fit resample
-lasso_fit_rs <-
-  lasso_final %>% 
+ridge_fit_rs <-
+  ridge_final %>% 
   fit_resamples(resample = folds)
 
 # collect metrics
-plot <- collect_metrics(lasso_fit_rs, summarize = FALSE)
+plot <- collect_metrics(ridge_fit_rs, summarize = FALSE)
 
 # plot rmse
 plot %>% 
@@ -171,7 +171,7 @@ plot %>%
   geom_line() +
   geom_point() +
   scale_y_continuous(limits = c(0, 8)) +
-  labs(title = "Calculated RMSE Across the 10 Folds - Lasso Regression",
+  labs(title = "Calculated RMSE Across the 10 Folds - Ridge Regression",
        y = "RMSE_hat") +
   theme_minimal()
 ```
