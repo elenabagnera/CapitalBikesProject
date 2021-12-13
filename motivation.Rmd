@@ -21,7 +21,15 @@ knitr::include_graphics("map.png")
 ```
 
 
-DC's Capital Bikeshare service has been increasing in popularity, especially during the COVID-19 pandemic, when Washingtonians needed alternatives for public transport. To date it has 5,000 bikes and 600+ stations across 7 jurisdictions. However, users find the service unreliable at times, especially at peak times. In this project, our goal is to use and optimize supervised machine learning models that can predict the number of ride-sharing bikes that will be used at any give hour, using time and weather predictors. For simplicity, we apply our models to one station in particular that has particularly high demand: the Lincoln Memorial station. As such, our target variable will be the number of bikes that departed from that station at a given hour.
+DC's Capital Bikeshare service has been increasing in popularity, especially during the COVID-19 pandemic, when Washingtonians needed alternatives for public transport. To date it has 5,000 bikes and 600+ stations across 7 jurisdictions. However, users find the service unreliable at times, especially at peak times. In this project, our goal is to use and optimize supervised machine learning models that can predict the number of ride-sharing bikes that will be used at any give hour. For simplicity, we apply our models to one station in particular that has particularly high demand: the Lincoln Memorial station. As such, our target variable will be the number of bikes that departed from that station at a given hour.
+
+We chose predictors that vary by the hour that we believe are relevant to individuals' choices of taking a capital Bikeshare bike. They are of three types:
+
+* weather: this includes general weather conditions (categorical variable), rain, temperature. 
+* sunlight: this is a dummy variable for whether there is sunlight or not
+* time: this includes day of the week, weekday, month, year, as well as holiday days.
+* other stations: this includes stations by an [ADD] mile radius
+
 
 Being able to predict Capital Bikeshare demand, could result in a more efficient allocation of bikes when stations are re-stocked at night. It could also inform and it could inform the eventual expansion of stations across strategic locations across the city to improve the experience of Washingtonians.
 
@@ -48,23 +56,25 @@ The historic data initially included the following variables:
 We had to perform significant data cleaning to be able to use the data for our purposes, which involved generating functions for the following purposes:
 
 * Appending 17 datasets into a single dataset
+* Using the lubridate package to standardize and generate time-relevant predictors 9such as weekday)
 * Getting hourly data
 * Separating departures from arrivals
 * Filtering stations from Lincoln memorial based on a given parameter
-* Lagging data by 14 days in order to be abe to use it as predictors
-* Making data wider
+* Lagging data by 14 days in order to be able to use it as predictors
+* Making the data wider [ADD EXPLANATION]
 
 We also had to add data on weather and sunlight predictors in the following way:
 * Clean weather dataset using lubridate functions in order to be able to merge on date and hour
-* Removig variables with missing obsrvations
-* Creating a categorical vaariable for good, bad and "okay" weather
+* Removing variables with missing observations
+* Creating a categorical variable for good, bad and "okay" weather
 * To add sunlight predictors, we had to... [ADD - I DO NOT UNDERSTAND THIS FULLY]
 
 The cleaned dataset includes the following variables:
 
+[ADD]
 
 ## Overall method
 
-here is where we explain why we used certain algorithms versus others
+here is where we explain why we used certain algorithms versus others - I thinkw e are using parametric algorithm because we have a very wide dataset?
 
 
