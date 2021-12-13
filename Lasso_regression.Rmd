@@ -51,14 +51,14 @@ source("manipulate_data.R")
 
 ```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
 
-cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data) %>%
-  filter(!is.na(station)) # Remove electric bikes not going to / from a station
-
-# cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
-# 
+# cbs_data <- read_files('data/')
 # data <- sep_departures_from_arrivals(cbs_data) %>%
-#   filter(!is.na(station)) # if you want to try first with one data set only to not overload your machine you can use these lines instead of the above
+#   filter(!is.na(station)) # Remove electric bikes not going to / from a station
+
+cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
+
+data <- sep_departures_from_arrivals(cbs_data) %>%
+  filter(!is.na(station)) # if you want to try first with one data set only to not overload your machine you can use these lines instead of the above
 
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
@@ -89,7 +89,7 @@ lasso_data_split <- initial_split(lasso_data, prop = 0.8)
 
 # create the training and testing data
 lasso_train <- training(x = lasso_data_split)
-lasso_test  <- testing(x = data_split)
+lasso_test  <- testing(x = lasso_data_split)
 
 # create 10-fold
 folds <- vfold_cv(data = lasso_train, v = 10)
@@ -102,8 +102,8 @@ lasso_recipe <-
   recipe(formula = departures ~ ., data = lasso_train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% # Aaron said we should put more weight on some holidays rather than other, for example 4th of July and inauguration day especially since we are looking at Lincoln memorial
   step_nzv(all_predictors()) %>% # Aaron suggested adding this
-  step_other() %>% # add this for any categorical predictors
-  step_BoxCox(all_outcomes()) %>% 
+  step_other(all_nominal_predictors()) %>% # add this for any categorical predictors
+  #step_BoxCox(all_outcomes()) %>% 
   step_dummy(all_nominal_predictors()) %>%
   step_center(all_numeric_predictors()) %>% # definitely need to add these too
   step_scale(all_numeric_predictors()) %>% # definitely need to add these too
@@ -144,7 +144,7 @@ lasso_best <- lasso_res %>%
 
 ### create a new model ###
 lasso_final <- finalize_workflow(
-  lasso_wf,
+  lasso_workflow,
   parameters = lasso_best
 )
 
@@ -162,16 +162,16 @@ lasso_fit_rs <-
   fit_resamples(resample = folds)
 
 # collect metrics
-collect_metrics(lasso_fit_rs)
+plot <- collect_metrics(lasso_fit_rs, summarize = FALSE)
 
 # plot rmse
-collect_metrics(lasso_fit_rs, summarize = FALSE) %>% 
+plot %>% 
   filter(.metric == "rmse") %>% 
   ggplot(aes(id, .estimate, group = .estimator)) +
   geom_line() +
   geom_point() +
-  scale_y_continuous(limits = c(0, 1)) +
-  labs(title = "Calculated RMSE Across the 10 Folds",
+  scale_y_continuous(limits = c(0, 8)) +
+  labs(title = "Calculated RMSE Across the 10 Folds - Lasso Regression",
        y = "RMSE_hat") +
   theme_minimal()
 ```
