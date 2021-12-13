@@ -1,10 +1,11 @@
-*.png
 *.xlsx
 debug.R
 git branch -M main
 secrets.json
 *.DS_Store
 data/untracked_data
+!docs/*
+*_files
 
 # Template from https://github.com/github/gitignore
 
