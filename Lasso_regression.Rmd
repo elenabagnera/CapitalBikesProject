@@ -55,11 +55,10 @@ cbs_data <- read_files('data/')
 data <- sep_departures_from_arrivals(cbs_data) %>%
   filter(!is.na(station)) # Remove electric bikes not going to / from a station
 
-
 # cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
 # 
 # data <- sep_departures_from_arrivals(cbs_data) %>%
-#   filter(!is.na(station)) # if you want to try first with one data set only to not oevrload your machine you can use these lines instead of the above
+#   filter(!is.na(station)) # if you want to try first with one data set only to not overload your machine you can use these lines instead of the above
 
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
@@ -101,8 +100,8 @@ folds <- vfold_cv(data = lasso_train, v = 10)
 # create a recipe
 lasso_recipe <-
   recipe(formula = departures ~ ., data = lasso_train) %>%
-  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% # aaron said we should put more weight on some holidays rather than other, for example 4th of july and inauguration day especially since we are looking at lincoln memorial
-  step_nzv(all_predictors()) %>% # aaron suggested adding this
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% # Aaron said we should put more weight on some holidays rather than other, for example 4th of July and inauguration day especially since we are looking at Lincoln memorial
+  step_nzv(all_predictors()) %>% # Aaron suggested adding this
   step_other() %>% # add this for any categorical predictors
   step_BoxCox(all_outcomes()) %>% 
   step_dummy(all_nominal_predictors()) %>%
