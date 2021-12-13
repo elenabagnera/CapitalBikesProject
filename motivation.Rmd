@@ -27,18 +27,44 @@ Being able to predict Capital Bikeshare demand, could result in a more efficient
 
 ## Data
 
-We use Capital Bikeshare's publicly available [historic data](https://www.capitalbikeshare.com/system-data), ranging from May 2020 until September 2021. After data cleaning, our dataset has 11,718 rows (CONFIRM?), each indicating the number of hours that departed Lincoln Memorial at a certain hour.
+We use Capital Bikeshare's publicly available [historic data](https://www.capitalbikeshare.com/system-data), ranging from May 2020 until September 2021. After data cleaning, our dataset has 309197 rows (CONFIRM?), each indicating the number of hours that departed Lincoln Memorial at a certain hour.
+
+For weather predictors we used data from ADD
+
+For sunlight we used data from ADD
 
 ## Data cleaning
 
-Duration – Duration of trip
-Start Date – Includes start date and time
-End Date – Includes end date and time
-Start Station – Includes starting station name and number
-End Station – Includes ending station name and number
-Bike Number – Includes ID number of bike used for the trip
-Member Type – Indicates whether user was a "registered" member (Annual Member, 30-Day Member or Day Key Member) or a "casual" rider (Single Trip, 24-Hour Pass, 3-Day Pass or 5-Day Pass)
+The historic data initially included the following variables:
+
+* Duration – Duration of trip
+* Start Date – Includes start date and time
+* End Date – Includes end date and time
+* Start Station – Includes starting station name and number
+* End Station – Includes ending station name and number
+* Bike Number – Includes ID number of bike used for the trip
+* Member Type – Indicates whether user was a "registered" member 
+
+We had to perform significant data cleaning to be able to use the data for our purposes, which involved generating functions for the following purposes:
+
+* Appending 17 datasets into a single dataset
+* Getting hourly data
+* Separating departures from arrivals
+* Filtering stations from Lincoln memorial based on a given parameter
+* Lagging data by 14 days in order to be abe to use it as predictors
+* Making data wider
+
+We also had to add data on weather and sunlight predictors in the following way:
+* Clean weather dataset using lubridate functions in order to be able to merge on date and hour
+* Removig variables with missing obsrvations
+* Creating a categorical vaariable for good, bad and "okay" weather
+* To add sunlight predictors, we had to... [ADD - I DO NOT UNDERSTAND THIS FULLY]
+
+The cleaned dataset includes the following variables:
 
 
+## Overall method
+
+here is where we explain why we used certain algorithms versus others
 
 
