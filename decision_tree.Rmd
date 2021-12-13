@@ -64,6 +64,9 @@ doParallel::registerDoParallel()
 
 cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
 
+data <- sep_departures_from_arrivals(cbs_data) %>%
+  filter(!is.na(station))
+
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
 hour_data <- get_station_hourly(filtered_data) %>%
