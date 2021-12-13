@@ -55,6 +55,12 @@ cbs_data <- read_files('data/')
 data <- sep_departures_from_arrivals(cbs_data) %>%
   filter(!is.na(station)) # Remove electric bikes not going to / from a station
 
+
+# cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
+# 
+# data <- sep_departures_from_arrivals(cbs_data) %>%
+#   filter(!is.na(station)) # if you want to try first with one data set only to not oevrload your machine you can use these lines instead of the above
+
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
 hour_data <- get_station_hourly(filtered_data) %>%
