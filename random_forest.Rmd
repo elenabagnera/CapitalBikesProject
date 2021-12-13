@@ -53,18 +53,20 @@ doParallel::registerDoParallel()
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
   
-cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data) %>%
-  filter(!is.na(station)) # Remove electric bikes not going to / from a station
+# cbs_data <- read_files('data/')
+# data <- sep_departures_from_arrivals(cbs_data) %>%
+#   filter(!is.na(station)) # Remove electric bikes not going to / from a station
+# 
+# filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
+# 
+# hour_data <- get_station_hourly(filtered_data) %>%
+#   get_historic_weather() %>% 
+#   add_sun_is_out()
+# 
+# lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
 
-filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
-
-hour_data <- get_station_hourly(filtered_data) %>%
-  get_historic_weather() %>% 
-  add_sun_is_out()
-  #filter(conditions != "Bad") # To test if bad weather really hurts RMSE that much
-
-lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+lagged_data <- read_csv('lagged_data.csv') %>% 
+  filter(conditions != 'Bad')
 
 model_data <- lagged_data %>%
   add_predictor_times() %>%
@@ -99,7 +101,6 @@ recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
   step_nzv(all_predictors()) %>% # aaron suggested adding this
-  step_other() %>% # add this for any categorical predictors
   step_BoxCox(all_outcomes())  ## only works with positve vars, no problem in our case
   
   
