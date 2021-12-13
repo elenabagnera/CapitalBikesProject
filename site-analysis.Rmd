@@ -1,0 +1,41 @@
+---
+title: "analysis"
+author: "Elena Bagnera"
+date: "11/13/2021"
+output: html_document
+---
+
+```{r include = FALSE}
+def.chunk.hook <- knitr::knit_hooks$get("chunk")
+knitr::opts_chunk$set(cache = FALSE)
+knitr::knit_hooks$set(
+  chunk = function(x, options) {
+    x <- def.chunk.hook(x, options)
+    ifelse(options$size != "normalsize", paste0("\n \\", options$size, "\n\n", x, "\n\n \\normalsize"), x)
+  }
+)
+# knitr::knit_hooks$set(inline = function(x) {
+#   prettyNum(round(x, 2), big.mark = ",")
+# })
+options(scipen=999)
+```
+
+
+\begin{center}
+\Huge{PPOL 670 | Final Project}
+
+\Huge{Example}
+\end{center}
+
+\vspace{0.1in}
+
+```{r setup, message=FALSE}
+
+```
+
+
+
+```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
+
+
+```
