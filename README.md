@@ -9,13 +9,13 @@ This is for a group project for POL706 at Georgetown University.
 - explain in the html what we did
 
 2. Create visualizations on the current data in `visualizations.Rmd`. 
-	a. make initial viz (EB)
+	a. make initial viz (EB) - DONE
 	b. improve/add to any existing visualizations (QX)
-	c. correlation matrix with some predictors (FK)
+	c. correlation matrix with some predictors (FK) - DONE (DECIDED NOT TO DO)
 	e. add viz with binary rain predictor QX
 	f. add viz with weather conditions (categorical) QX
 	g. add viz with sun is out QX
-	H. do a viz with holidays (color holidays in a different color) use percent in EB
+	H. do a viz with holidays (color holidays in a different color) use percent in FK -  DONE
 
 3. ~~Widen hour_data on the column type for each station (QX & FK)~~ DONE
 
@@ -41,7 +41,8 @@ This is for a group project for POL706 at Georgetown University.
 6. Run models on the new data
 	a. random forest (can try first with parameter tuning and then without) - FK
 		i. try a version where we first do a random forest model to predict a binary variable of whether bikes are departing or not.     Then use the predictions to create a new variable and estimate a random forest model that uses that variable as a predictor
-	b. either Lasso, Ridge or Glymet (or multiple of these) - QX - EB
+	b. either Lasso, Ridge or Glymet (or multiple of these) - QX 
+	c. decision tree - EB - DONE (although with a smaller dataset)
 	c. xg boost (no idea what it is) - SB TO LOOK INTO IT- EB [optional]
 	d. compares the models and writes explanation of results - FK
 
@@ -52,7 +53,7 @@ This is for a group project for POL706 at Georgetown University.
 	b. set up structure and bare bones of template - EK
 	c. split finalization of website - ALL
 		i. each person to annotate their model rmd. why we ran a certain model; what predictors we are using; interpretation of results
-		ii. explanation of cleaning - EK (but mostly talking about it in class)
+		ii. explanation of cleaning - EK (but mostly talking about it in class) - STARTED THIS IN MOTIVATION HTML
 		iii. explanation of data viz - QX
-		iv. explanation of overall project goals - EB
+		iv. explanation of overall project goals - EB -  DONE
 		v. comparison of models - FK
