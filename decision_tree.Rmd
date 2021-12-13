@@ -160,4 +160,7 @@ collect_metrics(model_fit, summarize = FALSE) %>%
   theme_minimal() 
 
 ```
-  
+
+## Discussion of results
+
+Dcision-trees traditionally lack in performance because they are very simple.
