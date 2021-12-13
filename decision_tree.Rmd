@@ -69,12 +69,12 @@ Tree-based models are a class of nonparametric algorithms that work by partition
 # data <- sep_departures_from_arrivals(cbs_data) %>%
 #   filter(!is.na(station)) # Remove electric bikes not going to / from a station
 
-cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
+cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv") # trying with a smaller dataset as cannot load with larger
 
 data <- sep_departures_from_arrivals(cbs_data) %>%
   filter(!is.na(station))
 
-filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 400)
 
 hour_data <- get_station_hourly(filtered_data) %>%
   get_historic_weather() %>% 
