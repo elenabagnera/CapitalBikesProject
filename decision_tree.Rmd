@@ -49,8 +49,15 @@ source("times.R")
 source("io.R")
 source("manipulate_data.R")
 doParallel::registerDoParallel()
+library(rpart.plot)  
+library(vip)  
+library(rpart)
+library(caret)
 ```
 
+## Why this algorithm
+
+Tree-based models are a class of nonparametric algorithms that work by partitioning the feature space into a number of smaller (non-overlapping) regions with similar response values using a set of splitting rules. In essence, our tree is a set of rules that allows us to make predictions by asking simple yes-or-no questions about each feature.
 
 ## Preparing the data
 
@@ -111,7 +118,6 @@ recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
   step_nzv(all_predictors()) %>% 
-  step_other() %>% 
   step_BoxCox(all_outcomes()) # for decision trees, we use the same recipe as for a random forest model
 
 # create a model
@@ -148,7 +154,7 @@ collect_metrics(model_fit, summarize = FALSE) %>%
   ggplot(aes(id, .estimate, group = .estimator)) +
   geom_line() +
   geom_point() +
-  scale_y_continuous(limits = c(0, 3)) +
+  scale_y_continuous(limits = c(0, 10)) +
   labs(title = "Calculated RMSE Across the 10 Folds",
        y = "RMSE_hat") +
   theme_minimal() 

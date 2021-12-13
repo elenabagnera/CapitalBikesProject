@@ -56,7 +56,7 @@ The historic data initially included the following variables:
 We had to perform significant data cleaning to be able to use the data for our purposes, which involved generating functions for the following purposes:
 
 * Appending 17 datasets into a single dataset
-* Using the lubridate package to standardize and generate time-relevant predictors 9such as weekday)
+* Using the lubridate package to standardize and generate time-relevant predictors (such as weekday)
 * Getting hourly data
 * Separating departures from arrivals
 * Filtering stations from Lincoln memorial based on a given parameter
@@ -76,5 +76,7 @@ The cleaned dataset includes the following variables:
 ## Overall method
 
 here is where we explain why we used certain algorithms versus others - I thinkw e are using parametric algorithm because we have a very wide dataset?
+
+We start with a simple decision tree. Then random forest with hyperparameter tuning.
 
 
