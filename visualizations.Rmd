@@ -41,6 +41,7 @@ source("manipulate_data.R")
 library(tidymodels)
 library(corrplot)
 library(suncalc)
+library(lubridate)
 ```
 
 
@@ -235,48 +236,104 @@ train_data_date %>%
   geom_line(color = "Red")
 ```
 
+```{r holidays}
+
+# prep training data for holiday barchart - 1 year of data from May 2020 to April 2021
+bar_date <- train_data_date %>%
+  filter(year==2020 | year==2021 & month== "Jan" | year==2021 & month== "Feb"|year==2021 & month== "Mar"|year==2021 & month== "Apr") %>%
+  group_by(day, month, year)%>%
+  summarise(lincoln_memorial_departures=sum(lincoln_memorial_departures))
+
+## confirmed: 365 days exist in this data frame
+# check for missingness 
+sum(is.na(bar_date$lincoln_memorial_departures)) #0
+
+# what is the mean ridership per day
+mean_day <- bar_date %>%
+  group_by(day) %>%
+  summarize(n= mean(lincoln_memorial_departures)) %>%
+  summarize(mean(n))  ## mean per day is 1279
+              
+# create a dataframe for holidays
+holidays <- generated_holidays %>%
+  filter(country=="US") 
+
+holidays$ds <- as_date(ymd(holidays$ds)) 
+
+holidays <- holidays %>%
+  mutate(
+    day=day(ymd(ds)),
+    month=month(ymd(ds), label = TRUE)
+                     ) %>%
+  filter(year==2020 | year==2021) 
+
+holidays_date <- left_join(bar_date, holidays, by= c('year', 'month', 'day')) %>%
+    na.omit(holidays) 
+
+holidays_date %>%
+  ggplot(aes(y=lincoln_memorial_departures, x=holiday, fill=lincoln_memorial_departures)) + 
+  geom_bar(stat="identity")+
+  geom_hline(yintercept = 1279, color="blue")+ ## 1279 is the mean ridership per day
+  xlab("") +
+  ylab("Number of departures") +
+  scale_colour_discrete("Holidays")+
+  labs(title = "", caption = "") +
+  guides(fill=guide_legend(title="Number of departures")) +
+  theme_minimal() +
+  theme(plot.caption = element_text(face = "italic")
+  ) 
+
+ ggsave("holidaybar.jpg", width = 50, height = 20, units = "cm")
+
+
+```
+
+```
+
 ## Heat maps
 ```{r heat}
+
 # The below data can be used for a heat map - not sure what we want to show though?
 # Why only a very small area is shown in the map?
 
-coord_data <- data %>% 
-  select(station, lat, lng) %>% 
-  filter(duplicated(station) == FALSE)
+# coord_data <- data %>% 
+#   select(station, lat, lng) %>% 
+#   filter(duplicated(station) == FALSE)
+# 
+# heat_map_data <- data %>% 
+#   # filter() %>% Filter here if you want a certain date range
+#   group_by(station, type) %>% 
+#   summarize(count = n()) %>% 
+#   pivot_wider(names_from = type, values_from = count) %>% 
+#   left_join(coord_data) %>% 
+#   filter(!is.na(lat), !is.na(lng))
+# 
+# library(sf)
+# library(tigris)
+# 
+# states <- tigris::states(cb = TRUE, progress_bar = FALSE) %>% 
+#     st_crop(xmin = -77.4, xmax = -76.8,
+#     ymin = 38.75, ymax = 39.15)
+# 
+# dep_sf <- heat_map_data %>% 
+#   st_as_sf(coords=c("lng", "lat"), remove = FALSE) %>% 
+#   st_set_crs(value = 4326)
+# 
+# dep_sf %>% 
+#   ggplot() + 
+#   geom_sf(data = states, fill = NA ) +
+#   geom_sf(aes(color = departure), alpha = 0.3)
+# 
+# dep_sf %>% 
+#   ggplot() + 
+#   geom_sf(data = states, fill = NA ) +
+#   geom_sf(aes(color = arrival), alpha = 0.3)
+# 
+# dep_sf %>% 
+#   ggplot() + 
+#   geom_sf(data = states, fill = NA ) +
+#   geom_sf(aes(color = departure - arrival), alpha = 0.3)
 
-heat_map_data <- data %>% 
-  # filter() %>% Filter here if you want a certain date range
-  group_by(station, type) %>% 
-  summarize(count = n()) %>% 
-  pivot_wider(names_from = type, values_from = count) %>% 
-  left_join(coord_data) %>% 
-  filter(!is.na(lat), !is.na(lng))
-
-library(sf)
-library(tigris)
-
-states <- tigris::states(cb = TRUE, progress_bar = FALSE) %>% 
-    st_crop(xmin = -77.4, xmax = -76.8,
-    ymin = 38.75, ymax = 39.15)
-
-dep_sf <- heat_map_data %>% 
-  st_as_sf(coords=c("lng", "lat"), remove = FALSE) %>% 
-  st_set_crs(value = 4326)
-
-dep_sf %>% 
-  ggplot() + 
-  geom_sf(data = states, fill = NA ) +
-  geom_sf(aes(color = departure), alpha = 0.3)
-
-dep_sf %>% 
-  ggplot() + 
-  geom_sf(data = states, fill = NA ) +
-  geom_sf(aes(color = arrival), alpha = 0.3)
-
-dep_sf %>% 
-  ggplot() + 
-  geom_sf(data = states, fill = NA ) +
-  geom_sf(aes(color = departure - arrival), alpha = 0.3)
 ```
 
 
@@ -335,3 +392,35 @@ train_data_date %>%
   geom_smooth()
 # not sure why the data looks like this?
 ```
+
+
+```{r heatmap}
+
+
+heatmap <- train_data_date %>%
+  select (hour, lincoln_memorial_departures)  %>%
+    group_by (hour) %>%
+  summarize (sum_rider =sum(lincoln_memorial_departures))
+
+data_melt <- melt(heatmap, id= "hour")
+  
+
+data_melt %>%
+ ggplot( aes(hour, variable)) +
+    geom_tile(aes(fill = value)) +
+    labs(x = NULL,
+         y = NULL) + 
+  scale_fill_gradientn(colors = "blue") +
+   # scale_fill_gradientn(colours = rainbow(10)) +
+ # scale_fill_gradient(low = "white", mid = "blue", high = "black")+
+  scale_fill_gradient(low = "#FFFFFFFF",
+                    high = "#012345")  +
+    theme(legend.position = "right",
+          legend.direction = "vertical",
+          axis.line.x = element_blank(),
+          panel.grid.major.y = element_blank()) 
+
+
+
+```
+
