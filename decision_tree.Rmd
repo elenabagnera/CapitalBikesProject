@@ -9,7 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
 ```{r include = FALSE}
 def.chunk.hook <- knitr::knit_hooks$get("chunk")
@@ -59,15 +58,17 @@ doParallel::registerDoParallel()
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
 
-cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data) %>%
-  filter(!is.na(station)) # Remove electric bikes not going to / from a station
+# cbs_data <- read_files('data/')
+# data <- sep_departures_from_arrivals(cbs_data) %>%
+#   filter(!is.na(station)) # Remove electric bikes not going to / from a station
+
+cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
 
 filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
 
 hour_data <- get_station_hourly(filtered_data) %>%
   get_historic_weather() %>% 
-  add_sun_is_out() %>% 
+  add_sun_is_out() 
   #filter(conditions != "Bad") # To test if bad weather really hurts RMSE that much
 
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
@@ -92,7 +93,7 @@ data_split <- initial_split(model_data, prop = 0.8)
 
 # create the training and testing data
 train <- training(x = data_split)
-test  <- testing(x = data_split)
+test <- testing(x = data_split)
 
 folds <- vfold_cv(data = train, v = 10)
 
@@ -108,10 +109,46 @@ recipe <-
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
   step_nzv(all_predictors()) %>% 
   step_other() %>% 
-  step_BoxCox(all_outcomes()) 
-  
+  step_BoxCox(all_outcomes()) # for decision trees, we use the same recipe as for a random forest model
+
+# create a model
+
+dec_mod <- decision_tree() %>%
+  set_engine(engine="rpart") %>%
+  set_mode(mode="regression")
+
+# create a workflow
+
+workflow_dec <-
+  workflow() %>%
+  add_model(spec = dec_mod) %>%
+  add_recipe(recipe = recipe)
 
 
+#fit the model on training data 
+
+model_fit <-
+workflow_dec %>%
+fit_resamples(resamples = folds)
+
+```
+
+
+## Evaluation
+
+```{r dec_rmse}
+
+collect_metrics(model_fit) #average rmse across resamples for this model is 2.49 
+
+collect_metrics(model_fit, summarize = FALSE) %>%
+  filter(.metric == "rmse") %>%
+  ggplot(aes(id, .estimate, group = .estimator)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(limits = c(0, 3)) +
+  labs(title = "Calculated RMSE Across the 10 Folds",
+       y = "RMSE_hat") +
+  theme_minimal() 
 
 ```
   
