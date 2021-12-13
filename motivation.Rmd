@@ -21,7 +21,7 @@ knitr::include_graphics("map.png")
 ```
 
 
-DC's Capital Bikeshare service has been increasing in popularity, especially during the COVID-19 pandemic, when Washingtonians needed alternatives for public transport. To date it has 5,000 bikes and 600+ stations across 7 jurisdictions. However, users find the service unreliable at times, especially at peak times. In this project, our goal is to use and optimize supervised machine learning models that can predict the number of ride-sharing bikes that will be used at any give hour. For simplicity, we apply our models to one station in particular that has particularly high demand: the Lincoln Memorial station. As such, our target variable will be the number of bikes that departed from that station at a given hour.
+DC's Capital Bikeshare service has been increasing in popularity, especially during the COVID-19 pandemic, when Washingtonians needed alternatives for public transport. To date it has 5,000 bikes and 600+ stations across 7 jurisdictions. However, users find the service unreliable at times, especially at peak times. In this project, our goal is to use and optimize supervised machine learning models that can predict the number of ride-sharing bikes that will be used at any give hour. For simplicity, we apply our models to one station in particular that has particularly high demand due to its proximity to DC's greatest tourist attraction: the Lincoln Memorial station. As such, our target variable will be the number of bikes that departed from that station at a given hour.
 
 We chose predictors that vary by the hour that we believe are relevant to individuals' choices of taking a capital Bikeshare bike. They are of three types:
 
@@ -60,7 +60,7 @@ We had to perform significant data cleaning to be able to use the data for our p
 * Getting hourly data
 * Separating departures from arrivals
 * Filtering stations from Lincoln memorial based on a given parameter
-* Lagging data by 14 days in order to be able to use it as predictors
+* Lagging data by 14 days in order to be able to use it as predictors. We coupled the given station rides with every station from the 14 days prior for predictions. So dates in our data for prediction and the stations are 14 day historic data.
 * Making the data wider [ADD EXPLANATION]
 
 We also had to add data on weather and sunlight predictors in the following way:
