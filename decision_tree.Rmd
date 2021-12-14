@@ -146,6 +146,7 @@ fit_resamples(resamples = folds)
 
 ```
 
+We can also look at variable importance:
 
 ```{r try}
 
@@ -159,7 +160,7 @@ model_fit %>%
 
 ```{r dec_rmse}
 
-collect_metrics(model_fit) #average rmse across resamples for this model is 2.49 
+collect_metrics(model_fit) 
 
 collect_metrics(model_fit, summarize = FALSE) %>%
   filter(.metric == "rmse") %>%
@@ -175,7 +176,7 @@ collect_metrics(model_fit, summarize = FALSE) %>%
 
 ## Discussion of results
 
-The decision tree estimation produced an RMSE of *INSERT RMSE*.  This is a relatively big RMSE compared to our range of *ideal/expected* values mentioned earlier. 
+The decision tree estimation produced an average RMSE of5.  This is a relatively big RMSE compared to what we wanted (range 2-3). 
 
-This could be due to several weaknesses pertaining to decision trees. as they tend to overfit which means that it will be difficult to generalize to novel data. They also tend to produce trees that are overly correlated with each other (as it is more likely to get swayed by points that split the attributes well in both our predictor variables and outcome variable) . 
+This could be due to several weaknesses pertaining to decision trees as they tend to overfit which means that it will be difficult to generalize to novel data. They also tend to produce trees that are overly correlated with each other (as it is more likely to get swayed by points that split the attributes well in both our predictor variables and outcome variable). We could expect random forest to perform better. 
 
