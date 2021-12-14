@@ -110,6 +110,13 @@ folds <- vfold_cv(data = train, v = 10)
 
 ```
 
+
+## Justification for Engineering based on data exploration
+
+From the exploratory data analysis phase, holidays clearly affected departures. When compared to the mean departures per day *these holidays* had significantly greater ridership compared to others which had much lower departures such as *insert holdays* To help improve our predictions, we add step_holiday to our recipe to control for outlier trends during holidays. Additionally, as shown in the exploratory phase, the distribution of our outcome variable, `Lincoln Memorial Departures` is skewed. To avoid this imbalance affecting our predictions, step_BoxCox works since departures is a strictly positive variable. We use it to transform the outcome variable so that it would be more like a normal distribution.
+
+step_other further improves our prediction as it removes any infrequently reoccurring observations  in both our predictors and outcome variable. Finally, we used the near zero variance filter: step_nzv, to account for any predictors in our models that don’t have variance (one or very few unique values) and where these few unique values are far away from each other.  
+
 ## Model Implementation
   
 ```{r dec}
