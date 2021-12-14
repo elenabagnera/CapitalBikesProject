@@ -1,6 +1,6 @@
 ---
-title: "model selection"
-author: "Elena Bagnera"
+title: "Running models"
+author: ""
 date: "11/13/2021"
 output: html_document
 ---
