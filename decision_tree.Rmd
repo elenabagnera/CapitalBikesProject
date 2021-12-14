@@ -37,7 +37,7 @@ options(scipen=999)
 
 ## Setup
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE include=FALSE}
 library(tidyverse)
 library(tidymodels)
 library(recipes)
@@ -55,13 +55,11 @@ library(rpart)
 library(caret)
 ```
 
-## Why this algorithm
+## Why Decision Trees
 
-Tree-based models are a class of nonparametric algorithms that work by partitioning the feature space into a number of smaller (non-overlapping) regions with similar response values using a set of splitting rules. In essence, our tree is a set of rules that allows us to make predictions by asking simple yes-or-no questions about each feature.
+Tree-based models are a class of nonparametric algorithms that work by partitioning the feature space into a number of smaller (non-overlapping) regions with similar response values using a set of splitting rules. In essence, our tree is a set of rules that allows us to make predictions by asking simple yes-or-no questions about each feature. It's a good place to start because it's a simple algorithm and it will tell us whether it's worth doing a random forest.
 
 ## Preparing the data
-
-[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
 
@@ -111,7 +109,7 @@ folds <- vfold_cv(data = train, v = 10)
 
 ## Justification for Engineering based on data exploration
 
-From the exploratory data analysis phase, holidays clearly affected departures. When compared to the mean departures per day *these holidays* had significantly greater ridership compared to others which had much lower departures such as *insert holdays* To help improve our predictions, we add step_holiday to our recipe to control for outlier trends during holidays. Additionally, as shown in the exploratory phase, the distribution of our outcome variable, `Lincoln Memorial Departures` is skewed. To avoid this imbalance affecting our predictions, step_BoxCox works since departures is a strictly positive variable. We use it to transform the outcome variable so that it would be more like a normal distribution.
+From the exploratory data analysis phase, holidays clearly affected departures. When compared to the mean departures per day *these holidays* had significantly greater ridership compared to others which had much lower departures such as *insert holdays* To help improve our predictions, we add step_holiday to our recipe to control for outlier trends during holidays. Additionally, as shown in the exploratory phase, the distribution of our outcome variable, `Lincoln Memorial Departures` is skewed. To avoid this imbalance affecting our predictions, step_BoxCox works since departures is a strictly positive variable but it does have 0s (hence we cannot use logs). We use it to transform the outcome variable so that it would be more like a normal distribution.
 
 step_other further improves our prediction as it removes any infrequently reoccurring observations  in both our predictors and outcome variable. Finally, we used the near zero variance filter: step_nzv, to account for any predictors in our models that don’t have variance (one or very few unique values) and where these few unique values are far away from each other.  
 
@@ -119,11 +117,12 @@ step_other further improves our prediction as it removes any infrequently reoccu
   
 ```{r dec}
 
+# creating a recipe
 recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
   step_nzv(all_predictors()) %>% 
-  step_BoxCox(all_outcomes()) # for decision trees, we use the same recipe as for a random forest model
+  step_BoxCox(all_outcomes()) 
 
 # create a model
 
