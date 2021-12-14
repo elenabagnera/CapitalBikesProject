@@ -373,6 +373,7 @@ train_data_date %>%
   geom_point(alpha = 0.1,color = "orange") +
   labs(x = 'Temperature', y = 'Hourly Departures and Arrivals')+
   geom_smooth() +
+  theme_minimal() +
   labs(title = "As the temperature goes up, departure also goes up",
        subtitle = "There is a linear relationship between demand and temperature",
        x = "Temperature (Fahrenheit)",
@@ -386,6 +387,7 @@ train_data_date %>%
   geom_point(alpha = 0.07, color = "orange") +
   geom_smooth() +
   facet_wrap(~month) +
+  theme_light() +
   labs(title = "As the temperature goes up, demand for bikes also goes up",
        subtitle = "There is a rough linear relationship between temperature demand except August",
        x = "Temperature (Fahrenheit)",
@@ -399,6 +401,7 @@ train_data_date %>%
   ggplot(aes(x = wind_speed,y = lincoln_memorial_departures))+
   geom_point(alpha = 0.1,color = "deepskyblue2") +
   geom_smooth() + # data is sparse hence why we get this weird trend
+  theme_minimal() +
   labs(title = "Demand for bikes is not sensitive to wind speed",
        subtitle = "No clear relationship is shown between wind speed and bike demand",
        x = "Wind Speed (miles per minute)",
@@ -413,6 +416,7 @@ train_data_date %>%
   ggplot(aes(x = precipitation, y = lincoln_memorial_departures))+
   geom_point(alpha = 0.1,color = "blue") +
   geom_smooth() +
+  theme_minimal() +
   labs(title = "Negative relationship between bike demand and precipitation",
        subtitle = "No clear relationship is shown between wind speed and bike demand",
        x = "Precipitation (include drizzling, rain, sleet, snow, ice pellets, graupel and hail)",
@@ -424,41 +428,53 @@ train_data_date %>%
 ```{r clouds}
 #cloud viz
 train_data_date %>%
-  ggplot(aes(x = cloud_cover,y = lincoln_memorial_departures))+
-  geom_point(alpha = 0.07,color = 'blue')+
-  labs(x = 'Cloud Cover', y = 'Hourly Departures and Arrivals') +
-  geom_smooth()
-# not sure why the data looks like this?
+  ggplot(aes(x = cloud_cover,y = lincoln_memorial_departures)) +
+  geom_point(alpha = 0.5, color = "lightblue") +
+  geom_smooth() +
+  theme_minimal() +
+  labs(title = "Demand for bikes is not sensitive to cloud coverage",
+       subtitle = "No clear relationship is shown between cloud and bike demand",
+       x = "Cloud Cover",
+       y = "Aggregate number of departures at Lincoln Memorial")
+```
+```{r sunlight}
+#sunlight
+train_data_date %>%
+  ggplot(aes(x = factor(sun_is_out), y = lincoln_memorial_departures)) +
+  geom_col(color = "lightgoldenrod1", width = 0.3) +
+  geom_smooth() +
+  theme_bw() +
+  facet_wrap(~month) +
+  labs(title = "Passengers have high preference to ride bikes during daytime",
+       subtitle = "While in cold seasons, the gap in demand shrinks drastically",
+       x = "Sunlight (sun is out = 1, otherwise = 0)",
+       y = "Aggregate number of departures at Lincoln Memorial")
 ```
 
-
 ```{r heatmap}
-
+library(reshape2)
 
 heatmap <- train_data_date %>%
   select (hour, lincoln_memorial_departures)  %>%
     group_by (hour) %>%
   summarize (sum_rider =sum(lincoln_memorial_departures))
 
+#reshape data
 data_melt <- melt(heatmap, id= "hour")
-  
 
+# plot the graph  
 data_melt %>%
- ggplot( aes(hour, variable)) +
+ ggplot(aes(hour, variable)) +
     geom_tile(aes(fill = value)) +
     labs(x = NULL,
          y = NULL) + 
   scale_fill_gradientn(colors = "blue") +
-   # scale_fill_gradientn(colours = rainbow(10)) +
- # scale_fill_gradient(low = "white", mid = "blue", high = "black")+
+ #scale_fill_gradientn(colours = rainbow(10)) +
+ #scale_fill_gradient(low = "white", mid = "blue", high = "black")+
   scale_fill_gradient(low = "#FFFFFFFF",
                     high = "#012345")  +
     theme(legend.position = "right",
           legend.direction = "vertical",
           axis.line.x = element_blank(),
           panel.grid.major.y = element_blank()) 
-
-
-
 ```
-
