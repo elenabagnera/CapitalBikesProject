@@ -32,8 +32,67 @@ options(scipen=999)
 ## Comparing RMSEs of our models 
 
 ```{r comparison}
+## from class notes 
+# the models are comparable for prediction accuracy
+bind_rows(
+  `lm` = show_best(lm_cv, metric = "rmse", n = 1),
+  `LASSO` = show_best(lasso_cv, metric = "rmse", n = 1),
+  `ridge` = show_best(ridge_fit, metric = "rmse",n = 1),
+  `enet` = show_best(elastic_net_fit, metric = "rmse", n = 1),
+  .id = "model"
+)
+
+all_coefs <- bind_rows(
+  `lm` = lm_coefs,
+  `LASSO` = lasso_coefs,
+  `ridge` = ridge_coefs,
+  `enet` = elastic_net_coefs,
+  .id = "model"
+) 
+
+all_coefs %>%
+  group_by(model) %>%
+  slice_max(Importance, n = 10) %>%
+  ggplot(aes(Importance, Variable, fill = model)) +
+  geom_col(position = "dodge")
+
+all_coefs %>%
+  filter(model != "lm") %>%
+  group_by(model) %>%
+  slice_max(Importance, n = 10) %>%
+  ggplot(aes(Importance, Variable, fill = model)) +
+  geom_col(position = "dodge")
 
 
+# compare the regularized coefficients to the lm coefficients for all three models
+plot1 <- left_join(
+  rename(lm_coefs, lm = Importance),
+  rename(lasso_coefs, LASSO = Importance),
+  by = "Variable"
+) %>%
+  ggplot(aes(lm, LASSO)) +
+  geom_point(alpha = 0.3) +
+  scale_y_continuous(limits = c(0, 0.08))
+
+plot2 <- left_join(
+  rename(lm_coefs, lm = Importance),
+  rename(ridge_coefs, ridge = Importance),
+  by = "Variable"
+) %>%
+  ggplot(aes(lm, ridge)) +
+  geom_point(alpha = 0.3) +
+  scale_y_continuous(limits = c(0, 0.08))
+
+plot3 <- left_join(
+  rename(lm_coefs, lm = Importance),
+  rename(elastic_net_coefs, enet = Importance),
+  by = "Variable"
+) %>%
+  ggplot(aes(lm, enet)) +
+  geom_point(alpha = 0.3) +
+  scale_y_continuous(limits = c(0, 0.08))
+
+plot1 + plot2 + plot3
 
 ``` 
 
@@ -48,10 +107,14 @@ options(scipen=999)
       1. random forests algorithm uses a subset of features as candidates at each split (does not rely          on the same set of features:: de- correlates individual trees) 
       2. Each tree uses a random sample from the training dataset as it generates the splits which             inserts an aspect of randomness and prevents overfitting
       
-##Overall, Random Forests should produce more accurate  predictions than one decision tree.
+##Overall, Random Forests should produce more accurate predictions than one decision tree.
 
 
+<<<<<<< Updated upstream
 ## Running best model on full training data 
+=======
+## Now let's run our model on the testing data to see how it performs by estimating out of sample error rate
+>>>>>>> Stashed changes
 
 Now let's run our model on the full training data to see how it performs
 
@@ -100,6 +163,9 @@ test <- testing(x = data_split)
 ```{r fulltraining}
 
 # basically here run the best out of our models but on the train dataset without folds
+
+
+
 
 ```   
 

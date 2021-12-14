@@ -118,10 +118,13 @@ lasso_recipe <-
   step_dummy(all_nominal_predictors()) %>%
   step_center(all_numeric_predictors()) %>% # definitely need to add these too
   step_scale(all_numeric_predictors()) %>% # definitely need to add these too
-  step_dummy(all_nominal_predictors()) # definitely need to add these too
+  step_dummy(all_nominal_predictors()) %>% # definitely need to add these too
+    # log10 transform the skewed outcome variable
+  step_log(all_outcomes(), base = 10)
 
 # see the outcome data
 bake(prep(lasso_recipe, training = lasso_train), new_data = lasso_test)
+
 ```
 
 ```{r run the model}
