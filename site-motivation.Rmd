@@ -1,6 +1,6 @@
 ---
 title: "Motivation & Goals"
-author: "Elena Bagnera"
+author: ""
 date: "12/12/2021"
 output: html_document
 ---
@@ -12,11 +12,10 @@ library(haven)
 ```
 
 
-## Predicting Capital Bikes Departures
+# Predicting Capital Bikes Departures
 
 
-could be nice to have a pic at the start
-```{r setup2}
+```{r setup2, include=FALSE}
 knitr::include_graphics("map.png")
 ```
 
@@ -33,7 +32,7 @@ We chose predictors that vary by the hour that we believe are relevant to indivi
 
 Being able to predict Capital Bikeshare demand, could result in a more efficient allocation of bikes when stations are re-stocked at night. It could also inform and it could inform the eventual expansion of stations across strategic locations across the city to improve the experience of Washingtonians.
 
-## Data
+# Data
 
 We use Capital Bikeshare's publicly available [historic data](https://www.capitalbikeshare.com/system-data), ranging from May 2020 until September 2021. After data cleaning, our dataset has 309197 rows (CONFIRM?), each indicating the number of hours that departed Lincoln Memorial at a certain hour.
 
@@ -42,7 +41,7 @@ For weather predictors we used data from ADD
 For sunlight we used data from ADD
 
 
-## Overall method
+# Overall method
 
 here is where we explain why we used certain algorithms versus others - I thinkw e are using parametric algorithm because we have a very wide dataset?
 
