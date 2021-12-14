@@ -47,10 +47,10 @@ library(lubridate)
 
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
-```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
+```{r get real-time data, warning = FALSE, message = FALSE, include = FALSE}
 
 ### get real-time data through API
-url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/5/query?where=1%3D1&outFields=*&outSR=4326&f=json"
+# url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/5/query?where=1%3D1&outFields=*&outSR=4326&f=json"
 
 # # 1) use the URL to make a request from the API
 # data_json <- GET(url = url,
@@ -64,12 +64,21 @@ url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation
 # # 5) turn the body of the character matrix into a tibble
 # realtime_data <- as_tibble(data_matrix$features$attributes)
 # #help needed: how to use lower case for var names?
+```
 
-### get historical data through CSVs
-cbs_data <- read_files('data/')
+```{r get historical data, warning = FALSE, message = FALSE}
 
-data <- sep_departures_from_arrivals(cbs_data) %>%
-  filter_by_distance(from_station = 'lincoln_memorial', distance_m = 1600) # added filtering
+# full-data
+# cbs_data <- read_files('data/') 
+# data <- sep_departures_from_arrivals(cbs_data) %>% 
+#     filter(!is.na(station)) # Remove electric bikes not going to / from a station
+
+# partial data
+cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
+data <- sep_departures_from_arrivals(cbs_data) %>% 
+  filter(!is.na(station)) # if you want to try first with one data set only to not overload your machine you can use these lines instead of the above
+
+filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600) # added filtering
 
 hour_data <- get_station_hourly(data) %>% 
   get_historic_weather() %>% # added weather
@@ -108,17 +117,11 @@ train_data_date %>%
 # how can we get better summary stats? maybe not split by hour?
 ```
 
-```{r correlation, eval = FALSE}
-# plot_data <- ?data %>% 
-#   select()
-# 
-# corrplot(plot_data)
-```
 
 ```{r stats_weather}
 # check how much NA in temperature variable
-sum(is.na(train_data_date$temperature)) #0
-sum(is.na(train_data_date$cloud_cover)) #0
+# sum(is.na(train_data_date$temperature)) #0
+# sum(is.na(train_data_date$cloud_cover)) #0
 
 train_data_date %>%
  # mutate(weekday = wday(date, label=TRUE)) %>%
@@ -126,35 +129,31 @@ train_data_date %>%
   summarize(mean(temperature), max(temperature), min(temperature), sd(temperature)) 
 ```
 
-```{r stats_dependent1}
+```{r ride density}
 
 # density plot (no log)
 train_data_date %>%
-  ggplot(aes(x = lincoln_memorial_departures))+
-  geom_density()
+  filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s
+  ggplot(aes(x = lincoln_memorial_departures)) +
+  geom_density() +
+  labs(title = "xxx", 
+       x = "Number of departures from Lincoln Memorial")
 # What does the number 50 entail?
 
-# density plot (no log)
+# density plot (log)
 train_data_date %>%
-  ggplot(aes(x = log(lincoln_memorial_departures)))+
-  geom_density()
+  filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s
+  ggplot(aes(x = log(lincoln_memorial_departures))) + # add log to fix skewness
+  geom_density() +
+  labs(title = "xxx", 
+       x = "Number of departures from Lincoln Memorial (logged")
 # What does the number 4 entail?
 ```
 
-```{r stats_dependent2}
-
-train_data_date %>%
-  filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s because then the visualization will be much clearer
-  ggplot(aes(x = log(lincoln_memorial_departures))) +
-  geom_density() # this is showing that it is heavily skewed and we might want to transform our dependent variable in our random forest. Aaron said we should look at Box Cox or Eon Johnson transformation. Or simple log
-# add log to fix skewness
-```
-
-
 ## Visualizations by time at Lincoln Memorial
-Amount of rides at the Lincoln memorial over all the time, and by various metrics
+In this part, we use Lincoln Memorial as an example to show the change in amount of rides over time,
 
-```{r visualizations}
+```{r data}
 
 train_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
   ggplot(aes(x = date, y = lincoln_memorial_departures)) +
@@ -197,7 +196,6 @@ train_data_date %>%
 ```
 
 ```{r color}
-
 # by hour & month
 train_data_date %>%
   ggplot(aes(x = hour, y = lincoln_memorial_departures)) +

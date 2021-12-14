@@ -1,7 +1,7 @@
 ---
 title: "Data cleaning"
 author: ""
-date: "11/13/2021"
+date: ""
 output: html_document
 ---
 
@@ -63,8 +63,9 @@ The cleaned dataset includes 81 [ADD - DEPENDS ON HOW MANY STATIONS] predictors.
 Below, we copy the functions that we created to complete the data cleaning process.
 
 
-## Reading in all the .csv files in the folder and returning the merged dataset
+# Reading in all the .csv files in the folder and returning the merged dataset
 
+```{r funct1}
 #' @param x The path to the folder which contains the data
 #' @return Tibble containing the data.
 read_files <- function(path) {
@@ -86,9 +87,12 @@ read_files <- function(path) {
   
   return(cbs_data_temp)
 }
+```
 
 
-## Making the dataset wider and modifying times 
+# Making the dataset wider and modifying times 
+
+```{r funct2}
 
 #' @param x A capital bikeshare dataset
 #' @return The wider capital bikeshare dataset with grouping times to the hour
@@ -110,7 +114,12 @@ add_grouping_times <- function(x) {
   return(result)
 }
 
-## Modifying times to serve as predictors
+```
+
+
+# Modifying times to serve as predictors
+
+```{r funct3}
 
 #' @param x A capital bikeshare dataset with columns for month, day, hour
 #' @return The wider capital bikeshare dataset with predictor times
@@ -129,7 +138,12 @@ add_predictor_times <- function(x) {
   return(result)
 }
 
-## Adding a new date column
+```
+
+
+# Adding a new date column
+
+```{r funct4}
 
 #' @param x A capital bikeshare dataset with columns for month, day, hour
 #' @return The wider capital bikeshare dataset with date
@@ -142,10 +156,13 @@ add_date_column <- function(x) {
     )
 }
 
+```
 
-## Separating Departures from Arrivals
+# Separating Departures from Arrivals
 
 CBS data contains a single ride which includes where a bike left and where it arrived. For this reason, you cannot sort by time for both arrivals and departures. This function makes the data-set longer separating out departures and arrivals.
+
+```{r funct5}
 
 #' @param x The CBS original data
 #' @return Tibble with longer data_set separating departures and arrivals
@@ -176,8 +193,11 @@ sep_departures_from_arrivals <- function(x) {
     return(data_temp)
 }
 
-## Filtering out all stations outside a given distance from a station
+```
 
+# Filtering out all stations outside a given distance from a station
+
+```{r funct6}
 
 #' @param x The long-data set produced by set_departures_from_arrivals
 #' @param from_station The station name you want to filter by
@@ -194,10 +214,15 @@ filter_by_distance <- function(x, from_station, distance_m) {
     filter(distm(cbind(from_lng, from_lat), cbind(lng, lat)) < distance_m))
 }
 
-## Grouping by station and by hour
+```
 
+
+# Grouping by station and by hour
 
 Each station will have two rows, one for departure and one for arrival. Each observation will have a type column to indicate if it is a departure or arrival. Each observation will have a count column for the number of departures and arrives. All NAs are replaced with zero since they have zero departures or arrivals. All stations renamed to lowercase and used underscores. Filtering out Oct and Nov 2021 for weather data. 
+
+
+```{r funct7}
 
 #' @param x The data pivoted to sep arrivals from departures
 #' @return Wide tibble with stations on columns grouped by hour.
@@ -218,10 +243,14 @@ get_station_hourly <- function(x) {
 
   return(hour_data_temp)
 }
+```
 
-## Create a dataset where a column named "ridership" contains the actual departures
+
+## Create a dataset where a column named "ridership" contains the actual departures, 14 days into the future
 
 Every other column is modified to be 14 day old data to be used as predictors.
+
+```{r funct8}
 
 #' @param x A wide dataset grouped by time with all the stations as columns
 #' @param station_name The name of the station you want to predict
@@ -274,7 +303,7 @@ setup_for_time_prediction <- function(x, station_name) {
   }
 
   # Shift the dates 14 days into the future
-  # I tried to do this with a map function, but ran into issues.
+
   for (index in 1:nrow(lagged_data)) {
     date <- make_datetime(
       lagged_data$year[index],
@@ -292,8 +321,11 @@ setup_for_time_prediction <- function(x, station_name) {
   return(lagged_data)
 }
 
+```
 
-## Adds weather to data grouped by hour
+# Adding weather to data grouped by hour
+
+```{r funct9}
 
 #' @param x The data with year, month, day, hour
 #' @return x with Attached weather
@@ -328,7 +360,11 @@ format_weather <- function(x) {
            -wind_gust)
 }
 
+```
+
 ## Adding sunlight dataset
+
+```{r funct10}
 
 add_sun_is_out <- function(x) {
   library(suncalc)
@@ -353,3 +389,4 @@ add_sun_is_out <- function(x) {
   
   return(result)
 }
+```
