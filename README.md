@@ -10,12 +10,12 @@ This is for a group project for POL706 at Georgetown University.
 
 2. Create visualizations on the current data in `visualizations.Rmd`. 
 	a. make initial viz (EB) - DONE
-	b. improve/add to any existing visualizations (QX)
+	b. improve/add to any existing visualizations (QX) - DONE
 	c. correlation matrix with some predictors (FK) - DONE (DECIDED NOT TO DO)
 	e. add viz with binary rain predictor QX
-	f. add viz with weather conditions (categorical) QX
-	g. add viz with sun is out QX
-	H. do a viz with holidays (color holidays in a different color) use percent in FK -  DONE
+	f. add viz with weather conditions (categorical) QX - DONE
+	g. add viz with sun is out QX - DONE
+	H. do a viz with holidays (color holidays in a different color) use percent in FK - DONE
 
 3. ~~Widen hour_data on the column type for each station (QX & FK)~~ DONE
 
