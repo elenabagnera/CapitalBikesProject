@@ -76,6 +76,43 @@ get_station_hourly <- function(x) {
   return(hour_data_temp)
 }
 
+fill_in_missing_rows <- function(x, last_date = make_date(2021, 9, 30)) {
+  
+  found_first <- FALSE
+  for (year in 2020:2021) {
+    for (month in month.abb) {
+      for (day in 1:31) {
+        for (hour in 0:23) {
+          test_date <- make_datetime(year, match(month, month.abb), day, hour)
+          # Test to make sure that day actually exists in the month
+          if (test_date <= last_date && day(test_date) == day) {
+            
+            # find the row for the given hour
+            index_prev <- which(hour_data$year == year &
+              hour_data$month == month &
+              hour_data$day == day &
+              hour_data$hour == hour)
+
+            # If that row exists...
+            if (length(index_prev) > 0) {
+              if (!found_first) {
+                found_first <- TRUE
+              } 
+            } else {
+              if (found_first) {
+                x[nrow(x) + 1,] = append(list(year, month, day, hour), integer(length(x)-4))
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  
+  return(x %>% arrange(year, month, day, hour))
+}
+
 #' Create a dataset where a column named "ridership" contains the actual departures
 #'  or arrivals for a station.
 #' Every other column is modified to be 14 day old data to be used as
