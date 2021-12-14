@@ -44,3 +44,7 @@ data/untracked_data
 
 # translation temp files
 po/*~
+
+#images
+*.jpg
+*.png
