@@ -124,7 +124,6 @@ lasso_recipe <-
 
 # see the outcome data
 bake(prep(lasso_recipe, training = lasso_train), new_data = lasso_test)
-
 ```
 
 ```{r run the model}
