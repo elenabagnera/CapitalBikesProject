@@ -32,6 +32,7 @@ options(scipen = 999)
 
 ## Setup
 ```{r setup, message=FALSE}
+
 library(tidyverse)
 library(httr)
 library(jsonlite)
@@ -52,16 +53,16 @@ library(lubridate)
 ### get real-time data through API
 # url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/5/query?where=1%3D1&outFields=*&outSR=4326&f=json"
 
-# # 1) use the URL to make a request from the API
+# 1) use the URL to make a request from the API
 # data_json <- GET(url = url,
 #                  user_agent("Georgetown University Assignment"))
-# # 2) Check for a server error in the response
+# 2) Check for a server error in the response
 # http_status(data_json)
-# # 3) get the contents of the response as a text string
+# 3) get the contents of the response as a text string
 # data_json <- content(data_json, as = "text")
-# # 4) create a character matrix from the JSON
+# 4) create a character matrix from the JSON
 # data_matrix <- fromJSON(data_json)
-# # 5) turn the body of the character matrix into a tibble
+# 5) turn the body of the character matrix into a tibble
 # realtime_data <- as_tibble(data_matrix$features$attributes)
 # #help needed: how to use lower case for var names?
 ```
@@ -69,14 +70,14 @@ library(lubridate)
 ```{r get historical data, warning = FALSE, message = FALSE}
 
 # full-data
-# cbs_data <- read_files('data/') 
-# data <- sep_departures_from_arrivals(cbs_data) %>% 
-#     filter(!is.na(station)) # Remove electric bikes not going to / from a station
+cbs_data <- read_files('data/')
+data <- sep_departures_from_arrivals(cbs_data) %>%
+    filter(!is.na(station)) # Remove electric bikes not going to / from a station
 
-# partial data
-cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
-data <- sep_departures_from_arrivals(cbs_data) %>% 
-  filter(!is.na(station)) # if you want to try first with one data set only to not overload your machine you can use these lines instead of the above
+# # partial data
+# cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
+# data <- sep_departures_from_arrivals(cbs_data) %>% 
+#   filter(!is.na(station)) # if you want to try first with one data set only to not overload your machine you can use these lines instead of the above
 
 filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600) # added filtering
 
@@ -84,12 +85,11 @@ hour_data <- get_station_hourly(data) %>%
   get_historic_weather() %>% # added weather
   add_sun_is_out() 
 
-# The grouped data does not have the original date column, but it can be nice
-#  for visualizations. There is a function to do this in times.R
+# The grouped data does not have the original date column, but it can be nice for visualizations. There is a function to do this in times.R
 hour_data_date <- add_date_column(hour_data)
 ```
 
-## Splitting training vs testing data
+## Splitting the data into training and testing
 ```{r split}
 set.seed(28021995)
 
@@ -103,7 +103,6 @@ test_data_date  <- testing(x = data_split)
 
 ## Summary stats
 ```{r stats_dependent}
-
 # summary entire train dataset
 summary(train_data_date)
 
@@ -151,18 +150,19 @@ train_data_date %>%
 ```
 
 ## Visualizations by time at Lincoln Memorial
-In this part, we use Lincoln Memorial as an example to show the change in amount of rides over time,
+In this part, we use Lincoln Memorial as an example to show the change in amount of rides over time, by date, weekday, day of month, hour, 
 
-```{r data}
-
+```{r date}
 train_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
   ggplot(aes(x = date, y = lincoln_memorial_departures)) +
   geom_point(alpha = 0.1, color = "orange") + 
-  geom_smooth()
+  geom_smooth() +
+  labs(title = "",
+       x = "Date", 
+       y = "The Number of Departures at Lincoln Memorial")
 ```
 
 ```{r weekday}
-
 # by weekday
 train_data_date %>% 
   mutate(weekday = wday(date, label=TRUE)) %>% 
@@ -179,7 +179,7 @@ train_data_date %>%
   #theme_minimal()
 ```
 
-```{r dayofmonth}
+```{r day of month}
 # by day of the month
 train_data_date %>% 
   ggplot(aes(x = day, y = lincoln_memorial_departures)) +
@@ -195,7 +195,7 @@ train_data_date %>%
   geom_smooth()
 ```
 
-```{r color}
+```{r hour & month}
 # by hour & month
 train_data_date %>%
   ggplot(aes(x = hour, y = lincoln_memorial_departures)) +

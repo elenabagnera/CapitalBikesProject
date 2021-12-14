@@ -1,7 +1,7 @@
 ---
-title: "discussion"
-author: "Elena Bagnera"
-date: "11/13/2021"
+title: "Discussion & Implementing the final model"
+author: ""
+date: ""
 output: html_document
 ---
 
@@ -51,11 +51,79 @@ options(scipen=999)
 ##Overall, Random Forests should produce more accurate  predictions than one decision tree.
 
 
-## Now let's run our model on the testing data to see how it performs?
+## Running best model on full training data 
+
+Now let's run our model on the full training data to see how it performs
+
+```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
+
+ cbs_data <- read_files('data/')
+data <- sep_departures_from_arrivals(cbs_data) %>%
+  filter(!is.na(station)) # Remove electric bikes not going to / from a station
+
+data <- sep_departures_from_arrivals(cbs_data) %>%
+  filter(!is.na(station))
+
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 400)
+
+hour_data <- get_station_hourly(filtered_data) %>%
+  get_historic_weather() %>% 
+  add_sun_is_out() 
+  #filter(conditions != "Bad") # To test if bad weather really hurts RMSE that much
+
+lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+
+model_data <- lagged_data %>%
+  add_predictor_times() %>%
+  filter(!is.na(departures) & !is.na(arrivals)) %>%
+  # Having real time arrival data would be cheating
+  select(-arrivals) %>%
+  format_weather()
+
+```
+
+
+
+```{r setup_data}
+
+set.seed(28021995)
+
+# create a split object
+data_split <- initial_split(model_data, prop = 0.8)
+
+# create the training and testing data
+train <- training(x = data_split)
+test <- testing(x = data_split)
+
+```
+
+```{r fulltraining}
+
+# basically here run the best out of our models but on the train dataset without folds
+
+```   
+
+
+## Generating predictions on the testing data
+
+Now let's run our final model on the testing data, which we had put to the side
 
 ```{r testing}
 
-```   
+predictions <- bind_cols(
+test,
+predict(object = best_fit, new_data = test), 
+) %>%
+  select(departures, starts_with(".pred"))
+
+predictions %>%
+rmse(departures, .pred) 
+
+predictions %>%
+  mae(departures, .pred) 
+
+``` 
+
 
 *this is the result which is expected to have a higher RMSE*
 

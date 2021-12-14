@@ -10,7 +10,6 @@
 
 
 
-<meta name="date" content="2021-11-13" />
 
 <title>Data cleaning</title>
 
@@ -166,7 +165,6 @@ pre code {
 
 <h1 class="title toc-ignore">Data cleaning</h1>
 <h4 class="author"></h4>
-<h4 class="date">11/13/2021</h4>
 
 </div>
 
@@ -197,106 +195,288 @@ pre code {
 <p>The cleaned dataset includes 81 [ADD - DEPENDS ON HOW MANY STATIONS] predictors.</p>
 <p>Below, we copy the functions that we created to complete the data cleaning process.</p>
 </div>
-<div id="reading-in-all-the-.csv-files-in-the-folder-and-returning-the-merged-dataset" class="section level2">
-<h2>Reading in all the .csv files in the folder and returning the merged dataset</h2>
-<p>#’ <span class="citation">@param</span> x The path to the folder which contains the data #’ <span class="citation">@return</span> Tibble containing the data. read_files &lt;- function(path) { ## Loop through all the files and merge them into one tibble file_list &lt;- list.files(path, pattern=“tripdata.csv”) rm(cbs_data_temp)</p>
-<p>for(file_name in file_list) { path &lt;- paste(“data/”, file_name, sep=““)</p>
-<pre><code>new_data &lt;- read_csv(path)
-
-if (exists(&quot;cbs_data_temp&quot;)){
-  cbs_data_temp &lt;- bind_rows(cbs_data_temp, new_data)
-} else {
-  cbs_data_temp &lt;- new_data
+<div id="reading-in-all-the-.csv-files-in-the-folder-and-returning-the-merged-dataset" class="section level1">
+<h1>Reading in all the .csv files in the folder and returning the merged dataset</h1>
+<pre class="r"><code>#&#39; @param x The path to the folder which contains the data
+#&#39; @return Tibble containing the data.
+read_files &lt;- function(path) {
+  ## Loop through all the files and merge them into one tibble
+  file_list &lt;- list.files(path, pattern=&quot;tripdata.csv&quot;)
+  rm(cbs_data_temp)
+  
+  for(file_name in file_list) {
+    path &lt;- paste(&quot;data/&quot;, file_name, sep=&quot;&quot;)
+    
+    new_data &lt;- read_csv(path)
+    
+    if (exists(&quot;cbs_data_temp&quot;)){
+      cbs_data_temp &lt;- bind_rows(cbs_data_temp, new_data)
+    } else {
+      cbs_data_temp &lt;- new_data
+    }
+  }
+  
+  return(cbs_data_temp)
 }</code></pre>
-<p>}</p>
-<p>return(cbs_data_temp) }</p>
 </div>
-<div id="making-the-dataset-wider-and-modifying-times" class="section level2">
-<h2>Making the dataset wider and modifying times</h2>
-<p>#’ <span class="citation">@param</span> x A capital bikeshare dataset #’ <span class="citation">@return</span> The wider capital bikeshare dataset with grouping times to the hour add_grouping_times &lt;- function(x) { library(lubridate)</p>
-<p>result &lt;- x %&gt;% mutate( day = day(ymd_hms(time)), hour = hour(ymd_hms(time)), month = month(ymd_hms(time), label = TRUE), year = year(ymd_hms(time)), # hour_quarter = case_when(minute(ymd_hms(time)) &lt; 15 ~ 1, # minute(ymd_hms(time)) &lt; 30 ~ 2, # minute(ymd_hms(time)) &lt; 45 ~ 3, # TRUE ~ 4) )</p>
-<p>return(result) }</p>
+<div id="making-the-dataset-wider-and-modifying-times" class="section level1">
+<h1>Making the dataset wider and modifying times</h1>
+<pre class="r"><code>#&#39; @param x A capital bikeshare dataset
+#&#39; @return The wider capital bikeshare dataset with grouping times to the hour
+add_grouping_times &lt;- function(x) {
+  library(lubridate)
+
+  result &lt;- x %&gt;%
+    mutate(
+      day = day(ymd_hms(time)),
+      hour = hour(ymd_hms(time)),
+      month = month(ymd_hms(time), label = TRUE),
+      year = year(ymd_hms(time)),
+      # hour_quarter = case_when(minute(ymd_hms(time)) &lt; 15 ~ 1,
+      #                          minute(ymd_hms(time)) &lt; 30 ~ 2,
+      #                          minute(ymd_hms(time)) &lt; 45 ~ 3,
+      #                          TRUE ~ 4)
+    )
+
+  return(result)
+}</code></pre>
 </div>
-<div id="modifying-times-to-serve-as-predictors" class="section level2">
-<h2>Modifying times to serve as predictors</h2>
-<p>#’ <span class="citation">@param</span> x A capital bikeshare dataset with columns for month, day, hour #’ <span class="citation">@return</span> The wider capital bikeshare dataset with predictor times add_predictor_times &lt;- function(x) { library(lubridate)</p>
-<p>result &lt;- x %&gt;% mutate( weekday = wday(make_datetime(year, match(month, month.abb), day, hour), label = TRUE), yearday = yday(make_datetime(year, match(month, month.abb), day, hour)), date = make_datetime(year, match(month, month.abb), day, hour) )</p>
-<p>return(result) }</p>
+<div id="modifying-times-to-serve-as-predictors" class="section level1">
+<h1>Modifying times to serve as predictors</h1>
+<pre class="r"><code>#&#39; @param x A capital bikeshare dataset with columns for month, day, hour
+#&#39; @return The wider capital bikeshare dataset with predictor times
+add_predictor_times &lt;- function(x) {
+  library(lubridate)
+
+  result &lt;- x %&gt;%
+    mutate(
+      weekday =
+        wday(make_datetime(year, match(month, month.abb), day, hour), label = TRUE),
+      yearday =
+        yday(make_datetime(year, match(month, month.abb), day, hour)),
+      date = make_datetime(year, match(month, month.abb), day, hour)
+    )
+
+  return(result)
+}</code></pre>
 </div>
-<div id="adding-a-new-date-column" class="section level2">
-<h2>Adding a new date column</h2>
-<p>#’ <span class="citation">@param</span> x A capital bikeshare dataset with columns for month, day, hour #’ <span class="citation">@return</span> The wider capital bikeshare dataset with date add_date_column &lt;- function(x) { library(lubridate)</p>
-<p>result &lt;- x %&gt;% mutate( date = make_datetime(year, match(month, month.abb), day, hour) ) }</p>
+<div id="adding-a-new-date-column" class="section level1">
+<h1>Adding a new date column</h1>
+<pre class="r"><code>#&#39; @param x A capital bikeshare dataset with columns for month, day, hour
+#&#39; @return The wider capital bikeshare dataset with date
+add_date_column &lt;- function(x) {
+  library(lubridate)
+
+  result &lt;- x %&gt;%
+    mutate(
+      date = make_datetime(year, match(month, month.abb), day, hour)
+    )
+}</code></pre>
 </div>
-<div id="separating-departures-from-arrivals" class="section level2">
-<h2>Separating Departures from Arrivals</h2>
+<div id="separating-departures-from-arrivals" class="section level1">
+<h1>Separating Departures from Arrivals</h1>
 <p>CBS data contains a single ride which includes where a bike left and where it arrived. For this reason, you cannot sort by time for both arrivals and departures. This function makes the data-set longer separating out departures and arrivals.</p>
-<p>#’ <span class="citation">@param</span> x The CBS original data #’ <span class="citation">@return</span> Tibble with longer data_set separating departures and arrivals sep_departures_from_arrivals &lt;- function(x) { data_temp &lt;- x %&gt;% pivot_longer(c(“started_at”, “ended_at”), names_to = “type”, values_to = “time”) %&gt;% # Creates a new column named station, to replace start_station_name and end_station_name # and it creates new columns likewise for coordinates and id. # Mutates the station name to be more readable. mutate( station = tolower(str_replace_all(ifelse(type == “started_at”, start_station_name, end_station_name), pattern = ” “, replacement =”_“)), lat = ifelse(type ==”started_at”, start_lat, end_lat), lng = ifelse(type == “started_at”, start_lng, end_lng), station_id = ifelse(type == “started_at”, start_station_id, end_station_id), ) %&gt;% select( -start_station_name, -end_station_name, -start_lat, -end_lat, -start_station_id, -end_station_id, -start_lng, -end_lng ) %&gt;% # Rename the values from “started_at” and “ended_at” to “departure” and “arrival” mutate(type = ifelse(type == “started_at”, “departure”, “arrival”)) %&gt;% return(data_temp) }</p>
+<pre class="r"><code>#&#39; @param x The CBS original data
+#&#39; @return Tibble with longer data_set separating departures and arrivals
+sep_departures_from_arrivals &lt;- function(x) {
+  data_temp &lt;- x %&gt;%
+    pivot_longer(c(&quot;started_at&quot;, &quot;ended_at&quot;), names_to = &quot;type&quot;, values_to = &quot;time&quot;) %&gt;%
+    # Creates a new column named station, to replace start_station_name and end_station_name
+    # and it creates new columns likewise for coordinates and id.
+    # Mutates the station name to be more readable.
+    mutate(
+      station = tolower(str_replace_all(ifelse(type == &quot;started_at&quot;, start_station_name, end_station_name), pattern = &quot; &quot;, replacement = &quot;_&quot;)),
+      lat = ifelse(type == &quot;started_at&quot;, start_lat, end_lat),
+      lng = ifelse(type == &quot;started_at&quot;, start_lng, end_lng),
+      station_id = ifelse(type == &quot;started_at&quot;, start_station_id, end_station_id),
+    ) %&gt;%
+    select(
+      -start_station_name,
+      -end_station_name,
+      -start_lat,
+      -end_lat,
+      -start_station_id,
+      -end_station_id,
+      -start_lng,
+      -end_lng
+    ) %&gt;%
+    # Rename the values from &quot;started_at&quot; and &quot;ended_at&quot; to &quot;departure&quot; and &quot;arrival&quot;
+    mutate(type = ifelse(type == &quot;started_at&quot;, &quot;departure&quot;, &quot;arrival&quot;)) %&gt;%
+    return(data_temp)
+}</code></pre>
 </div>
-<div id="filtering-out-all-stations-outside-a-given-distance-from-a-station" class="section level2">
-<h2>Filtering out all stations outside a given distance from a station</h2>
-<p>#’ <span class="citation">@param</span> x The long-data set produced by set_departures_from_arrivals #’ <span class="citation">@param</span> from_station The station name you want to filter by #’ <span class="citation">@param</span> distance The distance in meters #’ <span class="citation">@return</span> The dataset with the stations removed filter_by_distance &lt;- function(x, from_station, distance_m) { library(geosphere)</p>
-<p>station_row &lt;- which(x<span class="math inline">\(station == from_station)[1]  from_lat &lt;- x\)</span>lat[station_row] from_lng &lt;- x$lng[station_row]</p>
-<p>return(x %&gt;% filter(distm(cbind(from_lng, from_lat), cbind(lng, lat)) &lt; distance_m)) }</p>
+<div id="filtering-out-all-stations-outside-a-given-distance-from-a-station" class="section level1">
+<h1>Filtering out all stations outside a given distance from a station</h1>
+<pre class="r"><code>#&#39; @param x The long-data set produced by set_departures_from_arrivals
+#&#39; @param from_station The station name you want to filter by
+#&#39; @param distance The distance in meters
+#&#39; @return The dataset with the stations removed
+filter_by_distance &lt;- function(x, from_station, distance_m) {
+  library(geosphere)
+
+  station_row &lt;- which(x$station == from_station)[1]
+  from_lat &lt;- x$lat[station_row]
+  from_lng &lt;- x$lng[station_row]
+
+  return(x %&gt;%
+    filter(distm(cbind(from_lng, from_lat), cbind(lng, lat)) &lt; distance_m))
+}</code></pre>
 </div>
-<div id="grouping-by-station-and-by-hour" class="section level2">
-<h2>Grouping by station and by hour</h2>
+<div id="grouping-by-station-and-by-hour" class="section level1">
+<h1>Grouping by station and by hour</h1>
 <p>Each station will have two rows, one for departure and one for arrival. Each observation will have a type column to indicate if it is a departure or arrival. Each observation will have a count column for the number of departures and arrives. All NAs are replaced with zero since they have zero departures or arrivals. All stations renamed to lowercase and used underscores. Filtering out Oct and Nov 2021 for weather data.</p>
-<p>#’ <span class="citation">@param</span> x The data pivoted to sep arrivals from departures #’ <span class="citation">@return</span> Wide tibble with stations on columns grouped by hour. get_station_hourly &lt;- function(x) { source(“times.R”) hour_data_temp &lt;- add_grouping_times(x) %&gt;% group_by(year, month, day, hour, station, type) %&gt;% summarize(count = n()) %&gt;% # Make departure and arrival plural as it is now a count mutate(type = ifelse(type == “departure”, “departures”, “arrivals”)) %&gt;% # Each station has its own row, this puts all the stations on one row pivot_wider(names_from = c(“station”, “type”), values_from = “count”) %&gt;% # Replace NAs with 0 mutate_all(~ ifelse(is.na(.), 0, .)) %&gt;% # There are a few Nov 2021 in the data that should not be there, probably returns # I did not get October 31st weather for 2021. I can get it later if we need it. filter(!(year == 2021 &amp; (month == “Oct” | month == “Nov”)))</p>
-<p>return(hour_data_temp) }</p>
-</div>
-<div id="create-a-dataset-where-a-column-named-ridership-contains-the-actual-departures" class="section level2">
-<h2>Create a dataset where a column named “ridership” contains the actual departures</h2>
+<pre class="r"><code>#&#39; @param x The data pivoted to sep arrivals from departures
+#&#39; @return Wide tibble with stations on columns grouped by hour.
+get_station_hourly &lt;- function(x) {
+  source(&quot;times.R&quot;)
+  hour_data_temp &lt;- add_grouping_times(x) %&gt;%
+    group_by(year, month, day, hour, station, type) %&gt;%
+    summarize(count = n()) %&gt;%
+    # Make departure and arrival plural as it is now a count
+    mutate(type = ifelse(type == &quot;departure&quot;, &quot;departures&quot;, &quot;arrivals&quot;)) %&gt;% 
+    # Each station has its own row, this puts all the stations on one row
+    pivot_wider(names_from = c(&quot;station&quot;, &quot;type&quot;), values_from = &quot;count&quot;) %&gt;% 
+    # Replace NAs with 0
+    mutate_all(~ ifelse(is.na(.), 0, .)) %&gt;% 
+    # There are a few Nov 2021 in the data that should not be there, probably returns
+    #  I did not get October 31st weather for 2021. I can get it later if we need it.
+    filter(!(year == 2021 &amp; (month == &quot;Oct&quot; | month == &quot;Nov&quot;)))
+
+  return(hour_data_temp)
+}</code></pre>
+<div id="create-a-dataset-where-a-column-named-ridership-contains-the-actual-departures-14-days-into-the-future" class="section level2">
+<h2>Create a dataset where a column named “ridership” contains the actual departures, 14 days into the future</h2>
 <p>Every other column is modified to be 14 day old data to be used as predictors.</p>
-<p>#’ <span class="citation">@param</span> x A wide dataset grouped by time with all the stations as columns #’ <span class="citation">@param</span> station_name The name of the station you want to predict #’ <span class="citation">@return</span> The modified dataset for predicting time as described</p>
-<p>setup_for_time_prediction &lt;- function(x, station_name) {</p>
-<p># Create a new field called ridership that will be the actual riders on the # given station lagged_data &lt;- x %&gt;% mutate(departures = NA, arrivals = NA)</p>
-<p># This loop gets the values from the given station and puts it into the ridership # ridership column 14 days into the future. The goal is to couple the given station rides # with every station from 14 days ago for predictions. # When this is done running, the dates now represent future ridership, we need to shift # them 14 days into the future, so all the stations will be 14 day historic data. for (year in 2020:2021) { for (month in month.abb) { for (day in 1:31) { for (hour in 0:23) { # find the row for the given hour index_prev &lt;- which(hour_data<span class="math inline">\(year == year &amp;  hour_data\)</span>month == month &amp; hour_data<span class="math inline">\(day == day &amp;  hour_data\)</span>hour == hour)</p>
-<pre><code>      # If that row exists (it should)...
-      if (length(index_prev) &gt; 0) {
-        future_time &lt;- make_datetime(year, match(month, month.abb), day, hour) + days(14)
-        
-        # See if there is a row 14 days in the future, the last 14 days will not have one
-        index_future &lt;- which(hour_data$year == year(future_time) &amp;
-          hour_data$month == (month.abb[month(future_time)]) &amp;
-          hour_data$day == day(future_time) &amp;
-          hour_data$hour == hour(future_time))
-        
-        # If that future row is there...
-        if (length(index_future) &gt; 0) {
-          # Get future departures and arrivals and pair it with 14 day ago rides.
-          dep_column_name &lt;- paste(station_name, &quot;departures&quot;, sep = &quot;_&quot;)
-          arr_column_name &lt;- paste(station_name, &quot;arrivals&quot;, sep = &quot;_&quot;)
-          lagged_data$departures[index_prev[1]] &lt;- lagged_data[[dep_column_name]][index_future[1]]
-          lagged_data$arrivals[index_prev[1]] &lt;- lagged_data[[arr_column_name]][index_future[1]]
+<pre class="r"><code>#&#39; @param x A wide dataset grouped by time with all the stations as columns
+#&#39; @param station_name The name of the station you want to predict
+#&#39; @return The modified dataset for predicting time as described
+
+setup_for_time_prediction &lt;- function(x, station_name) {
+
+  # Create a new field called ridership that will be the actual riders on the
+  # given station
+  lagged_data &lt;- x %&gt;%
+    mutate(departures = NA, arrivals = NA)
+
+  # This loop gets the values from the given station and puts it into the ridership
+  # ridership column 14 days into the future. The goal is to couple the given station rides
+  # with every station from 14 days ago for predictions.
+  # When this is done running, the dates now represent future ridership, we need to shift
+  # them 14 days into the future, so all the stations will be 14 day historic data.
+  for (year in 2020:2021) {
+    for (month in month.abb) {
+      for (day in 1:31) {
+        for (hour in 0:23) {
+          # find the row for the given hour
+          index_prev &lt;- which(hour_data$year == year &amp;
+            hour_data$month == month &amp;
+            hour_data$day == day &amp;
+            hour_data$hour == hour)
+
+          # If that row exists (it should)...
+          if (length(index_prev) &gt; 0) {
+            future_time &lt;- make_datetime(year, match(month, month.abb), day, hour) + days(14)
+            
+            # See if there is a row 14 days in the future, the last 14 days will not have one
+            index_future &lt;- which(hour_data$year == year(future_time) &amp;
+              hour_data$month == (month.abb[month(future_time)]) &amp;
+              hour_data$day == day(future_time) &amp;
+              hour_data$hour == hour(future_time))
+            
+            # If that future row is there...
+            if (length(index_future) &gt; 0) {
+              # Get future departures and arrivals and pair it with 14 day ago rides.
+              dep_column_name &lt;- paste(station_name, &quot;departures&quot;, sep = &quot;_&quot;)
+              arr_column_name &lt;- paste(station_name, &quot;arrivals&quot;, sep = &quot;_&quot;)
+              lagged_data$departures[index_prev[1]] &lt;- lagged_data[[dep_column_name]][index_future[1]]
+              lagged_data$arrivals[index_prev[1]] &lt;- lagged_data[[arr_column_name]][index_future[1]]
+            }
+          }
         }
       }
     }
   }
-}</code></pre>
-<p>}</p>
-<p># Shift the dates 14 days into the future # I tried to do this with a map function, but ran into issues. for (index in 1:nrow(lagged_data)) { date &lt;- make_datetime( lagged_data<span class="math inline">\(year[index],  match(lagged_data\)</span>month[index], month.abb), lagged_data$day[index] )</p>
-<pre><code>future_date &lt;- date + days(14)
 
-lagged_data$year[index] &lt;- year(future_date)
-lagged_data$month[index] &lt;- month.abb[month(future_date)]
-lagged_data$day[index] &lt;- day(future_date)</code></pre>
-<p>}</p>
-<p>return(lagged_data) }</p>
+  # Shift the dates 14 days into the future
+
+  for (index in 1:nrow(lagged_data)) {
+    date &lt;- make_datetime(
+      lagged_data$year[index],
+      match(lagged_data$month[index], month.abb),
+      lagged_data$day[index]
+    )
+
+    future_date &lt;- date + days(14)
+
+    lagged_data$year[index] &lt;- year(future_date)
+    lagged_data$month[index] &lt;- month.abb[month(future_date)]
+    lagged_data$day[index] &lt;- day(future_date)
+  }
+
+  return(lagged_data)
+}</code></pre>
 </div>
-<div id="adds-weather-to-data-grouped-by-hour" class="section level2">
-<h2>Adds weather to data grouped by hour</h2>
-<p>#’ <span class="citation">@param</span> x The data with year, month, day, hour #’ <span class="citation">@return</span> x with Attached weather get_historic_weather &lt;- function(x) { library(lubridate)</p>
-<p>weather &lt;- read_csv(“weather.csv”) %&gt;% rename_with(~ tolower(str_replace_all(., pattern = ” “, replacement =”_“))) %&gt;% mutate(time = mdy_hms(paste(date_time,”00”, sep = “:”))) %&gt;% add_grouping_times() %&gt;% select(-date_time, -name, -time) # Filter out / mutate data here for NAs</p>
-<p>return(x %&gt;% left_join(weather, by = c(“year”, “month”, “day”, “hour”))) }</p>
-<p>format_weather &lt;- function(x) { x %&gt;% mutate(conditions = case_when( grepl(“Rain”, conditions, fixed = TRUE) ~ “Bad”, grepl(“Snow”, conditions, fixed = TRUE) ~ “Bad”, conditions == “Overcast” ~ “Okay”, TRUE ~ “Good” )) %&gt;% select(-cloud_cover, -visibility, -relative_humidity, -wind_chill, -heat_index, -wind_direction, -wind_gust) }</p>
 </div>
+<div id="adding-weather-to-data-grouped-by-hour" class="section level1">
+<h1>Adding weather to data grouped by hour</h1>
+<pre class="r"><code>#&#39; @param x The data with year, month, day, hour
+#&#39; @return x with Attached weather
+get_historic_weather &lt;- function(x) {
+  library(lubridate)
+
+  weather &lt;- read_csv(&quot;weather.csv&quot;) %&gt;%
+    rename_with(~ tolower(str_replace_all(., pattern = &quot; &quot;, replacement = &quot;_&quot;))) %&gt;%
+    mutate(time = mdy_hms(paste(date_time, &quot;00&quot;, sep = &quot;:&quot;))) %&gt;%
+    add_grouping_times() %&gt;%
+    select(-date_time, -name, -time)
+  # Filter out / mutate data here for NAs
+
+  return(x %&gt;%
+    left_join(weather, by = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;, &quot;hour&quot;)))
+}
+
+format_weather &lt;- function(x) {
+  x %&gt;% 
+    mutate(conditions = case_when(
+      grepl(&quot;Rain&quot;, conditions, fixed = TRUE) ~ &quot;Bad&quot;,
+      grepl(&quot;Snow&quot;, conditions, fixed = TRUE) ~ &quot;Bad&quot;,
+      conditions == &quot;Overcast&quot; ~ &quot;Okay&quot;,
+      TRUE ~ &quot;Good&quot;
+    )) %&gt;% 
+    select(-cloud_cover, 
+           -visibility, 
+           -relative_humidity, 
+           -wind_chill, 
+           -heat_index, 
+           -wind_direction, 
+           -wind_gust)
+}</code></pre>
 <div id="adding-sunlight-dataset" class="section level2">
 <h2>Adding sunlight dataset</h2>
-<p>add_sun_is_out &lt;- function(x) { library(suncalc) library(lubridate) # Copy to a new dataframe to not modify the original y &lt;- x mod_y &lt;- y %&gt;% mutate(lat = 38.8893, lon = -77.0502, date = as.Date(paste(year, match(month, month.abb),day,sep=“-”))) %&gt;% select(lat, lon, date)</p>
-<p>y_with_times &lt;- getSunlightTimes(data = mod_y, keep = c(“dawn”, “dusk”), tz = “America/New_York”) %&gt;% mutate(time = paste(date, “00:00:00”, sep= ” “)) %&gt;% add_grouping_times() %&gt;% select(year, month, day, dawn, dusk)</p>
-<p>result &lt;- left_join(x, y_with_times, by = c(“year”, “month”, “day”)) %&gt;% mutate(temp_date = make_datetime(year, match(month, month.abb), day, hour)) %&gt;% mutate(sun_is_out = ifelse(temp_date &gt; ymd_hms(dawn) &amp; temp_date &lt; ymd_hms(dusk), 1, 0)) %&gt;% select(-temp_date, -dusk, -dawn)</p>
-<p>return(result) }</p>
+<pre class="r"><code>add_sun_is_out &lt;- function(x) {
+  library(suncalc)
+  library(lubridate)
+  # Copy to a new dataframe to not modify the original
+  y &lt;- x
+  mod_y &lt;- y %&gt;% 
+    mutate(lat = 38.8893, 
+           lon = -77.0502, 
+           date = as.Date(paste(year, match(month, month.abb),day,sep=&quot;-&quot;))) %&gt;% 
+    select(lat, lon, date)
+
+  y_with_times &lt;- getSunlightTimes(data = mod_y, keep = c(&quot;dawn&quot;, &quot;dusk&quot;), tz = &quot;America/New_York&quot;) %&gt;% 
+      mutate(time = paste(date, &quot;00:00:00&quot;, sep= &quot; &quot;)) %&gt;% 
+      add_grouping_times() %&gt;% 
+      select(year, month, day, dawn, dusk)
+  
+  result &lt;- left_join(x, y_with_times, by = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;)) %&gt;% 
+    mutate(temp_date = make_datetime(year, match(month, month.abb), day, hour)) %&gt;% 
+    mutate(sun_is_out = ifelse(temp_date &gt; ymd_hms(dawn) &amp; temp_date &lt; ymd_hms(dusk), 1, 0)) %&gt;% 
+    select(-temp_date, -dusk, -dawn)
+  
+  return(result)
+}</code></pre>
+</div>
 </div>
 
 
