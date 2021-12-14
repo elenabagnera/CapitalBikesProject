@@ -199,7 +199,8 @@ add_sun_is_out <- function(x) {
   y_with_times <- getSunlightTimes(data = mod_y, keep = c("dawn", "dusk"), tz = "America/New_York") %>% 
       mutate(time = paste(date, "00:00:00", sep= " ")) %>% 
       add_grouping_times() %>% 
-      select(year, month, day, dawn, dusk)
+      select(year, month, day, dawn, dusk) %>% 
+      unique()
   
   result <- left_join(x, y_with_times, by = c("year", "month", "day")) %>% 
     mutate(temp_date = make_datetime(year, match(month, month.abb), day, hour)) %>% 
