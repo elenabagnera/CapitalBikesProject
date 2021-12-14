@@ -48,11 +48,7 @@ doParallel::registerDoParallel()
 
 ## Why this algorithm 
 
-Having a group of decision tree creates “randomness”  and avoids common weaknesses in predictions based on one decision tree like over fitting and excessive correlation between variables. This is because: 
-      1. random forests algorithm uses a subset of features as candidates at each split (does not rely          on the same set of features:: de- correlates individual trees) 
-      2. Each tree uses a random sample from the training dataset as it generates the splits which             inserts an aspect of randomness and prevents overfitting
-
-Random forests works well with large datasets like the one we are using in our project *mention how many observations there is*. It also has an extremely high accuracy in its predictions and it scales well.  
+Random forests works well with large datasets like the one we are using in our project *mention how many observations there is*. It also has an extremely high accuracy in its predictions and it scales well in general but also compared to decision trees (more on this in the model comparison section)
 
 ## How Random Forests Work
 

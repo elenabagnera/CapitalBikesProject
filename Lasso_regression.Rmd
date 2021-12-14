@@ -69,6 +69,17 @@ hour_data <- get_station_hourly(filtered_data) %>%
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
 ```
 
+
+## Why choose LASSO?
+
+LASSO regression is a variation of Linear Regression that uses Shrinkage. Shrinkage is a process that data values are shrunk towards a central point as the mean. This type of regression is well-suited for models showing heavy multicollinearity (heavy correlation of features with each other).
+
+Few points about Lasso Regression:
+  •	It’s most often used for eliminating automated variables and the selection of features.
+  •	It’s well-suited for models showing heavy multicollinearity (heavy correlation of features with     each other).
+  •	LASSO regression utilizes L1 regularization
+  •	LASSO regression is considered to be better than Ridge as it selects only some features and           decreases the coefficients of others to zero.
+
 ## Implementation
 
 ```{r setup_data}
