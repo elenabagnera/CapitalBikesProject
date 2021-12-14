@@ -138,6 +138,7 @@ train_data_date %>%
   filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s
   ggplot(aes(x = lincoln_memorial_departures)) +
   geom_density() +
+  theme_minimal() +
   labs(title = "xxx", 
        x = "Number of departures from Lincoln Memorial")
 # What does the number 50 entail?
@@ -147,8 +148,9 @@ train_data_date %>%
   filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s
   ggplot(aes(x = log(lincoln_memorial_departures))) + # add log to fix skewness
   geom_density() +
+  theme_minimal() +
   labs(title = "xxx", 
-       x = "Number of departures from Lincoln Memorial (logged")
+       x = "Number of departures from Lincoln Memorial (logged)")
 # What does the number 4 entail?
 ```
 
@@ -157,9 +159,10 @@ In this part, we use Lincoln Memorial as an example to show the change in amount
 
 ```{r date}
 train_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
-  ggplot(aes(x = date, y = lincoln_memorial_departures)) +
+  ggplot(aes(x = factor(date), y = lincoln_memorial_departures)) +
   geom_point(alpha = 0.1, color = "orange") + 
   geom_smooth() +
+  theme_minimal() +
   labs(title = "January has the least demand of capital bikes",
        x = "Date", 
        y = "The Number of Departures at Lincoln Memorial")
@@ -174,7 +177,7 @@ train_data_date %>%
   geom_smooth() +
   labs(title = "At Lincoln Memorial, Capitals bikes are mostly used for recreational purpose",
        subtitle = "Weekend has the highest demand",
-       x = "Weekday", 
+       x = "Weekday (Aggregate)", 
        y = "The Number of Departures at Lincoln Memorial")
 
 # farah's code here although similar to first one here?
@@ -201,9 +204,14 @@ train_data_date %>%
 ```{r hour}
 # by hour
 train_data_date %>%
-  ggplot(aes(x = hour, y = lincoln_memorial_departures)) +
-  geom_col(alpha = 0.1, color = "lightblue") + # people cycle more in the middle of the day, like between 1 and 7PM
-  geom_smooth()
+  ggplot(aes(x = factor(hour), y = lincoln_memorial_departures)) +
+  geom_col(alpha = 0.1, color = "deepskyblue2") + # people cycle more in the middle of the day, like between 1 and 7PM
+  geom_smooth() +
+  theme_minimal() +
+  labs(title = "At Lincoln Memorial, bikes are most demanded in the afternoon from 12pm-6pm",
+       subtitle = "The highest demand occurs at 2pm",
+       x = "Hour (Aggregate)", 
+       y = "The Number of Departures at Lincoln Memorial")
 ```
 
 ```{r hour & month}
@@ -217,12 +225,20 @@ train_data_date %>%
 
 
 ```{r month}
+# add month order
+order_month <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
 # by month
 train_data_date %>% 
-  ggplot(aes(x = month, y = lincoln_memorial_departures)) +
-  geom_point(alpha = 0.1, color="dark red") + 
+  ggplot(aes(x = month, y = lincoln_memorial_departures), level = order_month) +
+  geom_point(alpha = 0.1, color = "dark red") + 
+  scale_x_discrete(limits = month.abb) +
   # people cycle most in Spring, summer and fall. Surprised that there is no big spike in summer months
-  geom_smooth()
+  geom_smooth() +
+  theme_minimal() +
+  labs(title = "At Lincoln Memorial, people cycle the most in Spring",
+       x = "Month (Aggregate)",
+       y = "The Number of Departures at Lincoln Memorial")
 ```
 
 
