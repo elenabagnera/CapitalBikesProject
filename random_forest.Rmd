@@ -46,6 +46,20 @@ source("manipulate_data.R")
 doParallel::registerDoParallel()
 ```
 
+## Why this algorithm 
+
+Having a group of decision tree creates “randomness”  and avoids common weaknesses in predictions based on one decision tree like over fitting and excessive correlation between variables. This is because: 
+      1. random forests algorithm uses a subset of features as candidates at each split (does not rely          on the same set of features:: de- correlates individual trees) 
+      2. Each tree uses a random sample from the training dataset as it generates the splits which             inserts an aspect of randomness and prevents overfitting
+
+Random forests works well with large datasets like the one we are using in our project *mention how many observations there is*. It also has an extremely high accuracy in its predictions and it scales well.  
+
+## How Random Forests Work
+
+Random forests build n decision tree regressors, following specified parameters optimized by implementing hyperparameter tunning (more on this shortly). Predictions are made using attribute selection, where each decision tree works on defining the attributes and their values which would determine the “best split”. The objective is to choose the split that will minimize the error cost (MSE). We use mtry in our hyperparameter tuning to decide on number of variables randomly sampled as candidates at each split (essentially avoids overfitting).This process keeps repeating until either the leaf nodes reach all samples, or as in our case, there is a stopping criteria (maximum depth of the tree). To define this stopping criteria we use  min_n to optimize the number of observations needed to keep splitting nodes (the larger the tree, the more it become computationally expensive). 
+
+Finally, Random forests averages predictions estimated by all decision trees in the model to get the ‘final’ prediction 
+
 
 ## Preparing the data
 
@@ -98,6 +112,9 @@ test  <- testing(x = data_split)
 folds <- vfold_cv(data = train, v = 10)
 
 ```
+
+
+## Our preprocessing for Random Forests is the same as decision trees because Random Forests is just a "more complex" decision tree.
 
 ## Implementation
 
