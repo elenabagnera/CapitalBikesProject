@@ -159,10 +159,9 @@ In this part, we use Lincoln Memorial as an example to show the change in amount
 
 ```{r date}
 train_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
-  ggplot(aes(x = factor(date), y = lincoln_memorial_departures)) +
+  ggplot(aes(x = date, y = lincoln_memorial_departures)) +
   geom_point(alpha = 0.1, color = "orange") + 
   geom_smooth() +
-  theme_minimal() +
   labs(title = "January has the least demand of capital bikes",
        x = "Date", 
        y = "The Number of Departures at Lincoln Memorial")
@@ -205,12 +204,24 @@ train_data_date %>%
 # by hour
 train_data_date %>%
   ggplot(aes(x = factor(hour), y = lincoln_memorial_departures)) +
-  geom_col(alpha = 0.1, color = "deepskyblue2") + # people cycle more in the middle of the day, like between 1 and 7PM
+  geom_col(fill = "deepskyblue2", alpha = 0.8) +
   geom_smooth() +
   theme_minimal() +
   labs(title = "At Lincoln Memorial, bikes are most demanded in the afternoon from 12pm-6pm",
        subtitle = "The highest demand occurs at 2pm",
        x = "Hour (Aggregate)", 
+       y = "The Number of Departures at Lincoln Memorial")
+```
+
+```{r specific day}
+# for a specific month and day, seeing variance by hour
+train_data_date %>% 
+  filter(year == 2021, month == "Aug", day == 15) %>% 
+  ggplot(aes(x = factor(hour), y = lincoln_memorial_departures)) +
+  geom_col(fill = "Red", alpha = 0.5) + 
+  theme_minimal() +
+  labs(title = "On Aug 15, the highest demand occured at 12pm and 2pm",
+       x = "Hour",
        y = "The Number of Departures at Lincoln Memorial")
 ```
 
@@ -241,28 +252,19 @@ train_data_date %>%
        y = "The Number of Departures at Lincoln Memorial")
 ```
 
-
 ```{r year}
-
 # by year
 train_data_date %>% 
-  # something is off with the year variable, how can we remove the space in the middle? #add factor()
   ggplot(aes(x = factor(year), y = lincoln_memorial_departures)) +
-  geom_col(width = 0.5, color = "salmon") + 
-  # overall, more people use the service in 2021 than in 2020
-  geom_smooth()
-```
-
-```{r specific day}
-# for a specific month and day, seeing variance by hour
-train_data_date %>% 
-  filter(year == 2021, month == "Aug", day == 15) %>% 
-  ggplot(aes(x= hour, y = lincoln_memorial_departures)) +
-  geom_line(color = "Red")
+  geom_col(width = 0.3, color = "pink") + 
+  geom_smooth() +
+  theme_minimal() +
+  labs(title = "At Lincoln Memorial, more people use the bike in 2021 than in 2020",
+       x = "Year (Aggregate)",
+       y = "The Number of Departures at Lincoln Memorial")
 ```
 
 ```{r holidays}
-
 # prep training data for holiday barchart - 1 year of data from May 2020 to April 2021
 # bar_date <- train_data_date %>%
 #   filter(year==2020 | year==2021 & month== "Jan" | year==2021 & month== "Feb"|year==2021 & month== "Mar"|year==2021 & month== "Apr") %>%
@@ -274,9 +276,8 @@ bar_date <- train_data_date %>%
   group_by(day, month, year)%>%
   summarise(lincoln_memorial_departures=sum(lincoln_memorial_departures), n())
 
-
 ## confirmed: 365 days exist in this data frame
-# check for missingness 
+# check for missing data
 sum(is.na(bar_date$lincoln_memorial_departures)) #0
 
 # what is the mean ridership per day
@@ -285,16 +286,16 @@ mean_day <- bar_date %>%
   summarize(n= mean(lincoln_memorial_departures)) %>%
   summarize(mean(n))  ## mean per day is 1279
               
-# create a dataframe for holidays
+# create a data frame for holidays
 holidays <- generated_holidays %>%
-  filter(country=="US") 
+  filter(country = "US") 
 
 holidays$ds <- as_date(ymd(holidays$ds)) 
 
 holidays <- holidays %>%
   mutate(
-    day=day(ymd(ds)),
-    month=month(ymd(ds), label = TRUE)
+    day = day(ymd(ds)),
+    month = month(ymd(ds), label = TRUE)
                      ) %>%
   filter(year==2020 | year==2021) 
 
@@ -314,16 +315,11 @@ holidays_date %>%
   theme(plot.caption = element_text(face = "italic")
   ) 
 
-
  ggsave("holidaybar.jpg", width = 50, height = 20, units = "cm")
-
-
-```
-
 ```
 
 ## Heat maps
-```{r heat}
+```{r heatmap}
 
 # The below data can be used for a heat map - not sure what we want to show though?
 # Why only a very small area is shown in the map?
@@ -365,52 +361,62 @@ holidays_date %>%
 #   ggplot() + 
 #   geom_sf(data = states, fill = NA ) +
 #   geom_sf(aes(color = departure - arrival), alpha = 0.3)
-
 ```
-
 
 ## Visualizations by weather at Lincoln Memorial
 
+In this part, we visualize the demand of bikes at the Lincoln Memorial station by different whether conditions.
 ```{r temperatures}
 # weather viz
 train_data_date %>%
   ggplot(aes(x = temperature, y = lincoln_memorial_departures))+
-  geom_point(alpha = 0.07,color = 'orange')+
-  labs(x ='Temperature', y = 'Hourly Departures and Arrivals')+
-  geom_smooth() # as the temperature goes up, departures and arrivals go up
+  geom_point(alpha = 0.1,color = "orange") +
+  labs(x = 'Temperature', y = 'Hourly Departures and Arrivals')+
+  geom_smooth() +
+  labs(title = "As the temperature goes up, departure also goes up",
+       subtitle = "There is a linear relationship between demand and temperature",
+       x = "Temperature (Fahrenheit)",
+       y = "Aggregate number of departures at Lincoln Memorial")
 ```
 
-```{r temperatures_month}
+```{r temperatures_month, warning = FALSE}
 # temperature in each month
 train_data_date %>%
   ggplot(aes(x = temperature, y = lincoln_memorial_departures))+
-  geom_point(alpha = 0.07, color = 'orange') +
-  labs(x= 'Temperature', y = 'Hourly Departures and Arrivals')+
-  geom_smooth() + #super confused as to why November and December have hot temperature?
-  facet_wrap(~month)
+  geom_point(alpha = 0.07, color = "orange") +
+  geom_smooth() +
+  facet_wrap(~month) +
+  labs(title = "As the temperature goes up, demand for bikes also goes up",
+       subtitle = "There is a rough linear relationship between temperature demand except August",
+       x = "Temperature (Fahrenheit)",
+       y = "Aggregate number of departures at Lincoln Memorial")
 ```
 
 
-
-```{r wind}
+```{r wind, warning = FALSE}
 # wind viz
 train_data_date %>%
   ggplot(aes(x = wind_speed,y = lincoln_memorial_departures))+
-  geom_point(alpha = 0.1,color = 'blue')+
-  labs(x = 'Wind Speed', y = 'Hourly Departures and Arrivals') +
-  geom_smooth() # data is sparse hence why we get this weird trend
+  geom_point(alpha = 0.1,color = "deepskyblue2") +
+  geom_smooth() + # data is sparse hence why we get this weird trend
+  labs(title = "Demand for bikes is not sensitive to wind speed",
+       subtitle = "No clear relationship is shown between wind speed and bike demand",
+       x = "Wind Speed (miles per minute)",
+       y = "Aggregate number of departures at Lincoln Memorial")
 ```
 
-```{r rain}
+```{r rain, warning = FALSE}
 # rain viz
 train_data_date %>%
   filter(precipitation != 0) %>% 
   #removing 0 to better show relationship
-  ggplot(aes(x = precipitation,y = lincoln_memorial_departures))+
-  geom_point(alpha = 0.1,color = 'blue')+
-  labs(x = 'Precipitation', y = 'Hourly Departures and Arrivals') +
-  geom_smooth()
-# Negative relationship between bike usage and precipitation as expected
+  ggplot(aes(x = precipitation, y = lincoln_memorial_departures))+
+  geom_point(alpha = 0.1,color = "blue") +
+  geom_smooth() +
+  labs(title = "Negative relationship between bike demand and precipitation",
+       subtitle = "No clear relationship is shown between wind speed and bike demand",
+       x = "Precipitation (include drizzling, rain, sleet, snow, ice pellets, graupel and hail)",
+       y = "Aggregate number of departures at Lincoln Memorial")
 # data very sparse hence why weird trend. Aaron recommended also creating a variable that dychotomizes rain. 1 if it rains 0 if it doesn't.
 ```
 
