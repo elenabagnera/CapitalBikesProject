@@ -41,7 +41,6 @@ For weather predictors we used data from ADD
 
 For sunlight we used data from ADD
 
-
 ## Overall method
 
 here is where we explain why we used certain algorithms versus others - I thinkw e are using parametric algorithm because we have a very wide dataset?
