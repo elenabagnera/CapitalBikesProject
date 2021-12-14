@@ -29,7 +29,7 @@ options(scipen=999)
 
 \vspace{0.1in}
 
-## Comparing RMSEs of our models 
+## Comparing RMSEs of our models [ADD PLOT]
 
 ```{r comparison}
 ## from class notes 
@@ -104,17 +104,13 @@ plot1 + plot2 + plot3
 *Note to be used if required: Note: A Random Forest regressor may or may not perform better than the Decision Tree in regression (while it usually performs better in classification), because of the delicate overfitting-underfitting tradeoff in the nature of tree-constructing algorithms.*
 
 ## Having a group of decision tree creates “randomness”  and avoids common weaknesses in predictions based on one decision tree like over fitting and excessive correlation between variables. This is because: 
-      1. random forests algorithm uses a subset of features as candidates at each split (does not rely          on the same set of features:: de- correlates individual trees) 
-      2. Each tree uses a random sample from the training dataset as it generates the splits which             inserts an aspect of randomness and prevents overfitting
+      1. random forests algorithm uses a subset of features as candidates at each split (does not rely on the same set of features:: de- correlates individual trees) 
+      2. Each tree uses a random sample from the training dataset as it generates the splits which inserts an aspect of randomness and prevents overfitting
       
-##Overall, Random Forests should produce more accurate predictions than one decision tree.
+Overall, Random Forests should produce more accurate predictions than one decision tree.
 
 
-<<<<<<< Updated upstream
-## Running best model on full training data 
-=======
-## Now let's run our model on the testing data to see how it performs by estimating out of sample error rate
->>>>>>> Stashed changes
+##Implementing Best model
 
 Now let's run our model on the full training data to see how it performs
 
@@ -184,9 +180,6 @@ predict(object = best_fit, new_data = test),
 
 predictions %>%
 rmse(departures, .pred) 
-
-predictions %>%
-  mae(departures, .pred) 
 
 ``` 
 
