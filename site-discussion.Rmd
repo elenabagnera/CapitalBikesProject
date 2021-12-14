@@ -31,6 +31,13 @@ options(scipen=999)
 
 ## Comparing RMSEs of our models 
 
+```{r comparison}
+
+
+
+``` 
+
+
 *This model* does better than all other models in terms of RMSE.
 
 *since it is more likely to be the random forest here is a justification to why it is doing better than a decision tree*
@@ -59,17 +66,6 @@ We expect LASSO do better on this aspect. While random forests will do better in
 
  Our most important predictors are *insert predictors* -- *show a graph here possibly*
 
-
 *Note to be used if required: Decision Trees are great for obtaining non-linear relationships between input features and the target variable.  However, they pose a major challenge that is that they can’t extrapolate outside unseen data which is something that LASSO models are able to compute. *
 
 
-```{r setup, message=FALSE}
-
-```
-
-
-
-```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
-
-
-```
