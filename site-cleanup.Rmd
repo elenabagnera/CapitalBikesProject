@@ -1,6 +1,6 @@
 ---
 title: "cleanup"
-author: "Elena Bagnera"
+author: ""
 date: "11/13/2021"
 output: html_document
 ---
@@ -33,6 +33,35 @@ options(scipen=999)
 
 ```
 
+## Data cleaning
+
+The historic data initially included the following variables:
+
+* Duration – Duration of trip
+* Start Date – Includes start date and time
+* End Date – Includes end date and time
+* Start Station – Includes starting station name and number
+* End Station – Includes ending station name and number
+* Bike Number – Includes ID number of bike used for the trip
+* Member Type – Indicates whether user was a "registered" member 
+
+We had to perform significant data cleaning to be able to use the data for our purposes, which involved generating functions for the following purposes:
+
+* Appending 17 datasets into a single dataset
+* Using the lubridate package to standardize and generate time-relevant predictors (such as weekday)
+* Getting hourly data
+* Separating departures from arrivals
+* Filtering stations from Lincoln memorial based on a given parameter
+* Lagging data by 14 days in order to be able to use it as predictors. We coupled the given station rides with every station from the 14 days prior for predictions. So dates in our data for prediction and the stations are 14 day historic data.
+* Making the data wider [ADD EXPLANATION]
+
+We also had to add data on weather and sunlight predictors in the following way:
+* Clean weather dataset using lubridate functions in order to be able to merge on date and hour
+* Removing variables with missing observations
+* Creating a categorical variable for good, bad and "okay" weather
+* To add sunlight predictors, we had to... [ADD - I DO NOT UNDERSTAND THIS FULLY]
+
+The cleaned dataset includes 81 [ADD - DEPENDS ON HOW MANY STATIONS] predictors
 
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
