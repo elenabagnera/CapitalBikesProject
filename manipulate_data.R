@@ -76,6 +76,8 @@ get_station_hourly <- function(x) {
   return(hour_data_temp)
 }
 
+# The input is hour_data
+# Last_date can be changed if you only want to go to a certain date.
 fill_in_missing_rows <- function(x, last_date = make_date(2021, 9, 30)) {
   
   found_first <- FALSE
