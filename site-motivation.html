@@ -10,7 +10,6 @@
 
 
 
-<meta name="date" content="2021-12-12" />
 
 <title>Motivation &amp; Goals</title>
 
@@ -166,7 +165,6 @@ pre code {
 
 <h1 class="title toc-ignore">Motivation &amp; Goals</h1>
 <h4 class="author"></h4>
-<h4 class="date">12/12/2021</h4>
 
 </div>
 
@@ -185,18 +183,25 @@ pre code {
 </div>
 <div id="data" class="section level1">
 <h1>Data</h1>
-<p>We use Capital Bikeshare’s publicly available <a href="https://www.capitalbikeshare.com/system-data">historic data</a>, ranging from May 2020 until September 2021. After data cleaning, our dataset has 309197 rows (CONFIRM?), each indicating the number of hours that departed Lincoln Memorial at a certain hour.</p>
+<p>We use Capital Bikeshare’s publicly available <a href="https://www.capitalbikeshare.com/system-data">historic data</a>, ranging from May 2020 until September 2021. The reason we chose this range is that before May 2020, the data were collected in a different format.</p>
+<p>Our unit of observation is departures by the hour. So we would expect 24 rows per day. Since we have 17 months worth of data, we would expect roughly 365x24 + 150x24= 12360 observations. In fatc, after data cleaning, our dataset has 309197 rows (CONFIRM?), each indicating the number of hours that departed Lincoln Memorial at a certain hour.</p>
 <p>For weather predictors we used data from ADD</p>
 <p>For sunlight we used data from ADD</p>
 </div>
-<div id="overall-method" class="section level1">
-<h1>Overall method</h1>
-<p>here is where we explain why we used certain algorithms versus others - I thinkw e are using parametric algorithm because we have a very wide dataset?</p>
-<p>We start with a simple decision tree. Then random forest with hyperparameter tuning.</p>
-<div id="error-metric" class="section level3">
-<h3>Error Metric</h3>
-<p>We will use RMSE as our error metric to judge how well our models do. RMSE is very sensitive to outlines as it squares them resulting in a bigger error. From the exploration done above, I would expect a large RMSE as the range within and across days in terms of hourly departures is wide regardless of the hour. How much error is too much depends on how loose or strict we want to predict our outcomes. For our project, some error is probably accepted but being too loose in deciding what the error would be might cost the company money and decrease efficiency because they might be overprovidng or underproviding bikes at their stations. Based on the average departures per hour on any given day <em>insert number</em> , I think an RMSE of 2-3 would be acceptable</p>
+<div id="models-performed" class="section level1">
+<h1>Models performed</h1>
+<p>We run three different models:</p>
+<ul>
+<li>Decision tree</li>
+<li>Random forest</li>
+<li>Lasso</li>
+</ul>
+<p>We start with a decision tree given the size and complexity of our data . We then do a random forest, which is a more complex version of a decision tree and we expect to do better than the decision tree. We then move on to lasso, which belongs to a different class of models. It performs variable selection and, unlike decision trees and random forests, it is parametric and so it will give us coefficients.</p>
 </div>
+<div id="error-metric-choice" class="section level1">
+<h1>Error Metric Choice</h1>
+<p>We will use RMSE as our error metric to judge how well our models do. RMSE is very sensitive to outliers as it squares them resulting in a bigger error compared to MAE for example. From the exploration done above, we know that there is a wide range within (e.g. in some hours it is 0, for example at night) and across days (e.g. for instance there are very few rides on Christmas day) in terms of hourly departures. Our motivation for this project is to reduce the chance that there will be no bikes available so that the service is more reliable. Therefore, we think that the RMSE will be better for our application purposes because it penalizes more the outliers that we do have in our data.</p>
+<p>How much error is too much depends on how loose or strict we want to predict our outcomes. For our project, some error is probably accepted but being too loose in deciding what the error could be too costly. Based on the average departures per hour on any given day <em>insert number</em> , we think an RMSE of 2-3 would be acceptable</p>
 </div>
 
 
