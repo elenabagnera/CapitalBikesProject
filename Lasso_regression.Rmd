@@ -1,7 +1,7 @@
 ---
 title: "Lasso_regression"
-author: "Qi Xue"
-date: "12/11/2021"
+author: ""
+date: ""
 output: html_document
 ---
 
@@ -47,7 +47,19 @@ source("io.R")
 source("manipulate_data.R")
 ```
 
-[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+## Why LASSO
+
+LASSO regression is a variation of Linear Regression that uses Shrinkage. Shrinkage is a process that data values are shrunk towards a central point as the mean. This type of regression is well-suited for models showing heavy multicollinearity (heavy correlation of features with each other).
+
+Few points about Lasso Regression:
+  •	It’s most often used for eliminating automated variables and the selection of features.
+  •	It’s well-suited for models showing heavy multicollinearity (heavy correlation of features with each other).
+  •	LASSO regression utilizes L1 regularization
+  •	LASSO regression is considered to be better than Ridge as it selects only some features and decreases the coefficients of others to zero.
+  
+ADD EXPLANATION OF TUNING
+  
+## Preparing the data
 
 ```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
 
@@ -69,18 +81,6 @@ hour_data <- get_station_hourly(filtered_data) %>%
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
 ```
 
-
-## Why choose LASSO?
-
-LASSO regression is a variation of Linear Regression that uses Shrinkage. Shrinkage is a process that data values are shrunk towards a central point as the mean. This type of regression is well-suited for models showing heavy multicollinearity (heavy correlation of features with each other).
-
-Few points about Lasso Regression:
-  •	It’s most often used for eliminating automated variables and the selection of features.
-  •	It’s well-suited for models showing heavy multicollinearity (heavy correlation of features with     each other).
-  •	LASSO regression utilizes L1 regularization
-  •	LASSO regression is considered to be better than Ridge as it selects only some features and           decreases the coefficients of others to zero.
-
-## Implementation
 
 ```{r setup_data}
 
@@ -106,6 +106,13 @@ lasso_test  <- testing(x = lasso_data_split)
 folds <- vfold_cv(data = lasso_train, v = 10)
 ```
 
+## Justification for Engeneering based on data exploration
+
+(take from decision tree explanation but add something on step scale step dummy and step center)
+
+
+## Model implementation
+
 ```{r recipe}
 
 # create a recipe
@@ -114,13 +121,11 @@ lasso_recipe <-
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% # Aaron said we should put more weight on some holidays rather than other, for example 4th of July and inauguration day especially since we are looking at Lincoln memorial
   step_nzv(all_predictors()) %>% # Aaron suggested adding this
   step_other(all_nominal_predictors()) %>% # add this for any categorical predictors
-  #step_BoxCox(all_outcomes()) %>% 
   step_dummy(all_nominal_predictors()) %>%
-  step_center(all_numeric_predictors()) %>% # definitely need to add these too
-  step_scale(all_numeric_predictors()) %>% # definitely need to add these too
-  step_dummy(all_nominal_predictors()) %>% # definitely need to add these too
-    # log10 transform the skewed outcome variable
-  step_log(all_outcomes(), base = 10)
+  step_center(all_numeric_predictors()) %>% 
+  step_scale(all_numeric_predictors()) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
+  step_BoxCox(all_outcomes()) # this is because we have 0s and cannot use log 
 
 # see the outcome data
 bake(prep(lasso_recipe, training = lasso_train), new_data = lasso_test)
@@ -151,6 +156,14 @@ lasso_res <-
             control = control_grid(save_pred = TRUE),
             metrics = metric_set(rmse))
 
+
+```
+
+
+## Selecting the best model and fitting
+
+```{r select}
+
 # select best model
 lasso_best <- lasso_res %>% 
             select_best("rmse")
@@ -174,6 +187,22 @@ lasso_fit_rs <-
   lasso_final %>% 
   fit_resamples(resample = folds)
 
+```
+
+We can also look at variable importance:
+
+```{r try}
+
+model_fit %>%
+  pull_workflow_fit() %>%
+  vip(num_features = 10) ## variable importance
+
+```
+
+## Results
+
+```{r results}
+
 # collect metrics
 plot <- collect_metrics(lasso_fit_rs, summarize = FALSE)
 
@@ -188,4 +217,11 @@ plot %>%
        y = "RMSE_hat") +
   theme_minimal()
 ```
+
+## Discussion of results
+ADD TWO LINES EXPLAINING WHAT RESULTS WE GOT similar to decision tree (copied below)
+
+The decision tree estimation produced an average RMSE of5.  This is a relatively big RMSE compared to what we wanted (range 2-3). 
+
+This could be due to several weaknesses pertaining to decision trees as they tend to overfit which means that it will be difficult to generalize to novel data. They also tend to produce trees that are overly correlated with each other (as it is more likely to get swayed by points that split the attributes well in both our predictor variables and outcome variable). We could expect random forest to perform better. 
 
