@@ -27,7 +27,6 @@ Having a group of decision tree creates “randomness”  and avoids common weak
       
 Overall, Random Forests should produce more accurate  predictions than one decision tree. 
 
-
 ## Random Forests vs LASSO
 
 Random forests will do better in predictions of hourly departures in  the Lincoln Memorial Station whereas LASSO will do better in feature/variable selection (identifying which variables predict our outcome best). 

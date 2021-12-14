@@ -29,6 +29,40 @@ options(scipen=999)
 
 \vspace{0.1in}
 
+## Comparing RMSEs of our models 
+
+*This model* does better than all other models in terms of RMSE.
+
+*since it is more likely to be the random forest here is a justification to why it is doing better than a decision tree*
+
+*Note to be used if required: Note: A Random Forest regressor may or may not perform better than the Decision Tree in regression (while it usually performs better in classification), because of the delicate overfitting-underfitting tradeoff in the nature of tree-constructing algorithms.*
+
+## Having a group of decision tree creates “randomness”  and avoids common weaknesses in predictions based on one decision tree like over fitting and excessive correlation between variables. This is because: 
+      1. random forests algorithm uses a subset of features as candidates at each split (does not rely          on the same set of features:: de- correlates individual trees) 
+      2. Each tree uses a random sample from the training dataset as it generates the splits which             inserts an aspect of randomness and prevents overfitting
+      
+##Overall, Random Forests should produce more accurate  predictions than one decision tree.
+
+
+## Now let's run our model on the testing data to see how it performs?
+
+```{r testing}
+
+```   
+
+*this is the result which is expected to have a higher RMSE*
+
+## What are the most important predictors of hourly departures at the Lincoln Memorial Station?
+
+We expect LASSO do better on this aspect. While random forests will do better in predictions of hourly departures in  the Lincoln Memorial Station *(as evidenced by lower RMSE)*, LASSO will do better in feature/variable selection (identifying which variables predict our outcome best). 
+
+
+ Our most important predictors are *insert predictors* -- *show a graph here possibly*
+
+
+*Note to be used if required: Decision Trees are great for obtaining non-linear relationships between input features and the target variable.  However, they pose a major challenge that is that they can’t extrapolate outside unseen data which is something that LASSO models are able to compute. *
+
+
 ```{r setup, message=FALSE}
 
 ```
