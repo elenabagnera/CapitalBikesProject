@@ -189,10 +189,19 @@ pre code {
 <p>For weather predictors we used data from ADD</p>
 <p>For sunlight we used data from ADD</p>
 </div>
+<<<<<<< Updated upstream
 <div id="overall-method" class="section level1">
 <h1>Overall method</h1>
+=======
+<div id="overall-method" class="section level2">
+<h2>Overall method</h2>
+>>>>>>> Stashed changes
 <p>here is where we explain why we used certain algorithms versus others - I thinkw e are using parametric algorithm because we have a very wide dataset?</p>
 <p>We start with a simple decision tree. Then random forest with hyperparameter tuning.</p>
+<div id="error-metric" class="section level3">
+<h3>Error Metric</h3>
+<p>We will use RMSE as our error metric to judge how well our models do. RMSE is very sensitive to outlines as it squares them resulting in a bigger error. From the exploration done above, I would expect a large RMSE as the range within and across days in terms of hourly departures is wide regardless of the hour. How much error is too much depends on how loose or strict we want to predict our outcomes. For our project, some error is probably accepted but being too loose in deciding what the error would be might cost the company money and decrease efficiency because they might be overprovidng or underproviding bikes at their stations. Based on the average departures per hour on any given day <em>insert number</em> , I think an RMSE of 2-3 would be acceptable</p>
+</div>
 </div>
 
 

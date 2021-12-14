@@ -48,3 +48,8 @@ here is where we explain why we used certain algorithms versus others - I thinkw
 We start with a simple decision tree. Then random forest with hyperparameter tuning.
 
 
+### Error Metric 
+
+We will use RMSE as our error metric to judge how well our models do. RMSE is very sensitive to outlines as it squares them resulting in a bigger error. From the exploration done above, I would expect a large RMSE as the range within and across days in terms of hourly departures is wide regardless of the hour. How much error is too much depends on how loose or strict we want to predict our outcomes. For our project, some error is probably accepted but being too loose in deciding what the error would be might cost the company money and decrease efficiency because they might be overprovidng or underproviding bikes at their stations. Based on the average departures per hour on any given day *insert number* , I think an RMSE of 2-3 would be acceptable
+
+

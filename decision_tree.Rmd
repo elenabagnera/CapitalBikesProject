@@ -170,4 +170,7 @@ collect_metrics(model_fit, summarize = FALSE) %>%
 
 ## Discussion of results
 
-Dcision-trees traditionally lack in performance because they are very simple.
+The decision tree estimation produced an RMSE of *INSERT RMSE*.  This is a relatively big RMSE compared to our range of *ideal/expected* values mentioned earlier. 
+
+This could be due to several weaknesses pertaining to decision trees. as they tend to overfit which means that it will be difficult to generalize to novel data. They also tend to produce trees that are overly correlated with each other (as it is more likely to get swayed by points that split the attributes well in both our predictor variables and outcome variable) . 
+
