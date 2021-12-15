@@ -99,7 +99,10 @@ LASSO + DT + RF
 ``` 
 
 
-As seen from the *graph/table*, Random forests does better than decision tree and LASSO models in terms of RMSE.
+As seen from the *graph/table*, Random forests does better than decision tree and LASSO models in terms of RMSE. 
+- Decision tree lowest RMSE: 4.25
+- Random Forests  lowest RMSE: 3.95
+- LASSO lowest RMSE: 4
 
 Some potential reasons for Random Forests out-performing decision trees and LASSO: 
 
@@ -186,7 +189,6 @@ sqrt(mean((p_test$departures - p_test$.pred)^2))
 
 ``` 
 
-## Understanding variable importance
 
 ## What are the most important predictors of hourly departures at the Lincoln Memorial Station?
 
@@ -205,16 +207,21 @@ final_rf %>%
 ```
 
 ```
- Our most important predictors are 
+Based on the variable impoertance plot, our most important predictors are:
+ 
  1. Hour: as expected, the hour has a big influence on predicting departures at Lincoln Memorial Station. We know from the exploration period that there is some hours *(1-6 am)* where deparutres are nearly non exitent, compared to peaking in the evening around *(4-6 pm)*
  
  2. Sun: 
- 
- Our results also suggest that departures are associated with sunlight. 
+ Our results also suggest that departures are associated with sunlight. This is reasonable given that people are more likely to ride bikes duirng daylight 
  
  3. Year day
+ ******Year days ** not sure
+ 
  4. Week day 
- 5. 4th Street and Maddison Station
+From earlier data exploration we could see that weekdays have a strong rleationship with departures (less dpeartures during weekends). This is a reasonable prediction.
+ 
+ 5. 4th Street and Maddison DR. Station departures and arrivals
+This suggests that a lot trips go back and forth between Lincoln Memorial Station and  4th Street and Maddison DR. Station
  
 
 ## Ideas for future projects
@@ -222,4 +229,5 @@ final_rf %>%
 * Try xgboost
 * Account for the pandemic somehow (for example over the summer 2020 when there was a curfew)
 * Try a version where we first implement a random forest model to predict a binary variable of whether bikes are departing or not. Then use the predictions to create a new variable and estimate a second random forest model that uses that variable as a predictor
+* Instead of using RMSE, we could use a range of error that we envision for our project (eg. we can aim at always haviing 3 bikes at a station-- and hence our prediction would essentially be wether or not we have 3 bikes!)
 
