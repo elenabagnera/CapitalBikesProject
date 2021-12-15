@@ -1,0 +1,145 @@
+---
+title: "random_forest"
+author: "Elena Bagnera"
+date: "11/13/2021"
+output: html_document
+---
+
+```{r include = FALSE}
+def.chunk.hook <- knitr::knit_hooks$get("chunk")
+knitr::opts_chunk$set(cache = FALSE)
+knitr::knit_hooks$set(
+  chunk = function(x, options) {
+    x <- def.chunk.hook(x, options)
+    ifelse(options$size != "normalsize", paste0("\n \\", options$size, "\n\n", x, "\n\n \\normalsize"), x)
+  }
+)
+# knitr::knit_hooks$set(inline = function(x) {
+#   prettyNum(round(x, 2), big.mark = ",")
+# })
+options(scipen=999)
+```
+
+\begin{center}
+\Huge{PPOL 670 | Final Project}
+
+\Huge{Random Forest}
+\end{center}
+
+\vspace{0.1in}
+
+[GitHub](https://github.com/elenabagnera/CapitalBikesProject)
+
+## Setup
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(tidymodels)
+library(recipes)
+library(vip)
+library(lubridate)
+library(workflows)
+library(ranger)
+source("times.R")
+source("io.R")
+source("manipulate_data.R")
+doParallel::registerDoParallel()
+```
+
+
+## Preparing the data
+
+[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+
+```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
+  
+cbs_data <- read_files('data/')
+data <- sep_departures_from_arrivals(cbs_data) %>%
+  filter(!is.na(station)) # Remove electric bikes not going to / from a station
+
+filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
+
+hour_data <- get_station_hourly(filtered_data) 
+
+hour_data_test <- hour_data %>% 
+  fill_in_missing_rows() %>% 
+  get_historic_weather() %>% 
+  add_sun_is_out()
+
+hour_data <- read_csv('hour_data.csv')
+
+lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+
+lagged_data <- read_csv('lagged_data_3200.csv')
+
+model_data <- lagged_data %>%
+  add_predictor_times() %>%
+  filter(!is.na(departures) & !is.na(arrivals)) %>%
+  # Having real time arrival data would be cheating
+  select(-arrivals) %>% 
+  format_weather()
+```
+
+
+```{r setup_data}
+
+set.seed(28021995)
+
+# create a split object
+data_split <- initial_split(model_data, prop = 0.8)
+
+# create the training and testing data
+train <- training(x = data_split)
+test  <- testing(x = data_split)
+```
+
+## Implementation
+
+
+```{r recipe}
+recipe <-
+  recipe(formula = departures ~ ., data = train) %>%
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
+  step_nzv(all_predictors()) %>% # aaron suggested adding this
+  step_BoxCox(all_outcomes())  ## only works with positive vars, no problem in our case
+```
+
+
+```{r tuning, cache=TRUE}
+# Tuning min_n doesn't seem to help
+mod <- rand_forest(mtry = 300, trees = 1000) %>% # we should have anywhere between 100 and 1000 trees
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+wf <- workflow() %>%
+  add_recipe(recipe) %>%
+  add_model(mod)
+
+```
+
+
+```{r chosen_one}
+final_wf <- workflow() %>%
+  add_recipe(recipe) %>%
+  add_model(mod) %>%
+  fit(train)
+
+p_test <- bind_cols(
+  test,
+  predict(object = final_wf, new_data = test))
+```
+
+Out of sample RMSE
+
+```{r OOS_RMSE_lincoln}
+sqrt(mean((p_test$departures - p_test$.pred)^2))
+```
+
+```{r lincoln_final_vip, warning=FALSE}
+mod %>%
+  # set_engine("ranger", importance = "permutation") %>%
+  fit(departures ~ .,
+    data = train
+  ) %>%
+  vip(geom = "point")
+```
