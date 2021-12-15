@@ -59,37 +59,16 @@ Finally, Random forests averages predictions estimated by all decision trees in 
 
 ## Preparing the data
 
-[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
-
 ```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
   
-# cbs_data <- read_files('data/')
-# data <- sep_departures_from_arrivals(cbs_data) %>%
-#   filter(!is.na(station)) # Remove electric bikes not going to / from a station
-# 
-# filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 3200)
-# 
-# hour_data <- get_station_hourly(filtered_data) %>%
-#   get_historic_weather() %>%
-#   add_sun_is_out() %>%
-#   format_weather() %>% 
-#   filter(conditions != 'Bad')
-
-hour_data <- read_csv('hour_data_3200.csv') %>%
-  format_weather() %>%
-  filter(conditions != 'Bad')
-
-
-lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
-
-#lagged_data <- read_csv('lagged_data.csv') %>% 
+lagged_data <- read_csv('lagged_data_3200.csv') #or use 1600 if too much computationally
 
 model_data <- lagged_data %>%
   add_predictor_times() %>%
   filter(!is.na(departures) & !is.na(arrivals)) %>%
   # Having real time arrival data would be cheating
-  select(-arrivals)
-  #format_weather()
+  select(-arrivals) %>% 
+  format_weather()
 
 ```
 

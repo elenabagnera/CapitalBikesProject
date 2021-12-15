@@ -63,27 +63,13 @@ Tree-based models are a class of nonparametric algorithms that work by partition
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
 
- cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data) %>%
-  filter(!is.na(station)) # Remove electric bikes not going to / from a station
-
-data <- sep_departures_from_arrivals(cbs_data) %>%
-  filter(!is.na(station))
-
-filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 400)
-
-hour_data <- get_station_hourly(filtered_data) %>%
-  get_historic_weather() %>% 
-  add_sun_is_out() 
-  #filter(conditions != "Bad") # To test if bad weather really hurts RMSE that much
-
-lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+lagged_data <- read_csv('lagged_data_3200.csv') # or use 1600 if too much computationally
 
 model_data <- lagged_data %>%
   add_predictor_times() %>%
   filter(!is.na(departures) & !is.na(arrivals)) %>%
   # Having real time arrival data would be cheating
-  select(-arrivals) %>%
+  select(-arrivals) %>% 
   format_weather()
 
 ```

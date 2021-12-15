@@ -63,22 +63,14 @@ ADD EXPLANATION OF TUNING
 
 ```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
 
-# cbs_data <- read_files('data/')
-# data <- sep_departures_from_arrivals(cbs_data) %>%
-#   filter(!is.na(station)) # Remove electric bikes not going to / from a station
+lagged_data <- read_csv('lagged_data_3200.csv') # or use 1600 if too much computationally?
 
-cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
-
-data <- sep_departures_from_arrivals(cbs_data) %>%
-  filter(!is.na(station)) # if you want to try first with one data set only to not overload your machine you can use these lines instead of the above
-
-filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
-
-hour_data <- get_station_hourly(filtered_data) %>%
-  get_historic_weather() %>%
-  add_sun_is_out()
-
-lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
+model_data <- lagged_data %>%
+  add_predictor_times() %>%
+  filter(!is.na(departures) & !is.na(arrivals)) %>%
+  # Having real time arrival data would be cheating
+  select(-arrivals) %>% 
+  format_weather()
 ```
 
 
@@ -210,6 +202,7 @@ plot %>%
 ```
 
 ## Discussion of results
+
 ADD TWO LINES EXPLAINING WHAT RESULTS WE GOT similar to decision tree (copied below)
 
 The decision tree estimation produced an average RMSE of5.  This is a relatively big RMSE compared to what we wanted (range 2-3). 
