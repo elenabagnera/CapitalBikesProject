@@ -306,7 +306,9 @@ holidays_date %>%
   geom_vline(xintercept = 55.6, color="black")+ ## 66.6 is the mean ridership per day
   xlab("") +
   ylab("Number of departures") +
-  scale_fill_gradient2() +
+  scale_fill_gradient(low = "#FFFFFFFF",
+                    high = "#012345") +
+  #scale_fill_gradient2() +
  #scale_colour_discrete("Holidays")+
   #scale_fill_manual(c("#FF6666")) +
   labs(title = "", caption = "") +
