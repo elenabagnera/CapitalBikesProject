@@ -180,17 +180,16 @@ pre code {
 <li>other stations: this includes departures from stations in an [ADD] mile radius</li>
 </ul>
 <p>Being able to predict Capital Bikeshare demand, could result in a more efficient allocation of bikes when stations are re-stocked at night. It could also inform and it could inform the eventual expansion of stations across strategic locations across the city to improve the experience of Washingtonians.</p>
-</div>
-<div id="data" class="section level1">
-<h1>Data</h1>
+<div id="data" class="section level2">
+<h2>Data</h2>
 <p>We use Capital Bikeshare’s publicly available <a href="https://www.capitalbikeshare.com/system-data">historic data</a>, ranging from May 2020 until September 2021. The reason we chose this range is that before May 2020, the data were collected in a different format.</p>
-<p>Our unit of observation is departures by the hour. So we would expect 24 rows per day. Since we have 17 months worth of data, we would expect roughly 365x24 + 150x24= 12360 observations. In fatc, after data cleaning, our dataset has 309197 rows (CONFIRM?), each indicating the number of hours that departed Lincoln Memorial at a certain hour.</p>
+<p>Our unit of observation is departures by the hour. So we would expect 24 rows per day. Since we have 17 months worth of data, we would expect roughly 365x24 + 150x24= 12360 observations. In fact, after data cleaning, our dataset has 12430 rows, each indicating the number of hours that departed Lincoln Memorial at a given hour.</p>
 <p>For weather predictors we used data from ADD</p>
 <p>For sunlight we used data from ADD</p>
 </div>
-<div id="models-performed" class="section level1">
-<h1>Models performed</h1>
-<p>We run three different models:</p>
+<div id="models-performed" class="section level2">
+<h2>Models performed</h2>
+<p>We ran three different models:</p>
 <ul>
 <li>Decision tree</li>
 <li>Random forest</li>
@@ -198,10 +197,11 @@ pre code {
 </ul>
 <p>We start with a decision tree given the size and complexity of our data . We then do a random forest, which is a more complex version of a decision tree and we expect to do better than the decision tree. We then move on to lasso, which belongs to a different class of models. It performs variable selection and, unlike decision trees and random forests, it is parametric and so it will give us coefficients.</p>
 </div>
-<div id="error-metric-choice" class="section level1">
-<h1>Error Metric Choice</h1>
+<div id="error-metric-choice" class="section level2">
+<h2>Error Metric Choice</h2>
 <p>We will use RMSE as our error metric to judge how well our models do. RMSE is very sensitive to outliers as it squares them resulting in a bigger error compared to MAE for example. From the exploration done above, we know that there is a wide range within (e.g. in some hours it is 0, for example at night) and across days (e.g. for instance there are very few rides on Christmas day) in terms of hourly departures. Our motivation for this project is to reduce the chance that there will be no bikes available so that the service is more reliable. Therefore, we think that the RMSE will be better for our application purposes because it penalizes more the outliers that we do have in our data.</p>
 <p>How much error is too much depends on how loose or strict we want to predict our outcomes. For our project, some error is probably accepted but being too loose in deciding what the error could be too costly. Based on the average departures per hour on any given day <em>insert number</em> , we think an RMSE of 2-3 would be acceptable</p>
+</div>
 </div>
 
 
