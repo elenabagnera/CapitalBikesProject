@@ -85,7 +85,6 @@ train_data_date %>%
     sd(lincoln_memorial_departures)) 
 # how can we get better summary stats? maybe not split by hour?
 # we can group the data, and sum if we need to
-
 ```
 
 
@@ -269,19 +268,20 @@ holidays_date <- left_join(bar_date, holidays, by= c('year', 'month', 'day')) %>
 holidays_date %>%
   ggplot(aes(y= holiday, x= lincoln_memorial_departures , fill=lincoln_memorial_departures)) + 
   geom_col()+
-  geom_vline(xintercept = 55.6, color="black")+ ## 66.6 is the mean ridership per day
+  geom_vline(xintercept = 55.6, color = "red") + 
   xlab("") +
   ylab("Number of departures") +
   scale_fill_gradient(low = "#FFFFFFFF",
-                    high = "#012345") +
+                      high = "#012345") +
   #scale_fill_gradient2() +
- #scale_colour_discrete("Holidays")+
+  #scale_colour_discrete("Holidays")+
   #scale_fill_manual(c("#FF6666")) +
-  labs(title = "", caption = "") +
+
   guides(fill=guide_legend(title="Number of departures")) +
-  #theme_minimal() +
-  theme(plot.caption = element_text(face = "italic")
-  ) 
+  theme_bw() +
+  labs(title = "Demand is highest among holidays such as Independence Day, Labor Day and Memorial Day",
+       x = "",
+       y = "The number of departures from Licoln Memorial") 
 
  ggsave("holidaybar.jpg", width = 50, height = 20, units = "cm")
 ```
