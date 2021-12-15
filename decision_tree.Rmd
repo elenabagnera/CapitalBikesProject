@@ -1,7 +1,7 @@
 ---
-title: "Decision tree"
-author: "Elena Bagnera"
-date: "12/12/2021"
+title: "Model 1: Decision tree"
+author: ""
+date: ""
 output: html_document
 ---
 
@@ -36,7 +36,6 @@ options(scipen=999)
 
 [GitHub](https://github.com/elenabagnera/CapitalBikesProject)
 
-## Setup
 
 ```{r setup, include=FALSE}
 library(tidyverse)
@@ -60,7 +59,7 @@ library(caret)
 
 Tree-based models are a class of nonparametric algorithms that work by partitioning the feature space into a number of smaller (non-overlapping) regions with similar response values using a set of splitting rules. In essence, our tree is a set of rules that allows us to make predictions by asking simple yes-or-no questions about each feature. It's a good place to start because it's a simple algorithm and it will tell us whether it's worth doing a random forest.
 
-## Preparing the data
+## Preparing the Data
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
 
@@ -153,9 +152,9 @@ collect_metrics(model_fit, summarize = FALSE) %>%
 ```
 
 
-## Discussion of results
+## Discussion of Results
 
-The decision tree estimation produced an average RMSE of5.  This is a relatively big RMSE compared to what we wanted (range 2-3). 
+The decision tree estimation produced an average RMSE of 4.25.  This is a relatively big RMSE compared to what we wanted (range 2-3). 
 
 This could be due to several weaknesses pertaining to decision trees as they tend to overfit which means that it will be difficult to generalize to novel data. They also tend to produce trees that are overly correlated with each other (as it is more likely to get swayed by points that split the attributes well in both our predictor variables and outcome variable). We could expect random forest to perform better. 
 
