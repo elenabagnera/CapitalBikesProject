@@ -182,7 +182,7 @@ lasso_fit_rs <-
 plot <- collect_metrics(lasso_fit_rs, summarize = FALSE)
 
 # plot rmse
-plot %>% 
+LASSO <- plot %>% 
   filter(.metric == "rmse") %>% 
   ggplot(aes(id, .estimate, group = .estimator)) +
   geom_line() +

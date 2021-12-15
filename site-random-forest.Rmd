@@ -203,6 +203,22 @@ collect_metrics(tune_results, summarize = FALSE) %>%
 collect_metrics(tune_results, summarize = FALSE) %>%
   filter(.metric == "rmse") %>%
   summarize(mean(.estimate))
+
+## line plot fo RMSE for comparison between models
+plot <- collect_metrics(tune_results, summarize = FALSE)
+
+# plot rmse
+RF <- plot %>% 
+  filter(.metric == "rmse") %>% 
+  ggplot(aes(id, .estimate, group = .estimator)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(limits = c(0, 8)) +
+  labs(title = "Calculated RMSE Across the 10 Folds - Random Forests Regression",
+       y = "RMSE_hat") +
+  theme_minimal()
+
+
 ```
 
 ```{r chosen_one, cache=TRUE}

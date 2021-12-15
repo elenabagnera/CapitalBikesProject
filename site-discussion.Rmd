@@ -32,67 +32,69 @@ options(scipen=999)
 ## Comparing RMSEs of our models [ADD PLOT]
 
 ```{r comparison}
-## from class notes 
+
+LASSO + DT + RF
+
 # the models are comparable for prediction accuracy
-bind_rows(
-  `lm` = show_best(lm_cv, metric = "rmse", n = 1),
-  `LASSO` = show_best(lasso_cv, metric = "rmse", n = 1),
-  `ridge` = show_best(ridge_fit, metric = "rmse",n = 1),
-  `enet` = show_best(elastic_net_fit, metric = "rmse", n = 1),
-  .id = "model"
-)
-
-all_coefs <- bind_rows(
-  `lm` = lm_coefs,
-  `LASSO` = lasso_coefs,
-  `ridge` = ridge_coefs,
-  `enet` = elastic_net_coefs,
-  .id = "model"
-) 
-
-all_coefs %>%
-  group_by(model) %>%
-  slice_max(Importance, n = 10) %>%
-  ggplot(aes(Importance, Variable, fill = model)) +
-  geom_col(position = "dodge")
-
-all_coefs %>%
-  filter(model != "lm") %>%
-  group_by(model) %>%
-  slice_max(Importance, n = 10) %>%
-  ggplot(aes(Importance, Variable, fill = model)) +
-  geom_col(position = "dodge")
-
-
-# compare the regularized coefficients to the lm coefficients for all three models
-plot1 <- left_join(
-  rename(lm_coefs, lm = Importance),
-  rename(lasso_coefs, LASSO = Importance),
-  by = "Variable"
-) %>%
-  ggplot(aes(lm, LASSO)) +
-  geom_point(alpha = 0.3) +
-  scale_y_continuous(limits = c(0, 0.08))
-
-plot2 <- left_join(
-  rename(lm_coefs, lm = Importance),
-  rename(ridge_coefs, ridge = Importance),
-  by = "Variable"
-) %>%
-  ggplot(aes(lm, ridge)) +
-  geom_point(alpha = 0.3) +
-  scale_y_continuous(limits = c(0, 0.08))
-
-plot3 <- left_join(
-  rename(lm_coefs, lm = Importance),
-  rename(elastic_net_coefs, enet = Importance),
-  by = "Variable"
-) %>%
-  ggplot(aes(lm, enet)) +
-  geom_point(alpha = 0.3) +
-  scale_y_continuous(limits = c(0, 0.08))
-
-plot1 + plot2 + plot3
+# bind_rows(
+#   `lm` = show_best(lm_cv, metric = "rmse", n = 1),
+#   `LASSO` = show_best(lasso_cv, metric = "rmse", n = 1),
+#   `ridge` = show_best(ridge_fit, metric = "rmse",n = 1),
+#   `enet` = show_best(elastic_net_fit, metric = "rmse", n = 1),
+#   .id = "model"
+# )
+# 
+# all_coefs <- bind_rows(
+#   `lm` = lm_coefs,
+#   `LASSO` = lasso_coefs,
+#   `ridge` = ridge_coefs,
+#   `enet` = elastic_net_coefs,
+#   .id = "model"
+# ) 
+# 
+# all_coefs %>%
+#   group_by(model) %>%
+#   slice_max(Importance, n = 10) %>%
+#   ggplot(aes(Importance, Variable, fill = model)) +
+#   geom_col(position = "dodge")
+# 
+# all_coefs %>%
+#   filter(model != "lm") %>%
+#   group_by(model) %>%
+#   slice_max(Importance, n = 10) %>%
+#   ggplot(aes(Importance, Variable, fill = model)) +
+#   geom_col(position = "dodge")
+# 
+# 
+# # compare the regularized coefficients to the lm coefficients for all three models
+# plot1 <- left_join(
+#   rename(lm_coefs, lm = Importance),
+#   rename(lasso_coefs, LASSO = Importance),
+#   by = "Variable"
+# ) %>%
+#   ggplot(aes(lm, LASSO)) +
+#   geom_point(alpha = 0.3) +
+#   scale_y_continuous(limits = c(0, 0.08))
+# 
+# plot2 <- left_join(
+#   rename(lm_coefs, lm = Importance),
+#   rename(ridge_coefs, ridge = Importance),
+#   by = "Variable"
+# ) %>%
+#   ggplot(aes(lm, ridge)) +
+#   geom_point(alpha = 0.3) +
+#   scale_y_continuous(limits = c(0, 0.08))
+# 
+# plot3 <- left_join(
+#   rename(lm_coefs, lm = Importance),
+#   rename(elastic_net_coefs, enet = Importance),
+#   by = "Variable"
+# ) %>%
+#   ggplot(aes(lm, enet)) +
+#   geom_point(alpha = 0.3) +
+#   scale_y_continuous(limits = c(0, 0.08))
+# 
+# plot1 + plot2 + plot3
 
 ``` 
 
@@ -203,7 +205,17 @@ final_rf %>%
 ```
 
 ```
- Our most important predictors are *insert predictors* -- *show a graph here possibly*
+ Our most important predictors are 
+ 1. Hour: as expected, the hour has a big influence on predicting departures at Lincoln Memorial Station. We know from the exploration period that there is some hours *(1-6 am)* where deparutres are nearly non exitent, compared to peaking in the evening around *(4-6 pm)*
+ 
+ 2. Sun: 
+ 
+ Our results also suggest that departures are associated with sunlight. 
+ 
+ 3. Year day
+ 4. Week day 
+ 5. 4th Street and Maddison Station
+ 
 
 ## Ideas for future projects
 

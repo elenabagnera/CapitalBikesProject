@@ -139,7 +139,9 @@ fit_resamples(resamples = folds)
 
 collect_metrics(model_fit) 
 
-collect_metrics(model_fit, summarize = FALSE) %>%
+plot <- collect_metrics(model_fit, summarize = FALSE)
+
+DT <- plot %>% 
   filter(.metric == "rmse") %>%
   ggplot(aes(id, .estimate, group = .estimator)) +
   geom_line() +
