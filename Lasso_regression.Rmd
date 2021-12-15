@@ -1,11 +1,11 @@
 ---
-title: "Lasso_regression"
+title: "Model 3: Lasso_regression"
 author: ""
 date: ""
 output: html_document
 ---
 
-```{r include = FALSE}
+```{r setup1, include = FALSE}
 def.chunk.hook <- knitr::knit_hooks$get("chunk")
 knitr::opts_chunk$set(cache = FALSE)
 knitr::knit_hooks$set(
@@ -30,9 +30,8 @@ options(scipen = 999)
 
 [GitHub](https://github.com/elenabagnera/CapitalBikesProject)
 
-## Setup
 
-```{r setup, message = FALSE, warnings = FALSE}
+```{r setup, include = FALSE}
 
 library(tidyverse)
 library(tidymodels)
@@ -59,7 +58,7 @@ Few points about Lasso Regression:
   
 ADD EXPLANATION OF TUNING
   
-## Preparing the data
+## Preparing the Data
 
 ```{r get_data, cache = FALSE, warning = FALSE, message = FALSE}
 
@@ -98,12 +97,13 @@ lasso_test  <- testing(x = lasso_data_split)
 folds <- vfold_cv(data = lasso_train, v = 10)
 ```
 
+
 ## Justification for Engeneering based on data exploration
 
 (take from decision tree explanation but add something on step scale step dummy and step center)
 
 
-## Model implementation
+## Model Implementation
 
 ```{r recipe}
 
@@ -152,7 +152,7 @@ lasso_res <-
 ```
 
 
-## Selecting the best model and fitting
+## Selecting the Best Model and Fitting
 
 ```{r select}
 
@@ -201,7 +201,7 @@ plot %>%
   theme_minimal()
 ```
 
-## Discussion of results
+## Discussion of Results
 
 ADD TWO LINES EXPLAINING WHAT RESULTS WE GOT similar to decision tree (copied below)
 
