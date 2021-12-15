@@ -189,15 +189,6 @@ lasso_fit_rs <-
 
 ```
 
-We can also look at variable importance:
-
-```{r try}
-
-model_fit %>%
-  pull_workflow_fit() %>%
-  vip(num_features = 10) ## variable importance
-
-```
 
 ## Results
 

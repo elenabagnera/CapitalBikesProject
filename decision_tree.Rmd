@@ -166,17 +166,6 @@ collect_metrics(model_fit, summarize = FALSE) %>%
 ```
 
 
-We can also look at variable importance for the best performing fold:
-
-```{r try}
-
-model_fit %>%
-  pull_workflow_fit() %>%
-  vip(num_features = 10) ## variable importance
-
-```
-
-
 ## Discussion of results
 
 The decision tree estimation produced an average RMSE of5.  This is a relatively big RMSE compared to what we wanted (range 2-3). 
