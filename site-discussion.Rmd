@@ -221,7 +221,7 @@ Based on the variable impoertance plot, our most important predictors are:
 From earlier data exploration we could see that weekdays have a strong rleationship with departures (less dpeartures during weekends). This is a reasonable prediction.
  
  5. 4th Street and Maddison DR. Station departures and arrivals
-This suggests that a lot trips go back and forth between Lincoln Memorial Station and  4th Street and Maddison DR. Station
+This suggests that a lot trips go back and forth between Lincoln Memorial Station and  4th Street and Maddison DR. Station. Trips back and forth from near the Smithonian to Lincoln Memorial seem popular among cpaital bikeshare riders. 
  
 
 ## Ideas for future projects
