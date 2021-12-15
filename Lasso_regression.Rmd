@@ -1,5 +1,5 @@
 ---
-title: "Model 3: Lasso_regression"
+title: "Model 3: Lasso Regression"
 author: ""
 date: ""
 output: html_document
@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup1, include = FALSE}
 def.chunk.hook <- knitr::knit_hooks$get("chunk")
-knitr::opts_chunk$set(cache = FALSE)
+knitr::opts_chunk$set(cache = FALSE, warning = FALSE)
 knitr::knit_hooks$set(
   chunk = function(x, options) {
     x <- def.chunk.hook(x, options)
@@ -46,17 +46,17 @@ source("io.R")
 source("manipulate_data.R")
 ```
 
-## Why LASSO
+## Why LASSO?
 
-LASSO regression is a variation of Linear Regression that uses Shrinkage. Shrinkage is a process that data values are shrunk towards a central point as the mean. This type of regression is well-suited for models showing heavy multicollinearity (heavy correlation of features with each other).
+LASSO regression is a variation of Linear Regression that uses Shrinkage. Shrinkage is a process that data values are shrunk towards a central point as the mean. This type of regression is well-suited for models showing heavy multi-collinearity (heavy correlation of features with each other).
 
 Few points about Lasso Regression:
-  •	It’s most often used for eliminating automated variables and the selection of features.
-  •	It’s well-suited for models showing heavy multicollinearity (heavy correlation of features with each other).
-  •	LASSO regression utilizes L1 regularization
-  •	LASSO regression is considered to be better than Ridge as it selects only some features and decreases the coefficients of others to zero.
+* It’s most often used for eliminating automated variables and the selection of features.   
+* It’s well-suited for models showing heavy multi-collinearity (heavy correlation of features with each other).   
+* LASSO regression utilizes L1 regularization   
+* LASSO regression is considered to be better than Ridge as it selects only some features and decreases the coefficients of others to zero.
   
-ADD EXPLANATION OF TUNING
+A tuning parameter (λ), sometimes called a penalty parameter, controls the strength of the penalty term in ridge regression and lasso regression. It is basically the amount of shrinkage, where data values are shrunk towards a central point, like the mean. Shrinkage results in simple, sparse models which are easier to analyze than high-dimensional data models with large numbers of parameters.
   
 ## Preparing the Data
 
@@ -67,16 +67,12 @@ lagged_data <- read_csv('lagged_data_3200.csv') # or use 1600 if too much comput
 model_data <- lagged_data %>%
   add_predictor_times() %>%
   filter(!is.na(departures) & !is.na(arrivals)) %>%
-  # Having real time arrival data would be cheating
   select(-arrivals) %>% 
   format_weather()
 ```
 
 
 ```{r setup_data}
-
-# to run the three models, we only need this chunk once?
-
 set.seed(28021995)
 
 lasso_data <- lagged_data %>%
@@ -100,7 +96,11 @@ folds <- vfold_cv(data = lasso_train, v = 10)
 
 ## Justification for Engeneering based on data exploration
 
-(take from decision tree explanation but add something on step scale step dummy and step center)
+From the exploratory data analysis phase, holidays clearly affected departures. When compared to the mean departures per day these holidays had significantly greater ridership compared to others which had much lower departures such as insert holidays.
+
+To help improve our predictions, we add step_holiday to our recipe to control for outlier trends during holidays. Additionally, as shown in the exploratory phase, the distribution of our outcome variable, Lincoln Memorial Departures is skewed. To avoid this imbalance affecting our predictions, step_BoxCox works since departures is a strictly positive variable but it does have 0s (hence we cannot use logs). We use it to transform the outcome variable so that it would be more like a normal distribution.
+
+Besides, we add `step_dummy` and `step_center` in recipe. `step_dummy()` creates a specification of a recipe step that will convert nominal data (e.g. character or factors) into one or more numeric binary model terms for the levels of the original data. `step_center()` creates a specification of a recipe step that will normalize numeric data to have a mean of zero.
 
 
 ## Model Implementation
@@ -117,10 +117,7 @@ lasso_recipe <-
   step_center(all_numeric_predictors()) %>% 
   step_scale(all_numeric_predictors()) %>% 
   step_dummy(all_nominal_predictors()) %>% 
-  step_BoxCox(all_outcomes()) # this is because we have 0s and cannot use log 
-
-# see the outcome data
-bake(prep(lasso_recipe, training = lasso_train), new_data = lasso_test)
+  step_BoxCox(all_outcomes()) # this is because we have 0s and cannot use log
 ```
 
 ```{r run the model}
@@ -147,8 +144,6 @@ lasso_res <-
             grid = lasso_grid,
             control = control_grid(save_pred = TRUE),
             metrics = metric_set(rmse))
-
-
 ```
 
 
@@ -170,15 +165,12 @@ lasso_final <- finalize_workflow(
 lasso_coefs <- lasso_final %>%
   fit(data = lasso_train) %>%
   extract_fit_parsnip() %>%
-  vi(lambda = lasso_best$penalty) 
-
-lasso_coefs
+  vi(lambda = lasso_best$penalty)
 
 # fit resample
 lasso_fit_rs <-
   lasso_final %>% 
   fit_resamples(resample = folds)
-
 ```
 
 
@@ -203,9 +195,7 @@ plot %>%
 
 ## Discussion of Results
 
-ADD TWO LINES EXPLAINING WHAT RESULTS WE GOT similar to decision tree (copied below)
+The LASSO regression produced an average RMSE of 4. This is a relatively big RMSE compared to what we aim for (range 2-3). 
 
-The decision tree estimation produced an average RMSE of5.  This is a relatively big RMSE compared to what we wanted (range 2-3). 
-
-This could be due to several weaknesses pertaining to decision trees as they tend to overfit which means that it will be difficult to generalize to novel data. They also tend to produce trees that are overly correlated with each other (as it is more likely to get swayed by points that split the attributes well in both our predictor variables and outcome variable). We could expect random forest to perform better. 
+This could be due to several weaknesses pertaining to LASSO. With the RMSE around 5, it is likely that we have a model that badly overfits the data. i.e. We've created a model that tests well in sample, but has little predictive value when tested out of sample.
 
