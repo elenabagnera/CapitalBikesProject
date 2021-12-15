@@ -1,5 +1,5 @@
 ---
-title: "visualizations"
+title: "Exploratory Data Analysis (EDA)"
 author: "Capital Bikes Team"
 date: "11/13/2021"
 output: html_document
@@ -47,44 +47,7 @@ library(prophet)
 ```
 
 
-[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
-
-```{r get real-time data, warning = FALSE, message = FALSE, include = FALSE}
-
-### get real-time data through API
-# url <- "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/5/query?where=1%3D1&outFields=*&outSR=4326&f=json"
-
-# 1) use the URL to make a request from the API
-# data_json <- GET(url = url,
-#                  user_agent("Georgetown University Assignment"))
-# 2) Check for a server error in the response
-# http_status(data_json)
-# 3) get the contents of the response as a text string
-# data_json <- content(data_json, as = "text")
-# 4) create a character matrix from the JSON
-# data_matrix <- fromJSON(data_json)
-# 5) turn the body of the character matrix into a tibble
-# realtime_data <- as_tibble(data_matrix$features$attributes)
-# #help needed: how to use lower case for var names?
-```
-
 ```{r get historical data, warning = FALSE, message = FALSE}
-
-# # full-data
-# cbs_data <- read_files('data/')
-# data <- sep_departures_from_arrivals(cbs_data) %>%
-#     filter(!is.na(station)) # Remove electric bikes not going to / from a station
-
-# # partial data
-# cbs_data <- read.csv("data/202109-capitalbikeshare-tripdata.csv")
-# data <- sep_departures_from_arrivals(cbs_data) %>% 
-#   filter(!is.na(station)) # if you want to try first with one data set only to not overload your machine you can use these lines instead of the above
-
-# filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600) # added filtering
-
-# hour_data <- get_station_hourly(data) %>% 
-#   get_historic_weather() %>% # added weather
-#   add_sun_is_out()
 
 # load generated data
 hour_data <- read_csv("hour_data.csv")
@@ -94,6 +57,7 @@ hour_data_date <- add_date_column(hour_data)
 ```
 
 ## Splitting the data into training and testing
+
 ```{r split}
 set.seed(28021995)
 
@@ -106,6 +70,7 @@ test_data_date  <- testing(x = data_split)
 ```
 
 ## Summary stats
+
 ```{r stats_dependent}
 # summary entire train dataset
 summary(train_data_date)
@@ -318,51 +283,6 @@ holidays_date %>%
   ) 
 
  ggsave("holidaybar.jpg", width = 50, height = 20, units = "cm")
-```
-
-## Heat maps
-```{r heatmap}
-
-# The below data can be used for a heat map - not sure what we want to show though?
-# Why only a very small area is shown in the map?
-
-# coord_data <- data %>% 
-#   select(station, lat, lng) %>% 
-#   filter(duplicated(station) == FALSE)
-# 
-# heat_map_data <- data %>% 
-#   # filter() %>% Filter here if you want a certain date range
-#   group_by(station, type) %>% 
-#   summarize(count = n()) %>% 
-#   pivot_wider(names_from = type, values_from = count) %>% 
-#   left_join(coord_data) %>% 
-#   filter(!is.na(lat), !is.na(lng))
-# 
-# library(sf)
-# library(tigris)
-# 
-# states <- tigris::states(cb = TRUE, progress_bar = FALSE) %>% 
-#     st_crop(xmin = -77.4, xmax = -76.8,
-#     ymin = 38.75, ymax = 39.15)
-# 
-# dep_sf <- heat_map_data %>% 
-#   st_as_sf(coords=c("lng", "lat"), remove = FALSE) %>% 
-#   st_set_crs(value = 4326)
-# 
-# dep_sf %>% 
-#   ggplot() + 
-#   geom_sf(data = states, fill = NA ) +
-#   geom_sf(aes(color = departure), alpha = 0.3)
-# 
-# dep_sf %>% 
-#   ggplot() + 
-#   geom_sf(data = states, fill = NA ) +
-#   geom_sf(aes(color = arrival), alpha = 0.3)
-# 
-# dep_sf %>% 
-#   ggplot() + 
-#   geom_sf(data = states, fill = NA ) +
-#   geom_sf(aes(color = departure - arrival), alpha = 0.3)
 ```
 
 ## Visualizations by weather at Lincoln Memorial
