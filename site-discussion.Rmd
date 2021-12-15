@@ -195,4 +195,9 @@ We expect LASSO do better on this aspect. While random forests will do better in
 
 *Note to be used if required: Decision Trees are great for obtaining non-linear relationships between input features and the target variable.  However, they pose a major challenge that is that they can’t extrapolate outside unseen data which is something that LASSO models are able to compute. *
 
+## Ideas for future projects
+
+* Try xgboost
+* Account for the pandemic somehow (for example over the summer 2020 when there was a curfew)
+* Try a version where we first implement a random forest model to predict a binary variable of whether bikes are departing or not. Then use the predictions to create a new variable and estimate a second random forest model that uses that variable as a predictor
 
