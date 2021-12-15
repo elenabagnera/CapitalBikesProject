@@ -184,6 +184,17 @@ rmse(departures, .pred)
 ``` 
 
 
+## Understanding variable importance
+
+
+```{r try}
+
+model_fit %>%
+  pull_workflow_fit() %>%
+  vip(num_features = 10) ## variable importance
+
+```
+
 *this is the result which is expected to have a higher RMSE*
 
 ## What are the most important predictors of hourly departures at the Lincoln Memorial Station?

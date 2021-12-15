@@ -146,15 +146,6 @@ fit_resamples(resamples = folds)
 
 ```
 
-We can also look at variable importance:
-
-```{r try}
-
-model_fit %>%
-  pull_workflow_fit() %>%
-  vip(num_features = 10) ## variable importance
-
-```
 
 ## Results
 
@@ -173,6 +164,18 @@ collect_metrics(model_fit, summarize = FALSE) %>%
   theme_minimal() 
 
 ```
+
+
+We can also look at variable importance for the best performing fold:
+
+```{r try}
+
+model_fit %>%
+  pull_workflow_fit() %>%
+  vip(num_features = 10) ## variable importance
+
+```
+
 
 ## Discussion of results
 
