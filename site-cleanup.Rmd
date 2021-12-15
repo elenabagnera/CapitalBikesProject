@@ -30,9 +30,9 @@ options(scipen=999)
 \vspace{0.1in}
 
 
-## Data cleaning
+## Detailed Explanation
 
-The historic data initially included the following variables:
+The historic data initially included the following relevant ariables:
 
 * Duration – Duration of trip
 * Start Date – Includes start date and time
@@ -50,18 +50,17 @@ We had to perform significant data cleaning to be able to use the data for our p
 * Separating departures from arrivals
 * Filtering stations from Lincoln memorial based on a given parameter
 * Lagging data by 14 days in order to be able to use it as predictors. We coupled the given station rides with every station from the 14 days prior for predictions. So dates in our data for prediction and the stations are 14 day historic data.
-* Making the data wider [ADD EXPLANATION]
+* Making the data wider to have one row per hour
 
 We also had to add data on weather and sunlight predictors in the following way:
 * Clean weather dataset using lubridate functions in order to be able to merge on date and hour
 * Removing variables with missing observations
-* Creating a categorical variable for good, bad and "okay" weather
-* To add sunlight predictors, we had to... [ADD - I DO NOT UNDERSTAND THIS FULLY]
+* Creating a categorical variable for good, bad and okay weather. We tried numeric as well.
+* We added if there was sunlight based on nautical twilight
 
-The cleaned dataset includes 81 [ADD - DEPENDS ON HOW MANY STATIONS] predictors.
+The cleaned dataset includes 81 to 700+ predictors depending on how many stations are filtered.
 
 Below, we copy the functions that we created to complete the data cleaning process.
-
 
 # Reading in all the .csv files in the folder and returning the merged dataset
 

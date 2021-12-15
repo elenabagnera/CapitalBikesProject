@@ -61,23 +61,23 @@ Finally, Random forests averages predictions estimated by all decision trees in 
 
 [Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
 
-```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
+```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
   
-cbs_data <- read_files('data/')
-data <- sep_departures_from_arrivals(cbs_data) %>%
-  filter(!is.na(station)) # Remove electric bikes not going to / from a station
-
-filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 3200)
-
-hour_data <- get_station_hourly(filtered_data) %>%
-  get_historic_weather() %>%
-  add_sun_is_out() %>%
-  format_weather() %>% 
-  filter(conditions != 'Bad')
-
-# hour_data <- read_csv('hour_data.csv') %>% 
+# cbs_data <- read_files('data/')
+# data <- sep_departures_from_arrivals(cbs_data) %>%
+#   filter(!is.na(station)) # Remove electric bikes not going to / from a station
+# 
+# filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 3200)
+# 
+# hour_data <- get_station_hourly(filtered_data) %>%
+#   get_historic_weather() %>%
+#   add_sun_is_out() %>%
 #   format_weather() %>% 
 #   filter(conditions != 'Bad')
+
+hour_data <- read_csv('hour_data_3200.csv') %>%
+  format_weather() %>%
+  filter(conditions != 'Bad')
 
 
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
@@ -150,7 +150,7 @@ recipe <-
 
 ```{r tuning, cache=FALSE}
 # Tuning min_n doesn't seem to help
-mod <- rand_forest(mtry = tune(), trees = 200, min_n = tune()) %>% # we should have anywhere between 100 and 1000 trees
+mod <- rand_forest(mtry = 250, trees = tune()) %>% # we should have anywhere between 100 and 1000 trees
   set_mode("regression") %>%
   set_engine("ranger")
 
@@ -161,7 +161,7 @@ wf <- workflow() %>%
 tune_results <- tune_grid(
   wf,
   resamples = folds,
-  grid = 8,
+  grid = 16,
   metrics = metric_set(rmse, mae)
 )
 ```
@@ -171,34 +171,34 @@ tune_results <- tune_grid(
 ```{r graphs}
 metrics <- tune_results %>%
   collect_metrics() %>%
-  pivot_longer(min_n:mtry,
+  pivot_longer(trees,
     values_to = "value",
     names_to = "parameter"
   )
 
 metrics %>%
   filter(.metric == "rmse") %>%
-  ggplot(aes(x = value, y = mean, color = parameter)) +
+  ggplot(aes(x = value, y = mean)) +
   geom_point() +
   labs(title = "RMSE")
 
 metrics %>%
   filter(.metric == "mae") %>%
-  ggplot(aes(x = value, y = mean, color = parameter)) +
+  ggplot(aes(x = value, y = mean)) +
   geom_point() +
   labs(title = "MAE")
 
-metrics %>%
-  filter(.metric == "rmse", parameter == "mtry") %>%
-  ggplot(aes(x = value, y = mean)) +
-  geom_point() +
-  labs(title = "RMSE")
-
-metrics %>%
-  filter(.metric == "rmse", parameter == "min_n") %>%
-  ggplot(aes(x = value, y = mean)) +
-  geom_point() +
-  labs(title = "RMSE")
+# metrics %>%
+#   filter(.metric == "rmse", parameter == "mtry") %>%
+#   ggplot(aes(x = value, y = mean)) +
+#   geom_point() +
+#   labs(title = "RMSE")
+# 
+# metrics %>%
+#   filter(.metric == "rmse", parameter == "min_n") %>%
+#   ggplot(aes(x = value, y = mean)) +
+#   geom_point() +
+#   labs(title = "RMSE")
 ```
 
 ## Picking results
