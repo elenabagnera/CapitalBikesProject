@@ -1,11 +1,11 @@
 ---
-title: "random_forest"
-author: "Elena Bagnera"
-date: "11/13/2021"
+title: "model 2: Random Forest"
+author: ""
+date: ""
 output: html_document
 ---
 
-```{r include = FALSE}
+```{r setup1, include = FALSE}
 def.chunk.hook <- knitr::knit_hooks$get("chunk")
 knitr::opts_chunk$set(cache = FALSE)
 knitr::knit_hooks$set(
@@ -30,9 +30,7 @@ options(scipen=999)
 
 [GitHub](https://github.com/elenabagnera/CapitalBikesProject)
 
-## Setup
-
-```{r setup, message=FALSE}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(tidymodels)
 library(recipes)
@@ -47,28 +45,9 @@ doParallel::registerDoParallel()
 ```
 
 
-## Preparing the data
-
-[Direct link to dataset](https://s3.amazonaws.com/capitalbikeshare-data/202108-capitalbikeshare-tripdata.zip)
+## Preparing the Data
 
 ```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
-  
-# cbs_data <- read_files('data/')
-# data <- sep_departures_from_arrivals(cbs_data) %>%
-#   filter(!is.na(station)) # Remove electric bikes not going to / from a station
-# 
-# filtered_data <- filter_by_distance(data, from_station = 'lincoln_memorial', distance_m = 1600)
-# 
-# hour_data <- get_station_hourly(filtered_data) 
-# 
-# hour_data_test <- hour_data %>% 
-#   fill_in_missing_rows() %>% 
-#   get_historic_weather() %>% 
-#   add_sun_is_out()
-# 
-# hour_data <- read_csv('hour_data.csv')
-# 
-# lagged_data <- setup_for_time_prediction(hour_data, station_name = "lincoln_memorial")
 
 lagged_data <- read_csv('lagged_data_3200.csv')
 
@@ -93,8 +72,7 @@ train <- training(x = data_split)
 test  <- testing(x = data_split)
 ```
 
-## Implementation
-
+## Our preprocessing for Random Forests is the same as decision trees because Random Forests is just a "more complex" decision tree.
 
 ```{r recipe}
 recipe <-
@@ -104,6 +82,7 @@ recipe <-
   step_BoxCox(all_outcomes())  ## only works with positive vars, no problem in our case
 ```
 
+## Model Implementation
 
 ```{r tuning, cache=TRUE}
 # Tuning min_n doesn't seem to help
@@ -129,6 +108,7 @@ p_test <- bind_cols(
   predict(object = final_wf, new_data = test))
 ```
 
+## Results
 Out of sample RMSE
 
 ```{r OOS_RMSE_lincoln}
@@ -143,3 +123,8 @@ mod %>%
   ) %>%
   vip(geom = "point")
 ```
+
+
+## Discussion of Results
+
+See decision tree for format
