@@ -56,8 +56,11 @@ train_data_date <- training(x = data_split)
 test_data_date  <- testing(x = data_split)
 ```
 
-## Visualizations by time at Lincoln Memorial
+### Visualizations by time at Lincoln Memorial
+
 In this part, we use Lincoln Memorial as an example station to show the change in amount of rides over time.
+
+
 
 ```{r date, include = TRUE}
 train_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
@@ -69,7 +72,7 @@ train_data_date %>%  # for me here there is a weird gap after July 2020, not sur
   labs(title = "January has the lowest demand of capital bikes",
        x = "", 
        y = "The Number of Departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 ```{r weekday, include = TRUE}
@@ -85,7 +88,7 @@ train_data_date %>%
        subtitle = "Weekend has the highest demand",
        x = "Weekday (Aggregate)", 
        y = "The Number of Departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13, hjust = 1))
 ```
 
 ```{r day of month, include = TRUE}
@@ -99,7 +102,7 @@ train_data_date %>%
   labs(title = "At Lincoln Memorial, demand for bikes is more fluctuated in tourist seasons",
        x = "Day of a month", 
        y = "The Number of Departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 ```{r hour, include = TRUE}
@@ -112,7 +115,7 @@ train_data_date %>%
        subtitle = "The highest demand occurs at 2pm",
        x = "Hour (Aggregate)", 
        y = "The Number of Departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13, hjust = 1))
 ```
 
 ```{r specific day, include = TRUE}
@@ -122,10 +125,10 @@ train_data_date %>%
   ggplot(aes(x = factor(hour), y = lincoln_memorial_departures)) +
   geom_col(fill = "Red", alpha = 0.5) + 
   theme_minimal() +
-  labs(title = "On Aug 15, the highest demand occured at 12pm and 2pm",
+  labs(title = "On August 15, the highest demand occured at 12pm and 2pm",
        x = "Hour",
        y = "The Number of Departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 ```{r month, include = TRUE}
@@ -153,7 +156,7 @@ train_data_date %>%
   labs(title = "At Lincoln Memorial, more people use the bike in 2021 than in 2020",
        x = "Year (Aggregate)",
        y = "The Number of Departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 ```{r holidays, include = TRUE}
@@ -163,15 +166,6 @@ bar_date <- train_data_date %>%
   group_by(day, month, year)%>%
   summarise(lincoln_memorial_departures=sum(lincoln_memorial_departures), n())
 ## confirmed: 365 days exist in this data frame but not everyday has 24 hours because the training data does not have the full data
-
-# check for missing data
-sum(is.na(bar_date$lincoln_memorial_departures)) #0
-
-# what is the mean departures per day?
-mean_day <- bar_date %>%
-  group_by(day) %>%
-  summarize(n= mean(lincoln_memorial_departures)) %>%
-  summarize(mean(n))  ## mean per day is 55.6
               
 # create a data frame for holidays
 holidays <- generated_holidays %>%
@@ -200,12 +194,15 @@ holidays_date %>%
   labs(title = "Demand is highest among holidays such as Independence Day, Labor Day and Memorial Day",
        x = "",
        y = "The number of departures from Licoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 11, hjust = 0.5, vjust = 2))
 ```
 
-## Visualizations by weather at Lincoln Memorial
+#### Visualizations by weather at Lincoln Memorial
 
 In this part, we visualize the demand of bikes at the Lincoln Memorial station by different whether conditions.
+
+
+
 ```{r temperatures, include = TRUE}
 # weather viz
 train_data_date %>%
@@ -219,7 +216,7 @@ train_data_date %>%
        subtitle = "There is a linear relationship between demand and temperature",
        x = "Temperature (Fahrenheit)",
        y = "Aggregate number of departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 ```{r temperatures_month, include = TRUE}
@@ -234,7 +231,7 @@ train_data_date %>%
        subtitle = "There is a rough linear relationship between temperature demand except August",
        x = "Temperature (Fahrenheit)",
        y = "Aggregate number of departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 
@@ -250,7 +247,7 @@ train_data_date %>%
        subtitle = "No clear relationship is shown between wind speed and bike demand",
        x = "Wind Speed (miles per minute)",
        y = "Aggregate number of departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 ```{r rain, include = TRUE}
@@ -265,7 +262,7 @@ train_data_date %>%
        subtitle = "Demand for bikes is very sensitive to precipitation",
        x = "Precipitation (include drizzling, rain, sleet, snow, ice pellets, graupel and hail)",
        y = "Aggregate number of departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 
@@ -281,7 +278,7 @@ train_data_date %>%
        subtitle = "No clear relationship is shown between cloud and bike demand",
        x = "Cloud Coverage",
        y = "Aggregate number of departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
 
@@ -296,5 +293,5 @@ train_data_date %>%
        subtitle = "While in cold seasons, the gap in demand shrinks drastically",
        x = "Sunlight (sun is out = 1, otherwise = 0)",
        y = "Aggregate number of departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 13))
 ```
