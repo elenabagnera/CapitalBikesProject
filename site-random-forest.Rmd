@@ -1,7 +1,7 @@
 ---
 title: "Random Forest Model"
-author: "Elena Bagnera"
-date: "12/15/2021"
+author: ""
+date: ""
 output: html_document
 ---
 
