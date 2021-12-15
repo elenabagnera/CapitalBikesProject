@@ -32,20 +32,20 @@ We chose predictors that vary by the hour that we believe are relevant to indivi
 
 Being able to predict Capital Bikeshare demand, could result in a more efficient allocation of bikes when stations are re-stocked at night. It could also inform and it could inform the eventual expansion of stations across strategic locations across the city to improve the experience of Washingtonians.
 
-# Data
+## Data
 
 We use Capital Bikeshare's publicly available [historic data](https://www.capitalbikeshare.com/system-data), ranging from May 2020 until September 2021. The reason we chose this range is that before May 2020, the data were collected in a different format.
 
-Our unit of observation is departures by the hour. So we would expect 24 rows per day. Since we have 17 months worth of data, we would expect roughly 365x24 + 150x24= 12360 observations. In fatc, after data cleaning, our dataset has 309197 rows (CONFIRM?), each indicating the number of hours that departed Lincoln Memorial at a certain hour.
+Our unit of observation is departures by the hour. So we would expect 24 rows per day. Since we have 17 months worth of data, we would expect roughly 365x24 + 150x24= 12360 observations. In fact, after data cleaning, our dataset has 12430 rows, each indicating the number of hours that departed Lincoln Memorial at a given hour.
 
 For weather predictors we used data from ADD
 
 For sunlight we used data from ADD
 
 
-# Models performed
+## Models performed
 
-We run three different models:
+We ran three different models:
 
 * Decision tree
 * Random forest
@@ -53,7 +53,7 @@ We run three different models:
 
 We start with a decision tree given the size and complexity of our data . We then do a random forest, which is a more complex version of a decision tree and we expect to do better than the decision tree. We then move on to lasso, which belongs to a different class of models. It performs variable selection and, unlike decision trees and random forests, it is parametric and so it will give us coefficients.
 
-# Error Metric Choice
+## Error Metric Choice
 
 We will use RMSE as our error metric to judge how well our models do. RMSE is very sensitive to outliers as it squares them resulting in a bigger error compared to MAE for example. From the exploration done above, we know that there is a wide range within (e.g. in some hours it is 0, for example at night) and across days (e.g. for instance there are very few rides on Christmas day) in terms of hourly departures. Our motivation for this project is to reduce the chance that there will be no bikes available so that the service is more reliable. Therefore, we think that the RMSE will be better for our application purposes because it penalizes more the outliers that we do have in our data.
 
