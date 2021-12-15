@@ -78,7 +78,7 @@ test  <- testing(x = data_split)
 recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
-  step_nzv(all_predictors()) %>% # aaron suggested adding this
+  # step_nzv(all_predictors()) %>% # aaron suggested adding this
   step_BoxCox(all_outcomes())  ## only works with positive vars, no problem in our case
 ```
 
@@ -86,7 +86,7 @@ recipe <-
 
 ```{r tuning, cache=TRUE}
 # Tuning min_n doesn't seem to help
-mod <- rand_forest(mtry = 300, trees = 1000) %>% # we should have anywhere between 100 and 1000 trees
+mod <- rand_forest(mtry = 250, trees = 1000) %>% # we should have anywhere between 100 and 1000 trees
   set_mode("regression") %>%
   set_engine("ranger")
 
@@ -97,7 +97,7 @@ wf <- workflow() %>%
 ```
 
 
-```{r chosen_one}
+```{r chosen_one, cache=TRUE}
 final_wf <- workflow() %>%
   add_recipe(recipe) %>%
   add_model(mod) %>%
@@ -117,7 +117,7 @@ sqrt(mean((p_test$departures - p_test$.pred)^2))
 
 ```{r lincoln_final_vip, warning=FALSE}
 mod %>%
-  # set_engine("ranger", importance = "permutation") %>%
+  set_engine("ranger", importance = "permutation") %>%
   fit(departures ~ .,
     data = train
   ) %>%
@@ -126,5 +126,53 @@ mod %>%
 
 
 ## Discussion of Results
+
+```{r result_sample}
+# Top 20 hours of 12431 hours.
+p_test %>% arrange(-departures) %>% select(departures) %>% head(20)
+
+p_test %>% summarize(mean(departures))
+
+p_test %>% 
+  mutate(error = abs(.pred - departures)) %>% 
+  select(year, month, day, hour, weekday, departures, .pred, error, conditions,temperature, cloud_cover, snow, precipitation, lincoln_memorial_departures) %>% 
+  arrange(-error) %>% 
+  head(20)
+
+p_test %>% 
+  mutate(error = abs(.pred - departures)) %>% 
+  select(year, month, day, hour, weekday, departures, .pred, error, conditions,temperature, cloud_cover, snow, precipitation, lincoln_memorial_departures)  %>% 
+  arrange(error) %>% 
+  head(20)
+
+p_test %>% 
+  mutate(error = abs(.pred - departures)) %>% 
+  filter(departures > 5) %>% 
+  select(year, month, day, hour, weekday, departures, .pred, error, conditions,temperature, cloud_cover, snow, precipitation, lincoln_memorial_departures)  %>% 
+  arrange(error) %>% 
+  head(20)
+
+p_test %>% 
+  mutate(error = abs(.pred - departures)) %>% 
+  filter(departures < 5) %>% 
+  select(year, month, day, hour, weekday, departures, .pred, error, conditions,temperature, cloud_cover, snow, precipitation, lincoln_memorial_departures)  %>% 
+  arrange(-error) %>% 
+  head(20)
+
+p_test_no_wx <- p_test %>% 
+    mutate(error = abs(.pred - departures)) %>% 
+  select(year, month, day, hour, weekday, departures, .pred, error, lincoln_memorial_departures)
+  
+hour_data_wx <- hour_data %>% 
+  select(year, month, day, hour, conditions,temperature, cloud_cover, precipitation, wind_speed, heat_index, wind_chill)
+
+left_join(p_test_no_wx, hour_data_wx, on=c(year, month, day, hour)) %>% 
+  filter(departures < 5) %>% 
+  arrange(-error) %>% 
+  head(20)
+
+p_test %>% summarize(mean(wind_speed))
+
+```
 
 See decision tree for format

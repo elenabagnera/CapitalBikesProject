@@ -214,13 +214,14 @@ format_weather <- function(x) {
       conditions == "Overcast" ~ "Okay",
       TRUE ~ "Good"
     )) %>% 
-    select(-cloud_cover, 
-           -visibility, 
+    select(-visibility, 
            -relative_humidity, 
            -wind_chill, 
            -heat_index, 
            -wind_direction, 
-           -wind_gust)
+           -wind_gust,
+           -minimum_temperature,
+           -maximum_temperature)
 }
 
 # Will modify the date column
