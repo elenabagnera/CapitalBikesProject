@@ -12,7 +12,7 @@ This is for a group project for POL706 at Georgetown University.
 	a. make initial viz (EB) - DONE
 	b. improve/add to any existing visualizations (QX) - DONE
 	c. correlation matrix with some predictors (FK) - DONE (DECIDED NOT TO DO)
-	e. add viz with binary rain predictor QX
+	e. add viz with binary rain predictor QX - FIXED
 	f. add viz with weather conditions (categorical) QX - DONE
 	g. add viz with sun is out QX - DONE
 	H. do a viz with holidays (color holidays in a different color) use percent in FK - DONE
@@ -54,6 +54,6 @@ This is for a group project for POL706 at Georgetown University.
 	c. split finalization of website - ALL
 		i. each person to annotate their model rmd. why we ran a certain model; what predictors we are using; interpretation of results
 		ii. explanation of cleaning - EK (but mostly talking about it in class) - STARTED THIS IN MOTIVATION HTML
-		iii. explanation of data viz - QX
+		iii. explanation of data viz - QX - DONE
 		iv. explanation of overall project goals - EB -  DONE
 		v. comparison of models - FK
