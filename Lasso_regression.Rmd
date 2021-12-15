@@ -181,6 +181,8 @@ lasso_fit_rs <-
 # collect metrics
 plot <- collect_metrics(lasso_fit_rs, summarize = FALSE)
 
+plot
+
 # plot rmse
 LASSO <- plot %>% 
   filter(.metric == "rmse") %>% 
