@@ -248,16 +248,6 @@ lasso_res &lt;-
             grid = lasso_grid,
             control = control_grid(save_pred = TRUE),
             metrics = metric_set(rmse))</code></pre>
-<pre><code>## ! Fold01: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold02: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold03: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold04: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold05: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold06: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold07: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold08: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold09: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold10: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
 </div>
 <div id="selecting-the-best-model-and-fitting" class="section level2">
 <h2>Selecting the Best Model and Fitting</h2>
@@ -281,16 +271,6 @@ lasso_coefs &lt;- lasso_final %&gt;%
 lasso_fit_rs &lt;-
   lasso_final %&gt;% 
   fit_resamples(resample = folds)</code></pre>
-<pre><code>## ! Fold01: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold02: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold03: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold04: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold05: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold06: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold07: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold08: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold09: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
-<pre><code>## ! Fold10: preprocessor 1/1: Non-positive values in selected variable., No Box-Cox ...</code></pre>
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>

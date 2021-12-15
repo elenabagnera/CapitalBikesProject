@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup1, include = FALSE}
 def.chunk.hook <- knitr::knit_hooks$get("chunk")
-knitr::opts_chunk$set(cache = FALSE, warning = FALSE)
+knitr::opts_chunk$set(cache = FALSE, warning = FALSE, message = FALSE)
 knitr::knit_hooks$set(
   chunk = function(x, options) {
     x <- def.chunk.hook(x, options)
