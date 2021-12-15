@@ -5,12 +5,13 @@ date: "12/12/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup1, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r include = FALSE}
+```{r setup2, include = FALSE}
+
 def.chunk.hook <- knitr::knit_hooks$get("chunk")
 knitr::opts_chunk$set(cache = FALSE)
 knitr::knit_hooks$set(
@@ -37,7 +38,7 @@ options(scipen=999)
 
 ## Setup
 
-```{r setup, message=FALSE include=FALSE}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(tidymodels)
 library(recipes)
