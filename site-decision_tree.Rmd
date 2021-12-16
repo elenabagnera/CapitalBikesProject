@@ -63,7 +63,7 @@ Tree-based models are a class of nonparametric algorithms that work by partition
 
 ```{r get_data, cache=FALSE, warning=FALSE, message=FALSE}
 
-lagged_data <- read_csv('lagged_data_3200.csv') # or use 1600 if too much computationally
+lagged_data <- read_csv('lagged_data_3200.csv') 
 
 model_data <- lagged_data %>%
   add_predictor_times() %>%

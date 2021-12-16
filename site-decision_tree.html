@@ -176,7 +176,7 @@ pre code {
 </div>
 <div id="preparing-the-data" class="section level2">
 <h2>Preparing the Data</h2>
-<pre class="r"><code>lagged_data &lt;- read_csv(&#39;lagged_data_3200.csv&#39;) # or use 1600 if too much computationally
+<pre class="r"><code>lagged_data &lt;- read_csv(&#39;lagged_data_3200.csv&#39;) 
 
 model_data &lt;- lagged_data %&gt;%
   add_predictor_times() %&gt;%
