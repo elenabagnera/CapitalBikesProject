@@ -44,6 +44,23 @@ source("manipulate_data.R")
 doParallel::registerDoParallel()
 ```
 
+## Comparing RMSEs of our models [ADD PLOT]
+
+As seen from the *graph/table*, Random forests does better than decision tree and LASSO models in terms of RMSE. 
+- Decision tree lowest RMSE: 4.25
+- Random Forests  lowest RMSE: 3.95
+- LASSO lowest RMSE: 4
+
+Some potential reasons for Random Forests out-performing decision trees and LASSO: 
+
+## Having a group of decision tree creates “randomness”  and avoids common weaknesses in predictions based on one decision tree like over fitting and excessive correlation between variables. This is because: 
+      1. random forests algorithm uses a subset of features as candidates at each split (does not rely on         the same set of features:: de- correlates individual trees) 
+      2. Each tree uses a random sample from the training dataset as it generates the splits which inserts        an aspect of randomness and prevents overfitting
+      
+## Compared to LASSO regression, Random forests decision trees are great for obtaining non-linear relationships between input features and the target variable.  
+It also operates within sample, as opposed to LASSO models which could potentially provide out of sample predictions. In our case, this might be risky because we can not have negative departures, and since departures could go to very high levels in general, we should be careful in analyzing predictions that give very high hourly departure estimation which could be unrealistic. Although we expected LASSO to do a better job in avoiding multicollinearity between our predictors, it is difficult to judge for sure. 
+
+
 ## Preparing the Data
 
 ```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
@@ -125,6 +142,21 @@ mod %>%
   vip(geom = "point")
 ```
 
+Based on the variable importance plot, our most important predictors are:
+ 
+ 1. Hour: as expected, the hour has a big influence on predicting departures at Lincoln Memorial Station. We know from the exploration period that there is some hours *(1-6 am)* where departures are nearly non existance, compared to peaking in the evening around *(2 pm)*
+ 
+ 2. Sun: 
+ Our results also suggest that departures are associated with sunlight. This is reasonable given that people are more likely to ride bikes duirng daylight 
+ 
+ 3. Year day
+ It is likely that year day affects departures because it reflects seasons which has many implications, including but not limited to weather changes due to seasons, but also other periods like the summer holidays.
+
+ 4. Week day 
+From earlier data exploration we could see that weekdays have a strong relationship with departures (less dpeartures during weekends). This is a reasonable prediction.
+ 
+ 5. 4th Street and Maddison DR. Station departures and arrivals
+This suggests that a lot trips go back and forth between Lincoln Memorial Station and  4th Street and Maddison DR. Station. Trips back and forth from near the Smithonian to Lincoln Memorial seem popular among cpaital bikeshare riders. 
 
 ## Discussion of Results
 
@@ -244,7 +276,7 @@ Having two or more years would likely have helped that did not have a large chan
 
 ## High Supply
 
-```{r high_supply, cache=TRUE}
+```{r high_supply, cache=TRUE, message=FALSE, warning=FALSE}
 cbs_data <- read_files('data/')
 
 data <- sep_departures_from_arrivals(cbs_data) %>%
@@ -263,6 +295,13 @@ model_data <- lagged_data %>%
   filter(!is.na(departures) & !is.na(arrivals)) %>%
   select(-departures) %>% 
   format_weather()
+
+# create a split object
+data_split <- initial_split(model_data, prop = 0.8)
+
+# create the training and testing data
+train <- training(x = data_split)
+test  <- testing(x = data_split)
 ```
 
 ```{r chosen_one_supply, cache=TRUE}
@@ -301,7 +340,7 @@ mod %>%
 
 ```{r high_supply_day}
 p_test %>% 
-  filter(weekday == "Sun") %>% 
+  filter(month == "Aug" && year == 2021) %>% 
   ggplot(aes(x = hour, y = .pred))+
   geom_point(color = "orange")
   # geom_smooth()
@@ -314,7 +353,7 @@ filtered_data <- filter_by_distance(data, from_station = '39th_&_calvert_st_nw_/
 
 hour_data <- get_station_hourly(filtered_data) %>%
   get_historic_weather() %>%
-  add_sun_is_out() %>%
+  add_sun_is_out()
 
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "39th_&_calvert_st_nw_/_stoddert")
 
@@ -323,6 +362,13 @@ model_data <- lagged_data %>%
   filter(!is.na(departures) & !is.na(arrivals)) %>%
   select(-arrivals) %>% 
   format_weather()
+
+# create a split object
+data_split <- initial_split(model_data, prop = 0.8)
+
+# create the training and testing data
+train <- training(x = data_split)
+test  <- testing(x = data_split)
 ```
 
 ```{r chosen_one_demand, cache=TRUE}
@@ -361,9 +407,18 @@ mod %>%
 
 ```{r high_demand_day}
 p_test %>% 
-  filter(weekday == "Sun") %>% 
+  filter(month == "Aug" && year == 2021) %>% 
   ggplot(aes(x = hour, y = .pred))+
   geom_point(color = "orange")
   # geom_smooth()
 ```
+ 
+
+# last thing 
+## Ideas for future projects
+
+* Try xgboost
+* Account for the pandemic somehow (for example over the summer 2020 when there was a curfew)
+* Try a version where we first implement a random forest model to predict a binary variable of whether bikes are departing or not. Then use the predictions to create a new variable and estimate a second random forest model that uses that variable as a predictor
+* Instead of using RMSE, we could use a range of error that we envision for our project (eg. we can aim at always haviing 3 bikes at a station-- and hence our prediction would essentially be wether or not we have 3 bikes!)
 
