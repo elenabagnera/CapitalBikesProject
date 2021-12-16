@@ -103,7 +103,7 @@ recipe <-
 
 ## Tuning
 
-We tuned for `min_n`, `trees`, and `mtry` at different times.
+We tuned for `min_n`, `trees`, and `mtry` at different times. Example code is below. Normally we tuned for two parameters at a time, however trees took too long to do as a pair. 
 
 ```{r tuning, cache=TRUE}
 mod <- rand_forest(mtry = 250, trees = tune()) %>% # we should have anywhere between 100 and 1000 trees
@@ -123,6 +123,8 @@ tune_results <- tune_grid(
 ```
 
 ### Graph results
+
+The graph code is not run, it is shown for an example. The graphs and screenshots of different runs are shown below the code.
 
 ```{r graphs, eval=FALSE}
 metrics <- tune_results %>%
@@ -159,25 +161,25 @@ metrics %>%
 
 ### `min_n` and `mtry` tuning
 
-![](min_n_mtry.png)
+![](images/min_n_mtry.png)
 
 ### `mtry` only graph
 
 We used `mtry=250` in the final model.
 
-![](mtry.png)
+![](images/mtry.png)
 
 ### `min_n` only graph
 
 `min_n` does not seem to matter, used the default value of 5.
 
-![](min_n.png)
+![](images/min_n.png)
 
 ### Tuning for number of trees
 
 We used `trees=1000`
 
-![](trees.png)
+![](images/trees.png)
 
 ## Picking results for tree tuning
 
@@ -215,5 +217,5 @@ collect_metrics(tune_results, summarize = FALSE) %>%
 
 ```
 
-## RMSE 3.82 on the training dataset across the 10 folds.
+## 3.82 RMSE for the training dataset across the 10 folds.
 

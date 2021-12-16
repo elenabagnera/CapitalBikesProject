@@ -44,29 +44,32 @@ source("manipulate_data.R")
 doParallel::registerDoParallel()
 ```
 
-## Comparing RMSEs of our models [ADD PLOT]
+## Comparing RMSEs of our models
 
-As seen from the *graph/table*, Random forests does better than decision tree and LASSO models in terms of RMSE. 
-- Decision tree lowest RMSE: 4.25
-- Random Forests  lowest RMSE: 3.95
-- LASSO lowest RMSE: 4
+Random forests does better than decision tree and LASSO models in terms of RMSE. 
 
-Some potential reasons for Random Forests out-performing decision trees and LASSO: 
+- Decision tree lowest RMSE - 4.25
+- Random Forest - 3.82
+- LASSO lowest RMSE - 4
 
-## Having a group of decision tree creates “randomness”  and avoids common weaknesses in predictions based on one decision tree like over fitting and excessive correlation between variables. This is because: 
-      1. random forests algorithm uses a subset of features as candidates at each split (does not rely on         the same set of features:: de- correlates individual trees) 
-      2. Each tree uses a random sample from the training dataset as it generates the splits which inserts        an aspect of randomness and prevents overfitting
+### Potential reasons for Random Forests out-performing decision trees and LASSO
+
+Having a group of decision trees creates “randomness” and avoids common weaknesses in predictions based on one decision tree over fitting and excessive correlation between variables. This is because
+
+1. random forest algorithm uses a subset of features as candidates at each split (does not rely on the same set of features: de-correlates individual trees) 
+2. Each tree uses a random sample from the training dataset as it generates the splits which inserts an aspect of randomness and prevents overfitting
       
-## Compared to LASSO regression, Random forests decision trees are great for obtaining non-linear relationships between input features and the target variable.  
-It also operates within sample, as opposed to LASSO models which could potentially provide out of sample predictions. In our case, this might be risky because we can not have negative departures, and since departures could go to very high levels in general, we should be careful in analyzing predictions that give very high hourly departure estimation which could be unrealistic. Although we expected LASSO to do a better job in avoiding multicollinearity between our predictors, it is difficult to judge for sure. 
+Compared to LASSO regression, Random forests decision trees are great for obtaining non-linear relationships between input features and the target variable.  
+
+RF also operates within sample, as opposed to LASSO models which could potentially provide out of sample predictions. In our case, this might be risky because we can not have negative departures, and since departures could go to very high levels in general, we should be careful in analyzing predictions that give very high hourly departure estimation which could be unrealistic. Although we expected LASSO to do a better job in avoiding multicollinearity between our predictors, it is difficult to judge for sure. 
 
 
-## Preparing the Data
+## Random Forest on the Test Data
 
 ```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
 
 lagged_data <- read_csv('lagged_data_3200.csv')
-hour_data <- read_csv('hour_data_3200.csv')
+hour_data <- read_csv('hour_data_3200.csv') # Used for graphs
 
 model_data <- lagged_data %>%
   add_predictor_times() %>%
@@ -89,8 +92,6 @@ train <- training(x = data_split)
 test  <- testing(x = data_split)
 ```
 
-## Our preprocessing for Random Forests is the same as decision trees because Random Forests is just a "more complex" decision tree.
-
 ```{r recipe, cache=TRUE}
 recipe <-
   recipe(formula = departures ~ ., data = train) %>%
@@ -100,6 +101,8 @@ recipe <-
 ```
 
 ## Model Implementation
+
+min_n left to default.
 
 ```{r tuning, cache=TRUE}
 # Tuning min_n doesn't seem to help
@@ -144,19 +147,19 @@ mod %>%
 
 Based on the variable importance plot, our most important predictors are:
  
- 1. Hour: as expected, the hour has a big influence on predicting departures at Lincoln Memorial Station. We know from the exploration period that there is some hours *(1-6 am)* where departures are nearly non existance, compared to peaking in the evening around *(2 pm)*
+1. Hour: as expected, the hour has a big influence on predicting departures at Lincoln Memorial Station. We know from the exploration period that there is some hours *(1-6 am)* where departures are nearly non existance, compared to peaking in the evening around *(2 pm)*
  
- 2. Sun: 
- Our results also suggest that departures are associated with sunlight. This is reasonable given that people are more likely to ride bikes duirng daylight 
- 
- 3. Year day
+3. Year day:
  It is likely that year day affects departures because it reflects seasons which has many implications, including but not limited to weather changes due to seasons, but also other periods like the summer holidays.
-
- 4. Week day 
-From earlier data exploration we could see that weekdays have a strong relationship with departures (less dpeartures during weekends). This is a reasonable prediction.
  
- 5. 4th Street and Maddison DR. Station departures and arrivals
-This suggests that a lot trips go back and forth between Lincoln Memorial Station and  4th Street and Maddison DR. Station. Trips back and forth from near the Smithonian to Lincoln Memorial seem popular among cpaital bikeshare riders. 
+2. Sun:
+ Our results also suggest that departures are associated with sunlight. This is reasonable given that people are more likely to ride bikes duirng daylight. This could also be a redundant variable with hour given too much weight to the time of day.
+
+4. Week day:
+From earlier data exploration we could see that weekdays have a strong relationship with departures (less departures during weekends). This is a reasonable prediction.
+ 
+5. 4th Street and Maddison DR. Station departures and arrivals:
+This suggests that a lot trips go back and forth between Lincoln Memorial Station and  4th Street and Maddison Dr. Station or simply that if that nearby station is receiving a lot of traffic, so too is the Lincoln Memorial. Trips back and forth from near the Smithonian to Lincoln Memorial seem popular among Capital Bikeshare riders. 
 
 ## Discussion of Results
 
@@ -166,13 +169,26 @@ This suggests that a lot trips go back and forth between Lincoln Memorial Statio
 p_test %>% summarize(mean(departures))
 ```
 
+The average departures per hour are `3.45`. Therefore an RMSE > 3.45 appears to not be very good. Lets look at the areas where the predicitions are poor.
+
 ### Top 20 hours of 12431 hours.
+
+Below you will see that for only 20 rides account for between 25 and 35 departures in a single hour. These will likely be underpredicted drastically.
 
 ```{r top_20_departures}
 p_test %>% arrange(-departures) %>% select(departures) %>% head(20)
 ```
 
-### Top 20 Error - very high departure days
+### Top 20 Error
+
+Below is our largest error. 
+
+- The Error column shows how many `rides / hour` the model missed by for that given hour. 
+- The departures column shows the actual number of departures
+- the .pred column shows what the model predicted
+- All other columns (lincoln_memorial_x, weather, temperature, etc are lagged two weeks)
+
+10 of the first 12 are from the the top 20 hours. The others are where the departures are zero. We will also examine that.
 
 ```{r top_20_error}
 p_test %>% 
@@ -184,6 +200,8 @@ p_test %>%
 
 ### Best guesses
 
+The model predicts very well at 2-5 AM.
+
 ```{r}
 p_test %>% 
   mutate(error = abs(.pred - departures)) %>% 
@@ -193,6 +211,8 @@ p_test %>%
 ```
 
 ### Best guesses with more 5 departures
+
+These are just the best guesses with a higher number of departures. The weather lagged was always good.
 
 ```{r}
 p_test %>% 
@@ -205,6 +225,10 @@ p_test %>%
 
 ### Worst guessing with low departures - why?
 
+We decided to investigate poor guesses with low actual departures. We realized a large issue with our modeling that does not effect other prediction models as much - weather. Weather will highly affect if a person rides a bike. And our model has no way of knowing the *actual* weather on the hour of the ride. It only knows the lagged weather. 
+
+Below shows the worst weather. They happen to be during high volume hours (2 pm is the busiest), good lagged weather, and low actual departures.
+
 ```{r}
 p_test %>% 
   mutate(error = abs(.pred - departures)) %>% 
@@ -215,6 +239,10 @@ p_test %>%
 ```
 
 ### Worst guesses with low departures and actual weather
+
+The data below rejoins the predictions with the actual weather. The data below is *not* lagged.
+
+You will see that either winds, rain, or cloud cover likely caused these low rides.
 
 ```{r}
 p_test_no_wx <- p_test %>% 
@@ -232,17 +260,25 @@ left_join(p_test_no_wx, hour_data_wx, on=c(year, month, day, hour)) %>%
 p_test %>% summarize(mean(wind_speed))
 ```
 
-### Can we predict Lincoln Memorial will be empty? Every prediction for Sunday.
+### Can we predict Lincoln Memorial will be empty?
+
+The initial goal of this project was to predict when a station would be empty. However, the data does not support knowing the actual number of spots available at a station. We were curious if the model would predict lower values for departures at times the station would likely be empty. Below is a high volume day.
 
 ```{r}
 p_test %>% 
   filter(weekday == "Sun") %>% 
   ggplot(aes(x = hour, y = .pred))+
-  geom_point(color = "orange")
-  # geom_smooth()
+  geom_point(color = "orange") +
+  geom_smooth(alpha=0.2)
 ```
 
-### After testing multiple variables, two week lagged data from two stations heavily weighted departures
+It does not appear easy to predict for the lincoln_memorial station. But that station is also not empty very often.
+
+### Why the variance for a given hour on a Sunday?
+
+We tested if perhaps the low values were actually predicting an empty station. We focused on 2 PM on Sunday, which is one of the highest demand times.
+
+After graphing the results over many of the predictors we found that the departures and arrivals, two weeks lagged, for 4th St and Madison / the Lincoln Memorial were strong correlators to the variance in a given hour. Below is the graph showing that.
 
 ```{r}
 p_test %>% 
@@ -253,7 +289,9 @@ p_test %>%
   geom_point()
 ```
 
-### Filtering out the high data point (Daylight Savings Time)
+Interesting Note: See that one high point where all the station predictor values were zero but the prediction is 13 (this point exists for for multiple stations)? We could find no reason as to why the model would make that prediction. Then we realized that day is Daylight Savings Time. That day had only 23 hours in it. Perhaps that one fact effected our model.
+
+### Filtering out the Daylight Savings Time data point and showing the trends
 
 ```{r}
 # Only having one data point for certain times of the year hurts
@@ -272,9 +310,11 @@ p_test %>%
 # 39th & Calvert St NW / Stoddert
 ```
 
-Having two or more years would likely have helped that did not have a large change due to COVID.
+Having two or more years would likely have helped whic did not have a large change due to COVID. Many of the large variances were Oct-March, where we have a single data point since our data covers approximately 17 months.
 
 ## High Supply
+
+To investigate more on if we could predict if a station would be empty or full we analyzed a very high supply station and a very high demand station. Below sithe high supply.
 
 ```{r high_supply, cache=TRUE, message=FALSE, warning=FALSE}
 cbs_data <- read_files('data/')
@@ -329,7 +369,7 @@ Out of sample RMSE
 sqrt(mean((p_test$arrivals - p_test$.pred)^2))
 ```
 
-```{r supply_final_vip, warning=FALSE, eval=FALSE}
+```{r supply_final_vip, warning=FALSE, cache=TRUE}
 mod %>%
   set_engine("ranger", importance = "permutation") %>%
   fit(arrivals ~ .,
@@ -345,6 +385,8 @@ p_test %>%
   geom_point(color = "orange")
   # geom_smooth()
 ```
+
+We would need to do more investigation to decide if the model could predict a full station. However, this graph is unique. Between 11 AM and 4 PM there is a gap in the predictions. Perhaps the lower predictions (2-3) are a full station and the higher predictions (5-8) are not full.
 
 ## High Demand
 
@@ -405,20 +447,39 @@ mod %>%
   vip(geom = "point")
 ```
 
-```{r high_demand_day}
+## Results
+
+This graph does not show the same unique attribute that the high supply station had. However it does show a lot more variance than the Lincoln Memorial. With more investigation it could be that the low predictions are an empty station and the high predictions are not empty.
+
+```{r high_demand_month}
 p_test %>% 
   filter(month == "Aug" && year == 2021) %>% 
   ggplot(aes(x = hour, y = .pred))+
   geom_point(color = "orange")
-  # geom_smooth()
+```
+
+The graph below is an attempt to compare the predicted value vs the overall rides going on in the city. The goal would be that if the overall rides in the city were high, and our predictions were low, perhaps at those times the station was empty. We filter out rows where all predictors are zero, both to avoid dividing by zero, thus getting results of infinity, and because this station also had zero rides at that hour (lagged two weeks). This is a very high demand bike station that should be above the average. It could be that the low predictions relative to volume show a likely empty station time and the high predictions show a non-empty station. This would require further analysis and actual empty status from the real-time data API.
+
+```{r high_demand_day}
+
+
+p_test %>% 
+  mutate(mean = max(mean( `34th_st_&_wisconsin_ave_nw_arrivals`:`connecticut_ave_&_mckinley_st_nw_arrivals`),0.1)) %>% 
+  filter(mean != 0) %>% 
+  mutate(pred_div_average = .pred / mean) %>% 
+  filter(month == "Aug" && year == 2021) %>% 
+  ggplot(aes(x = hour, y = pred_div_average))+
+  geom_point(color = "orange")
 ```
  
 
-# last thing 
-## Ideas for future projects
+## last thing 
 
+### Ideas for future projects
+
+* Scrape real time data to get station status
 * Try xgboost
 * Account for the pandemic somehow (for example over the summer 2020 when there was a curfew)
 * Try a version where we first implement a random forest model to predict a binary variable of whether bikes are departing or not. Then use the predictions to create a new variable and estimate a second random forest model that uses that variable as a predictor
-* Instead of using RMSE, we could use a range of error that we envision for our project (eg. we can aim at always haviing 3 bikes at a station-- and hence our prediction would essentially be wether or not we have 3 bikes!)
+* Instead of using RMSE, we could use a range of error that we envision for our project (eg. we can aim at always having 3 bikes at a station-- and hence our prediction would essentially be whether or not we have 3 bikes!)
 

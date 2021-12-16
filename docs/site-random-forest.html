@@ -227,7 +227,7 @@ folds &lt;- vfold_cv(data = train, v = 10)</code></pre>
 </div>
 <div id="tuning" class="section level2">
 <h2>Tuning</h2>
-<p>We tuned for <code>min_n</code>, <code>trees</code>, and <code>mtry</code> at different times.</p>
+<p>We tuned for <code>min_n</code>, <code>trees</code>, and <code>mtry</code> at different times. Example code is below. Normally we tuned for two parameters at a time, however trees took too long to do as a pair.</p>
 <pre class="r"><code>mod &lt;- rand_forest(mtry = 250, trees = tune()) %&gt;% # we should have anywhere between 100 and 1000 trees
   set_mode(&quot;regression&quot;) %&gt;%
   set_engine(&quot;ranger&quot;)
@@ -244,6 +244,7 @@ tune_results &lt;- tune_grid(
 )</code></pre>
 <div id="graph-results" class="section level3">
 <h3>Graph results</h3>
+<p>The graph code is not run, it is shown for an example. The graphs and screenshots of different runs are shown below the code.</p>
 <pre class="r"><code>metrics &lt;- tune_results %&gt;%
   collect_metrics() %&gt;%
   pivot_longer(trees,
@@ -334,8 +335,8 @@ best_mae</code></pre>
 ##               &lt;dbl&gt;
 ## 1              3.82</code></pre>
 </div>
-<div id="rmse-3.82-on-the-training-dataset-across-the-10-folds." class="section level2">
-<h2>RMSE 3.82 on the training dataset across the 10 folds.</h2>
+<div id="rmse-for-the-training-dataset-across-the-10-folds." class="section level2">
+<h2>3.82 RMSE for the training dataset across the 10 folds.</h2>
 </div>
 
 

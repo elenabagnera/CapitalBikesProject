@@ -16,7 +16,7 @@ library(haven)
 
 
 ```{r setup2, echo=FALSE}
-knitr::include_graphics("map.png")
+knitr::include_graphics("images/map.png")
 ```
 
 
