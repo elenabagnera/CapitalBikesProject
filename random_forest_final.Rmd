@@ -246,6 +246,7 @@ Having two or more years would likely have helped that did not have a large chan
 
 ```{r high_supply, cache=TRUE}
 cbs_data <- read_files('data/')
+
 data <- sep_departures_from_arrivals(cbs_data) %>%
   filter(!is.na(station)) # Remove electric bikes not going to / from a station
 
@@ -253,18 +254,24 @@ filtered_data <- filter_by_distance(data, from_station = 'georgetown_harbor_/_30
 
 hour_data <- get_station_hourly(filtered_data) %>%
   get_historic_weather() %>%
-  add_sun_is_out() %>%
+  add_sun_is_out()
 
 lagged_data <- setup_for_time_prediction(hour_data, station_name = "georgetown_harbor_/_30th_st_nw")
 
 model_data <- lagged_data %>%
   add_predictor_times() %>%
   filter(!is.na(departures) & !is.na(arrivals)) %>%
-  select(-arrivals) %>% 
+  select(-departures) %>% 
   format_weather()
 ```
 
 ```{r chosen_one_supply, cache=TRUE}
+recipe <-
+  recipe(formula = arrivals ~ ., data = train) %>%
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
+  step_nzv(all_predictors()) 
+  # step_BoxCox(all_outcomes()) # Does not run with zero in the values
+
 final_wf <- workflow() %>%
   add_recipe(recipe) %>%
   add_model(mod) %>%
@@ -280,13 +287,13 @@ p_test <- bind_cols(
 Out of sample RMSE
 
 ```{r OOS_RMSE_Supply}
-sqrt(mean((p_test$departures - p_test$.pred)^2))
+sqrt(mean((p_test$arrivals - p_test$.pred)^2))
 ```
 
 ```{r supply_final_vip, warning=FALSE, eval=FALSE}
 mod %>%
   set_engine("ranger", importance = "permutation") %>%
-  fit(departures ~ .,
+  fit(arrivals ~ .,
     data = train
   ) %>%
   vip(geom = "point")
@@ -319,6 +326,12 @@ model_data <- lagged_data %>%
 ```
 
 ```{r chosen_one_demand, cache=TRUE}
+recipe <-
+  recipe(formula = departures ~ ., data = train) %>%
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
+  step_nzv(all_predictors()) 
+  # step_BoxCox(all_outcomes()) # Does not run with zero in the values
+
 final_wf <- workflow() %>%
   add_recipe(recipe) %>%
   add_model(mod) %>%
