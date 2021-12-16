@@ -6,6 +6,7 @@ secrets.json
 data/untracked_data
 !docs/*
 *_files
+.RDataTmp
 
 # Template from https://github.com/github/gitignore
 
@@ -47,4 +48,3 @@ po/*~
 
 #images
 *.jpg
-*.png
