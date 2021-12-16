@@ -1,5 +1,5 @@
 ---
-title: "Random Forest Final Model"
+title: "Final Model"
 author: ""
 date: ""
 output: html_document
@@ -272,7 +272,9 @@ p_test %>%
   filter(weekday == "Sun") %>% 
   ggplot(aes(x = hour, y = .pred))+
   geom_point(color = "orange") +
-  geom_smooth(alpha=0.2)
+  geom_smooth(alpha=0.2) + 
+  labs(title = "Predicted Lincoln Departures for Sundays",
+     y = "predicted departures")
 ```
 
 It does not appear easy to predict for the lincoln_memorial station. But that station is also not empty very often.
@@ -289,7 +291,10 @@ p_test %>%
   select(`4th_st_&_madison_dr_nw_arrivals`, `4th_st_&_madison_dr_nw_departures`, `lincoln_memorial_departures`, lincoln_memorial_arrivals, .pred) %>% 
   pivot_longer(1:4, names_to = "station", values_to="value") %>% 
   ggplot(aes(x = value, y = .pred, color=station))+
-  geom_point()
+  geom_point() + 
+  labs(title = "Predicted Lincoln Departures for 2pm on Sundays",
+    y = "predicted departures",
+    x = "lagged station departures or arrivals")
 ```
 
 Interesting Note: See that one high point where all the station predictor values were zero but the prediction is 13 (this point exists for for multiple stations)? We could find no reason as to why the model would make that prediction. Then we realized that day is Daylight Savings Time. That day had only 23 hours in it. Perhaps that one fact effected our model.
@@ -307,7 +312,10 @@ p_test %>%
   filter(value >= 1) %>% 
   ggplot(aes(x = value, y = .pred, color=station))+
   geom_smooth(aes(x = value, y = .pred, color=station), alpha=0.1)+
-  geom_point()
+  geom_point() + 
+  labs(title = "Predicted Lincoln Departures for 2pm on Sundays",
+    y = "predicted departures",
+    x = "lagged station departures or arrivals")
 ```
 
 Having two or more years would likely have helped whic did not have a large change due to COVID. Many of the large variances were Oct-March, where we have a single data point since our data covers approximately 17 months.
@@ -381,7 +389,9 @@ sqrt(mean((p_test$arrivals - p_test$.pred)^2))
 p_test %>% 
   filter(month == "Aug" && year == 2021) %>% 
   ggplot(aes(x = hour, y = .pred))+
-  geom_point(color = "orange")
+  geom_point(color = "orange")+
+  labs(title = "August arrivals per hour",
+     y = "arrivals")
 ```
 
 We would need to do more investigation to decide if the model could predict a full station. However, this graph is unique. Between 11 AM and 4 PM there is a gap in the predictions. Perhaps the lower predictions (2-3) are a full station and the higher predictions (5-8) are not full.
@@ -450,7 +460,10 @@ This graph does not show the same unique attribute that the high supply station 
 p_test %>% 
   filter(month == "Aug" && year == 2021) %>% 
   ggplot(aes(x = hour, y = .pred))+
-  geom_point(color = "orange")
+  geom_point(color = "orange") + 
+  labs(title = "August 2021 predicted departures",
+    y = "predicted departures",
+    x = "hour")
 ```
 
 The graph below is an attempt to compare the predicted value vs the overall rides going on in the city. The goal would be that if the overall rides in the city were high, and our predictions were low, perhaps at those times the station was empty. We filter out rows where all predictors are zero, both to avoid dividing by zero, thus getting results of infinity, and because this station also had zero rides at that hour (lagged two weeks). This is a very high demand bike station that should be above the average. It could be that the low predictions relative to volume show a likely empty station time and the high predictions show a non-empty station. This would require further analysis and actual empty status from the real-time data API.
@@ -462,7 +475,10 @@ p_test %>%
   mutate(pred_div_average = .pred / mean) %>% 
   filter(month == "Aug" && year == 2021) %>% 
   ggplot(aes(x = hour, y = pred_div_average))+
-  geom_point(color = "orange")
+  geom_point(color = "orange") + 
+  labs(title = "August 2021 predicted departures / mean area traffic",
+    y = "departures / mean area traffic",
+    x = "hour")
 ```
  
 
