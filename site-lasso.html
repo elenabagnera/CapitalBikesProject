@@ -211,7 +211,7 @@ folds &lt;- vfold_cv(data = lasso_train, v = 10)</code></pre>
 <h2>Justification for Engeneering based on data exploration</h2>
 <p>From the exploratory data analysis phase, holidays clearly affected departures. When compared to the mean departures per day these holidays had significantly greater ridership compared to others which had much lower departures such as insert holidays.</p>
 <p>To help improve our predictions, we add step_holiday to our recipe to control for outlier trends during holidays. Additionally, as shown in the exploratory phase, the distribution of our outcome variable, Lincoln Memorial Departures is skewed. To avoid this imbalance affecting our predictions, step_BoxCox works since departures is a strictly positive variable but it does have 0s (hence we cannot use logs). We use it to transform the outcome variable so that it would be more like a normal distribution.</p>
-<p>Besides, we add <code>step_dummy</code> and <code>step_center</code> in recipe. <code>step_dummy()</code> creates a specification of a recipe step that will convert nominal data (e.g. character or factors) into one or more numeric binary model terms for the levels of the original data. <code>step_center()</code> creates a specification of a recipe step that will normalize numeric data to have a mean of zero.</p>
+<p>step_other further improves our prediction as it removes any infrequently reoccurring observations in both our predictors and outcome variable. Besides, we add <code>step_dummy</code> and <code>step_center</code> in recipe. <code>step_dummy()</code> creates a specification of a recipe step that will convert nominal data (e.g. character or factors) into one or more numeric binary model terms for the levels of the original data. <code>step_center()</code> creates a specification of a recipe step that will normalize numeric data to have a mean of zero.</p>
 </div>
 <div id="model-implementation" class="section level2">
 <h2>Model Implementation</h2>
@@ -224,7 +224,6 @@ lasso_recipe &lt;-
   step_dummy(all_nominal_predictors()) %&gt;%
   step_center(all_numeric_predictors()) %&gt;% 
   step_scale(all_numeric_predictors()) %&gt;% 
-  step_dummy(all_nominal_predictors()) %&gt;% 
   step_BoxCox(all_outcomes()) # this is because we have 0s and cannot use log, did not work</code></pre>
 <pre class="r"><code># create a model
 lasso_mod &lt;- linear_reg(

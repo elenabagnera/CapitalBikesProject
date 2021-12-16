@@ -100,7 +100,7 @@ From the exploratory data analysis phase, holidays clearly affected departures. 
 
 To help improve our predictions, we add step_holiday to our recipe to control for outlier trends during holidays. Additionally, as shown in the exploratory phase, the distribution of our outcome variable, Lincoln Memorial Departures is skewed. To avoid this imbalance affecting our predictions, step_BoxCox works since departures is a strictly positive variable but it does have 0s (hence we cannot use logs). We use it to transform the outcome variable so that it would be more like a normal distribution.
 
-Besides, we add `step_dummy` and `step_center` in recipe. `step_dummy()` creates a specification of a recipe step that will convert nominal data (e.g. character or factors) into one or more numeric binary model terms for the levels of the original data. `step_center()` creates a specification of a recipe step that will normalize numeric data to have a mean of zero.
+step_other further improves our prediction as it removes any infrequently reoccurring observations  in both our predictors and outcome variable. Besides, we add `step_dummy` and `step_center` in recipe. `step_dummy()` creates a specification of a recipe step that will convert nominal data (e.g. character or factors) into one or more numeric binary model terms for the levels of the original data. `step_center()` creates a specification of a recipe step that will normalize numeric data to have a mean of zero.
 
 
 ## Model Implementation
@@ -116,7 +116,6 @@ lasso_recipe <-
   step_dummy(all_nominal_predictors()) %>%
   step_center(all_numeric_predictors()) %>% 
   step_scale(all_numeric_predictors()) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
   step_BoxCox(all_outcomes()) # this is because we have 0s and cannot use log, did not work
 ```
 
