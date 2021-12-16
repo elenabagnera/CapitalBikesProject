@@ -12,10 +12,10 @@ library(haven)
 ```
 
 
-# Predicting Capital Bikes Departures
+# Predicting Capital Bikes Departures through Supervised Machine Learning
 
 
-```{r setup2}
+```{r setup2, echo=FALSE}
 knitr::include_graphics("map.png")
 ```
 
@@ -38,24 +38,25 @@ We use Capital Bikeshare's publicly available [historic data](https://www.capita
 
 Our unit of observation is departures by the hour. So we would expect 24 rows per day. Since we have 17 months worth of data, we would expect roughly 365x24 + 150x24 = 12334 observations. In fact, after data cleaning, our dataset has 12334 rows, each indicating the number of hours that departed Lincoln Memorial at a given hour.
 
-For weather predictors we used data from https://www.visualcrossing.com/weather/weather-data-services#/editDataDefinition
+For weather predictors we used data from [visual crossing](https://www.visualcrossing.com/weather/weather-data-services#/editDataDefinition)
 
-For sunlight we used data from the `suncalc` package
-
-## Models performed
-
-We ran three different models:
-
-* Decision tree
-* Random forest
-* Lasso
-
-We start with a decision tree given the size and complexity of our data . We then do a random forest, which is a more complex version of a decision tree and we expect to do better than the decision tree. We then move on to lasso, which belongs to a different class of models. It performs variable selection and, unlike decision trees and random forests, it is parametric and so it will give us coefficients.
+For sunlight we used data from the `suncalc` package.
 
 ## Error Metric Choice
 
 We will use RMSE as our error metric to judge how well our models do. RMSE is very sensitive to outliers as it squares them resulting in a bigger error compared to MAE for example. From the exploration done above, we know that there is a wide range within (e.g. in some hours it is 0, for example at night) and across days (e.g. for instance there are very few rides on Christmas day) in terms of hourly departures. Our motivation for this project is to reduce the chance that there will be no bikes available so that the service is more reliable. Therefore, we think that the RMSE will be better for our application purposes because it penalizes more the outliers that we do have in our data.
 
 How much error is too much depends on how loose or strict we want to predict our outcomes. For our project, some error is probably accepted but being too loose in deciding what the error could be too costly. Based on the average departures per hour on any given day 3.45, we think an RMSE of 1-2 would be acceptable
+
+
+## Models performed
+
+We ran three different models:
+
+* Lasso
+* Decision tree
+* Random forest
+
+We start with Lasso given that we have many predictors and we were interested in variable selection and seeing the coefficients of the most important predictors. We then moved to non-parametric models, given that they tend to work well with large datasets like ours. We did a decision tree first and then tried a random forest, which is a more complex version of a decision tree and we expect to do better than the decision tree. Our best results came from the random forest model.
 
 
