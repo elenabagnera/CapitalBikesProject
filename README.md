@@ -22,8 +22,21 @@ Being able to predict Capital Bikeshare demand, could result in a more efficient
 
 ## How to navigate this repository
 
-1 - Data folder: contains original data taken from Capital Bikeshare's website //
-2 - Docs folder: contains htmls used for building the project website //
+\begin{enumerate}
+  \item Data folder: contains original data taken from Capital Bikeshare's website 
+   \item Data folder: contains original data taken from Capital Bikeshare's website 
+    \item Data folder: contains original data taken from Capital Bikeshare's website 
+     \item Data folder: contains original data taken from Capital Bikeshare's website 
+      \item Data folder: contains original data taken from Capital Bikeshare's website 
+       \item Data folder: contains original data taken from Capital Bikeshare's website 
+        \item Data folder: contains original data taken from Capital Bikeshare's website 
+         \item Data folder: contains original data taken from Capital Bikeshare's website 
+          \item Data folder: contains original data taken from Capital Bikeshare's website 
+
+\end{enumerate}
+
+1 - Data folder: contains original data taken from Capital Bikeshare's website 
+2 - Docs folder: contains htmls used for building the project website 
 3 - Motivation.rmd: contains project motivation and overall details on the project and the data we use
 4 - Cleanup.rmd: contains a description of all of the data cleaning we did
 5 - visualizatiom.rmd: contains all the visualizations run for EDA
