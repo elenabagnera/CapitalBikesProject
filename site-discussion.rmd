@@ -481,9 +481,6 @@ p_test %>%
     x = "hour")
 ```
  
-
-## last thing 
-
 ### Ideas for future projects
 
 * Scrape real time data to get station status. We could take the information from the graph above and create a new is_empty prediction then compare that to the truth data from the API.
