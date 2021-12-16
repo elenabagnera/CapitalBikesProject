@@ -218,9 +218,9 @@ folds &lt;- vfold_cv(data = lasso_train, v = 10)</code></pre>
 <pre class="r"><code># create a recipe
 lasso_recipe &lt;-
   recipe(formula = departures ~ ., data = lasso_train) %&gt;%
-  step_holiday(date, holidays = timeDate::listHolidays(&quot;US&quot;), keep_original_cols = FALSE) %&gt;% # Aaron said we should put more weight on some holidays rather than other, for example 4th of July and inauguration day especially since we are looking at Lincoln memorial
-  step_nzv(all_predictors()) %&gt;% # Aaron suggested adding this
-  step_other(all_nominal_predictors()) %&gt;% # add this for any categorical predictors
+  step_holiday(date, holidays = timeDate::listHolidays(&quot;US&quot;), keep_original_cols = FALSE) %&gt;% 
+  step_nzv(all_predictors()) %&gt;% # 
+  step_other(all_nominal_predictors()) %&gt;% 
   step_dummy(all_nominal_predictors()) %&gt;%
   step_center(all_numeric_predictors()) %&gt;% 
   step_scale(all_numeric_predictors()) %&gt;% 

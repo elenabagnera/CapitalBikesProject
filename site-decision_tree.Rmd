@@ -151,6 +151,7 @@ DT <- plot %>%
        y = "RMSE_hat") +
   theme_minimal() 
 
+DT
 ```
 
 

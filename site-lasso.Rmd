@@ -110,9 +110,9 @@ Besides, we add `step_dummy` and `step_center` in recipe. `step_dummy()` creates
 # create a recipe
 lasso_recipe <-
   recipe(formula = departures ~ ., data = lasso_train) %>%
-  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% # Aaron said we should put more weight on some holidays rather than other, for example 4th of July and inauguration day especially since we are looking at Lincoln memorial
-  step_nzv(all_predictors()) %>% # Aaron suggested adding this
-  step_other(all_nominal_predictors()) %>% # add this for any categorical predictors
+  step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
+  step_nzv(all_predictors()) %>% # 
+  step_other(all_nominal_predictors()) %>% 
   step_dummy(all_nominal_predictors()) %>%
   step_center(all_numeric_predictors()) %>% 
   step_scale(all_numeric_predictors()) %>% 
