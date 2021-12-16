@@ -130,7 +130,6 @@ Out of sample RMSE: this is smaller than what we got when we ran random forest o
 
 ```{r OOS_RMSE_lincoln}
 sqrt(mean((p_test$departures - p_test$.pred)^2))
-write_csv(p_test, "final-p-test.csv")
 ```
 
 ```{r lincoln_final_vip, warning=FALSE, cache=TRUE}
@@ -481,6 +480,11 @@ p_test %>%
     x = "hour")
 ```
  
+### Takeaways
+
+* The dependent variable is very sensitive to certain real word conditions such as weather. This dataset relies only on lagged data which has no way to know the actual weather when making the prediction. To increase accuracy we would need to use weather predictions which will only be so accurate.
+* Simply having one data point for two week lagged data strongly influenced the predictions for nearby stations. If two weeks ago happened to have under-average volume, it is likely our model will under-predict. Therefore, it may be useful to filter stations to a closer distance and use multiple historical data for each station. Perhaps two year, one year, and two weeks.
+
 ### Ideas for future improvements
 
 * Transform the dependent variable since this didn't seem to work for us
