@@ -24,9 +24,11 @@ Being able to predict Capital Bikeshare demand, could result in a more efficient
 
 * Data folder: contains original data taken from Capital Bikeshare's website and .csv files generated from them
 * Docs folder: contains web content used for building the project's Svelte website
+* Images fodler: contains images produces i ram forest plots and the background image in our website page
 * site-\*.Rmd: Used to produce the individual pages on the website. They must knitted and copied to the docs folder when finalized. Most files have been merged into these files. Allows for easy copying to docs folder via `cp site-\*.html docs/`
-* visualizations.Rmd: contains all the visualizations run for EDA
-* lasso, random forest and decision tree contain the code for each individual model
+* analysis.Rmd: contains all the visualizations run for EDA
+* lasso, random forest and decision tree rmds contain the code for each individual model
+* cleanup.rmd contains all cleaning functions that were used (also in separate R files below)
 * Functions R files 
   + io.R - merging all csvs contained in data
   + mainipulate_data.R - all functions used to manipulate data
