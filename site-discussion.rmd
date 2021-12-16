@@ -64,7 +64,7 @@ Compared to LASSO regression, Random forests decision trees are great for obtain
 
 RF also operates within sample, as opposed to LASSO models which could potentially provide out of sample predictions. In our case, this might be risky because we can not have negative departures, and since departures could go to very high levels in general, we should be careful in analyzing predictions that give very high hourly departure estimation which could be unrealistic. Although we expected LASSO to do a better job in avoiding multicollinearity between our predictors, it is difficult to judge for sure. 
 
-
+## Implementing Random Forest on full training data
 
 ```{r get_data, cache=TRUE, warning=FALSE, message=FALSE}
 
@@ -120,6 +120,7 @@ final_wf <- workflow() %>%
   fit(train)
 ```
 
+## Making Predictions on the Testing Data
 
 ```{r test}
 p_test <- bind_cols(
