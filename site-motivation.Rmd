@@ -1,6 +1,6 @@
 ---
 title: "Motivation & Goals"
-author: ""
+author: "Eric Kitaif, Qi Xue, Farah Kaddah, Elena Bagnera"
 date: ""
 output: html_document
 ---
@@ -12,7 +12,7 @@ library(haven)
 ```
 
 
-# Predicting Capital Bikes Departures through Supervised Machine Learning
+## Predicting Capital Bikes Departures through Supervised Machine Learning
 
 
 ```{r setup2, echo=FALSE}
