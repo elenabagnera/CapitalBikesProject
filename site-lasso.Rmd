@@ -173,27 +173,15 @@ lasso_fit_rs <-
   fit_resamples(resample = folds)
 ```
 
+
 ## Results
 
-```{r variable importance}
-library(ggplot2)
-# plot result of variable importance
-lasso_coefs %>% 
-  slice_max(Importance, n = 15) %>% 
-  mutate(Variable = forcats::fct_reorder(.x = Importance,
-                                      .f = Variable)) %>% 
-  ggplot(aes(y = Importance, x = Variable)) +
-  geom_col(width = 0.7, fill = "lightskyblue3", alpha = 0.8) +
-  coord_flip() +
-  theme_minimal() + 
-  labs(title = "Sunlights has the highest coefficient in predicting ridership") +
-  theme(plot.title = element_text(face = "bold", size = 12))
-```
-
-```{r results, include = FALSE}
+```{r results}
 
 # collect metrics
 plot <- collect_metrics(lasso_fit_rs, summarize = FALSE)
+
+plot
 
 # plot rmse
 LASSO <- plot %>% 
@@ -209,7 +197,7 @@ LASSO <- plot %>%
 
 ## Discussion of Results
 
-The LASSO regression produced an average RMSE of 4. This is a relatively big RMSE compared to what we aim for (range 2-3). This could be due to several weaknesses pertaining to LASSO. With the RMSE around 4, it is likely that we have a model that badly overfits the data. We will elaborate in details in discussion.
+The LASSO regression produced an average RMSE of 4. This is a relatively big RMSE compared to what we aim for (range 2-3). 
 
-We also run into the issue of not being able to run Box-Cox as there are non-positive values in selected variable.
+This could be due to several weaknesses pertaining to LASSO. With the RMSE around 5, it is likely that we have a model that badly overfits the data. i.e. We've created a model that tests well in sample, but has little predictive value when tested out of sample.
 
