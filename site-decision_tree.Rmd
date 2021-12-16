@@ -1,5 +1,5 @@
 ---
-title: "Model 1: Decision tree"
+title: "Decision tree"
 author: ""
 date: ""
 output: html_document
@@ -108,7 +108,7 @@ recipe <-
   recipe(formula = departures ~ ., data = train) %>%
   step_holiday(date, holidays = timeDate::listHolidays("US"), keep_original_cols = FALSE) %>% 
   step_nzv(all_predictors()) %>% 
-  step_BoxCox(all_outcomes()) 
+  step_BoxCox(all_outcomes())  # tried this but it did not work
 
 # create a model
 
@@ -156,7 +156,7 @@ DT <- plot %>%
 
 ## Discussion of Results
 
-The decision tree estimation produced an average RMSE of 4.25.  This is a relatively big RMSE compared to what we wanted (range 2-3). 
+The decision tree estimation produced an average RMSE of 4.25.  This is a relatively big RMSE compared to what we wanted (range 1-2). 
 
 This could be due to several weaknesses pertaining to decision trees as they tend to overfit which means that it will be difficult to generalize to novel data. They also tend to produce trees that are overly correlated with each other (as it is more likely to get swayed by points that split the attributes well in both our predictor variables and outcome variable). We could expect random forest to perform better. 
 

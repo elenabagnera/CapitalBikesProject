@@ -1,5 +1,5 @@
 ---
-title: "Model 3: Lasso Regression"
+title: "Lasso Regression"
 author: ""
 date: ""
 output: html_document
@@ -117,7 +117,7 @@ lasso_recipe <-
   step_center(all_numeric_predictors()) %>% 
   step_scale(all_numeric_predictors()) %>% 
   step_dummy(all_nominal_predictors()) %>% 
-  step_BoxCox(all_outcomes()) # this is because we have 0s and cannot use log
+  step_BoxCox(all_outcomes()) # this is because we have 0s and cannot use log, did not work
 ```
 
 ```{r run the model}
@@ -209,6 +209,6 @@ LASSO <- plot %>%
 
 ## Discussion of Results
 
-The LASSO regression produced an average RMSE of 4. This is a relatively big RMSE compared to what we aim for (range 2-3). This could be due to several weaknesses pertaining to LASSO. With the RMSE around 4, it is likely that we have a model that badly overfits the data. We will elaborate in details in discussion.
+The LASSO regression produced an average RMSE of 4. This is a relatively big RMSE compared to what we aim for (range 1-2). This could be due to several weaknesses pertaining to LASSO. With the RMSE around 4, it is likely that we have a model that badly overfits the data. We will elaborate in details in discussion.
 
 We also run into the issue of not being able to run Box-Cox as there are non-positive values in selected variable.
