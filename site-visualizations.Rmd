@@ -1,0 +1,316 @@
+---
+title: "Exploratory Data Analysis (EDA)"
+author: ""
+date: ""
+output: html_document
+---
+
+```{r, include = FALSE}
+def.chunk.hook <- knitr::knit_hooks$get("chunk")
+knitr::opts_chunk$set(cache = FALSE, warning = FALSE)
+knitr::opts_chunk$set(include = FALSE, echo = FALSE)
+knitr::knit_hooks$set(
+  chunk = function(x, options) {
+    x <- def.chunk.hook(x, options)
+    ifelse(options$size != "normalsize", paste0("\n \\", options$size, "\n\n", x, "\n\n \\normalsize"), x)
+  }
+)
+# knitr::knit_hooks$set(inline = function(x) {
+#   prettyNum(round(x, 2), big.mark = ",")
+# })
+options(scipen = 999)
+```
+
+```{r setup, include = FALSE}
+
+library(tidyverse)
+library(httr)
+library(jsonlite)
+source("times.R")
+source("io.R")
+source("manipulate_data.R")
+library(tidymodels)
+library(corrplot)
+library(suncalc)
+library(lubridate)
+library(prophet)
+```
+
+```{r get historical data, warning = FALSE, message = FALSE}
+
+# load generated data
+hour_data <- read_csv("hour_data_3200.csv")
+
+# The grouped data does not have the original date column, but it can be nice for visualizations. There is a function to do this in times.R
+hour_data_date <- add_date_column(hour_data)
+```
+
+```{r split}
+set.seed(28021995)
+
+# create a split object
+data_split <- initial_split(hour_data_date, prop = 0.8)
+
+# create the training and testing data
+train_data_date <- training(x = data_split)
+test_data_date  <- testing(x = data_split)
+```
+
+### Density plot of the dependent variable  
+  
+  
+```{r ride density, include = TRUE}
+
+# density plot (no log)
+train_data_date %>%
+  filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s
+  ggplot(aes(x = lincoln_memorial_departures)) +
+  geom_density() +
+  theme_minimal() +
+  labs(title = "The depature distribution at Libcoln Memorial is skewed", 
+       x = "Number of departures from Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+
+### Visualizations by time at Lincoln Memorial  
+  
+
+In this part, we use Lincoln Memorial as an example station to show the change in amount of rides over time.  
+  
+
+
+```{r date, include = TRUE}
+train_data_date %>%  # for me here there is a weird gap after July 2020, not sure why?
+  ggplot(aes(x = date, y = lincoln_memorial_departures)) +
+  geom_point(alpha = 0.1, color = "orange") + 
+  geom_smooth(method = 'gam',
+              formula = y ~ s(x, bs = "cs")) +
+  theme_minimal() +
+  labs(title = "January has the lowest demand of capital bikes",
+       x = "", 
+       y = "The Number of Departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+```{r weekday, include = TRUE}
+# by weekday
+train_data_date %>% 
+  mutate(weekday = wday(date, label=TRUE)) %>% 
+  ggplot(aes(x = weekday, y = lincoln_memorial_departures)) +
+  geom_point(alpha = 0.1) + # clearly people cycle more on Saturdays and Sundays
+  geom_smooth(method = 'gam',
+              formula = y ~ s(x, bs = "cs")) +
+  theme_minimal() +
+  labs(title = "At Lincoln Memorial, Capitals bikes are mostly used for recreational purpose",
+       subtitle = "Weekend has the highest demand",
+       x = "Weekday (Aggregate)", 
+       y = "The Number of Departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13, hjust = 1))
+```
+
+```{r day of month, include = TRUE}
+# by day of the month
+train_data_date %>% 
+  ggplot(aes(x = day, y = lincoln_memorial_departures)) +
+  geom_point(alpha = 0.1, color = "salmon") + # there is no clear pattern across days of the month - aka probably not a good predictor
+  geom_smooth(method = 'gam',
+              formula = y ~ s(x, bs = "cs")) + 
+  facet_wrap(~month, scales = "free_y") +
+  labs(title = "At Lincoln Memorial, demand for bikes is more fluctuated in tourist seasons",
+       x = "Day of a month", 
+       y = "The Number of Departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+```{r hour, include = TRUE}
+# by hour
+train_data_date %>%
+  ggplot(aes(x = factor(hour), y = lincoln_memorial_departures)) +
+  geom_col(fill = "deepskyblue2", alpha = 0.8) +
+  theme_minimal() +
+  labs(title = "At Lincoln Memorial, bikes are mostly demanded in the afternoon from 12pm-6pm",
+       subtitle = "The highest demand usually occurs at 2pm",
+       x = "Hour (Aggregate)", 
+       y = "The Number of Departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 12, hjust = 1))
+```
+
+```{r specific day, include = TRUE}
+# for a specific month and day, seeing variance by hour
+train_data_date %>% 
+  filter(year == 2021, month == "Aug", day == 15) %>% 
+  ggplot(aes(x = factor(hour), y = lincoln_memorial_departures)) +
+  geom_col(fill = "Red", alpha = 0.5) + 
+  theme_minimal() +
+  labs(title = "On August 15, the highest demand occured at 11pm and 3pm",
+       x = "Hour",
+       y = "The Number of Departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+```{r month, include = TRUE}
+# add month order
+order_month <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+# by month
+train_data_date %>% 
+  ggplot(aes(x = month, y = lincoln_memorial_departures), level = order_month) +
+  geom_point(alpha = 0.1, color = "dark red") + 
+  scale_x_discrete(limits = month.abb) +
+  theme_minimal() +
+  labs(title = "At Lincoln Memorial, people cycle the most in Spring",
+       x = "Month (Aggregate)",
+       y = "The Number of Departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13, vjust = 2))
+```
+
+```{r year, include = TRUE}
+# by year
+train_data_date %>% 
+  ggplot(aes(x = factor(year), y = lincoln_memorial_departures)) +
+  geom_col(width = 0.2, color = "pink") + 
+  theme_minimal() +
+  labs(title = "At Lincoln Memorial, more people use the bike in 2021 than in 2020",
+       x = "Year (Aggregate)",
+       y = "The Number of Departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+```{r holidays, include = TRUE, message = FALSE}
+#prep training data for holiday barchart - 1 year of data from May 2020 to April 2021
+bar_date <- train_data_date %>%
+  filter(year==2020 | year==2021 & month== "Jan" | year==2021 & month== "Feb"|year==2021 & month== "Mar"|year==2021 & month== "Apr") %>%
+  group_by(day, month, year)%>%
+  summarise(lincoln_memorial_departures=sum(lincoln_memorial_departures), n())
+## confirmed: 365 days exist in this data frame but not everyday has 24 hours because the training data does not have the full data
+              
+# create a data frame for holidays
+holidays <- generated_holidays %>%
+  filter(country == "US") 
+
+holidays$ds <- as_date(ymd(holidays$ds)) 
+
+holidays <- holidays %>%
+  mutate(
+    day = day(ymd(ds)),
+    month = month(ymd(ds), label = TRUE)
+                     ) %>%
+  filter(year==2020 | year==2021) 
+
+holidays_date <- left_join(bar_date, holidays, by= c('year', 'month', 'day')) %>%
+    na.omit(holidays) 
+
+holidays_date %>%
+  ggplot(aes(y= holiday, x= lincoln_memorial_departures , fill=lincoln_memorial_departures)) + 
+  geom_col()+
+  geom_vline(xintercept = 55.6, color = "red") + 
+  scale_fill_gradient(low = "lightblue",
+                      high = "#012345") +
+  guides(fill=guide_legend(title="Number of departures")) +
+  theme_bw() +
+  labs(title = "Demand is highest among holidays such as Independence Day, Labor Day and Memorial Day",
+       x = "",
+       y = "The number of departures from Licoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 11, hjust = 0.5, vjust = 3))
+```
+
+### Visualizations by weather at Lincoln Memorial
+
+In this part, we visualize the demand of bikes at the Lincoln Memorial station by different whether conditions.
+
+
+
+```{r temperatures, include = TRUE}
+# weather viz
+train_data_date %>%
+  ggplot(aes(x = temperature, y = lincoln_memorial_departures))+
+  geom_point(alpha = 0.1,color = "orange") +
+  labs(x = 'Temperature', y = 'Hourly Departures and Arrivals')+
+  geom_smooth(method = 'gam',
+              formula = y ~ s(x, bs = "cs")) +
+  theme_minimal() +
+  labs(title = "As the temperature goes up, departure also goes up",
+       subtitle = "There is a linear relationship between demand and temperature",
+       x = "Temperature (Fahrenheit)",
+       y = "Aggregate number of departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+```{r temperatures_month, include = TRUE, message = FALSE}
+# temperature in each month
+train_data_date %>%
+  ggplot(aes(x = temperature, y = lincoln_memorial_departures))+
+  geom_point(alpha = 0.07, color = "orange") +
+  geom_smooth(method = 'gam',
+              formula = y ~ s(x, bs = "cs")) +
+  facet_wrap(~month) +
+  theme_light() +
+  labs(title = "As the temperature goes up, demand for bikes also goes up",
+       subtitle = "There is a rough linear relationship between temperature demand except August",
+       x = "Temperature (Fahrenheit)",
+       y = "Aggregate number of departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+
+```{r wind, include = TRUE}
+# wind viz
+train_data_date %>%
+  ggplot(aes(x = wind_speed,y = lincoln_memorial_departures))+
+  geom_point(alpha = 0.1,color = "deepskyblue2") +
+  geom_smooth(method = 'gam',
+              formula = y ~ s(x, bs = "cs")) + 
+  theme_minimal() +
+  labs(title = "Demand for bikes is not sensitive to wind speed",
+       subtitle = "No clear relationship is shown between wind speed and bike demand",
+       x = "Wind Speed (miles per minute)",
+       y = "Aggregate number of departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+```{r rain, include = TRUE}
+# rain viz
+train_data_date %>%
+  filter(precipitation != 0) %>% 
+  #removing 0 to better show relationship
+  ggplot(aes(x = precipitation, y = lincoln_memorial_departures)) +
+  geom_point(alpha = 0.2, color = "blue") +
+  theme_minimal() +
+  labs(title = "Negative relationship between bike demand and precipitation",
+       subtitle = "Demand for bikes is very sensitive to precipitation",
+       x = "Precipitation (include drizzling, rain, sleet, snow, ice pellets, graupel and hail)",
+       y = "Aggregate number of departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+
+```{r clouds, include = TRUE}
+#cloud viz
+train_data_date %>%
+  ggplot(aes(x = cloud_cover,y = lincoln_memorial_departures)) +
+  geom_point(alpha = 0.5, color = "lightblue") +
+  geom_smooth(method = 'gam',
+              formula = y ~ s(x, bs = "cs")) +
+  theme_minimal() +
+  labs(title = "Demand for bikes is not sensitive to cloud coverage",
+       subtitle = "No clear relationship is shown between cloud and bike demand",
+       x = "Cloud Coverage",
+       y = "Aggregate number of departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
+
+
+```{r sunlight, include = TRUE}
+#sunlight
+train_data_date %>%
+  ggplot(aes(x = factor(sun_is_out), y = lincoln_memorial_departures)) +
+  geom_col(color = "lightgoldenrod1", width = 0.3) +
+  theme_bw() +
+  facet_wrap(~month) +
+  labs(title = "Passengers have high preference to ride bikes during daytime",
+       subtitle = "While in cold seasons, the gap in demand shrinks drastically",
+       x = "Sunlight (sun is out = 1, otherwise = 0)",
+       y = "Aggregate number of departures at Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```

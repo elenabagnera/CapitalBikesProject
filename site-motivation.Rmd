@@ -57,6 +57,3 @@ We ran three different models:
 * Decision tree
 * Random forest
 
-We start with Lasso given that we have many predictors and we were interested in variable selection and seeing the coefficients of the most important predictors. We then moved to non-parametric models, given that they tend to work well with large datasets like ours. We did a decision tree first and then tried a random forest, which is a more complex version of a decision tree and we expect to do better than the decision tree. Our best results came from the random forest model.
-
-
