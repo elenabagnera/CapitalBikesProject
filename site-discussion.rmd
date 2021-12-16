@@ -38,6 +38,7 @@ library(vip)
 library(lubridate)
 library(workflows)
 library(ranger)
+library(formattable)
 source("times.R")
 source("io.R")
 source("manipulate_data.R")
@@ -159,7 +160,7 @@ This suggests that a lot trips go back and forth between Lincoln Memorial Statio
 
 ## Discussion of Results
 
-### Average departure per hour
+### Average departures per hour
 
 ```{r mean_of_departures}
 p_test %>% summarize(mean(departures))
@@ -191,7 +192,8 @@ p_test %>%
   mutate(error = abs(.pred - departures)) %>% 
   select(year, month, day, hour, weekday, departures, .pred, error, conditions,temperature, cloud_cover, snow, precipitation, lincoln_memorial_departures) %>% 
   arrange(-error) %>% 
-  head(20)
+  head(20) %>% 
+  formattable()
 ```
 
 ### Best guesses
@@ -203,7 +205,8 @@ p_test %>%
   mutate(error = abs(.pred - departures)) %>% 
   select(year, month, day, hour, weekday, departures, .pred, error, conditions,temperature, cloud_cover, snow, precipitation, lincoln_memorial_departures)  %>% 
   arrange(error) %>% 
-  head(15)
+  head(20) %>% 
+  formattable()
 ```
 
 ### Best guesses with more 5 departures
@@ -216,7 +219,8 @@ p_test %>%
   filter(departures > 5) %>% 
   select(year, month, day, hour, weekday, departures, .pred, error, conditions,temperature, cloud_cover, snow, precipitation, lincoln_memorial_departures)  %>% 
   arrange(error) %>% 
-  head(15)
+  head(20) %>% 
+  formattable()
 ```
 
 ### Worst guessing with low departures - why?
@@ -231,14 +235,16 @@ p_test %>%
   filter(departures < 5) %>% 
   select(year, month, day, hour, weekday, departures, .pred, error, conditions,temperature, cloud_cover, snow, precipitation, lincoln_memorial_departures)  %>% 
   arrange(-error) %>% 
-  head(15)
+  head(20) %>% 
+  formattable()
 ```
 
 ### Worst guesses with low departures and actual weather
 
 The data below rejoins the predictions with the actual weather. The data below is *not* lagged.
 
-You will see that either winds, rain, or cloud cover likely caused these low rides.
+You will see that either winds, rain, high heat index, or cold and rainy.
+
 
 ```{r}
 p_test_no_wx <- p_test %>% 
@@ -248,10 +254,11 @@ p_test_no_wx <- p_test %>%
 hour_data_wx <- hour_data %>% 
   select(year, month, day, hour, conditions,temperature, cloud_cover, precipitation, wind_speed, heat_index, wind_chill)
 
-left_join(p_test_no_wx, hour_data_wx, on=c(year, month, day, hour)) %>% 
+left_join(p_test_no_wx, hour_data_wx, on=c(year, month, day, hour)) %>%
   filter(departures < 5) %>% 
   arrange(-error) %>% 
-  head(15)
+  head(20) %>% 
+  formattable()
 
 p_test %>% summarize(mean(wind_speed))
 ```
@@ -301,9 +308,6 @@ p_test %>%
   ggplot(aes(x = value, y = .pred, color=station))+
   geom_smooth(aes(x = value, y = .pred, color=station), alpha=0.1)+
   geom_point()
-
-# Look at Georgetown Harbor / 30th St NW
-# 39th & Calvert St NW / Stoddert
 ```
 
 Having two or more years would likely have helped whic did not have a large change due to COVID. Many of the large variances were Oct-March, where we have a single data point since our data covers approximately 17 months.
@@ -342,8 +346,6 @@ data_split <- initial_split(model_data, prop = 0.8)
 train <- training(x = data_split)
 test  <- testing(x = data_split)
 
-colnames(train)
-
 mod <- rand_forest(mtry = 250, trees = 1000) %>%
   set_mode("regression") %>%
   set_engine("ranger")
@@ -364,6 +366,8 @@ p_test <- bind_cols(
   test,
   predict(object = final_wf, new_data = test))
 ```
+
+We are guessing that the stepping functions are causing the reduction in predictors.
 
 ## High Supply Results
 
@@ -409,8 +413,6 @@ data_split <- initial_split(model_data, prop = 0.8)
 train <- training(x = data_split)
 test  <- testing(x = data_split)
 
-colnames(train)
-
 mod <- rand_forest(mtry = 250, trees = 1000) %>%
   set_mode("regression") %>%
   set_engine("ranger")
@@ -431,6 +433,8 @@ p_test <- bind_cols(
   test,
   predict(object = final_wf, new_data = test))
 ```
+
+We are guessing that the stepping functions are causing the reduction in predictors.
 
 ## Results
 
