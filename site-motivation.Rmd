@@ -56,6 +56,6 @@ We start with a decision tree given the size and complexity of our data . We the
 
 We will use RMSE as our error metric to judge how well our models do. RMSE is very sensitive to outliers as it squares them resulting in a bigger error compared to MAE for example. From the exploration done above, we know that there is a wide range within (e.g. in some hours it is 0, for example at night) and across days (e.g. for instance there are very few rides on Christmas day) in terms of hourly departures. Our motivation for this project is to reduce the chance that there will be no bikes available so that the service is more reliable. Therefore, we think that the RMSE will be better for our application purposes because it penalizes more the outliers that we do have in our data.
 
-How much error is too much depends on how loose or strict we want to predict our outcomes. For our project, some error is probably accepted but being too loose in deciding what the error could be too costly. Based on the average departures per hour on any given day 3.45, we think an RMSE of 2-3 would be acceptable
+How much error is too much depends on how loose or strict we want to predict our outcomes. For our project, some error is probably accepted but being too loose in deciding what the error could be too costly. Based on the average departures per hour on any given day 3.45, we think an RMSE of 1-2 would be acceptable
 
 
