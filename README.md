@@ -22,14 +22,15 @@ Being able to predict Capital Bikeshare demand, could result in a more efficient
 
 ## How to navigate this repository
 
-* Data folder: contains original data taken from Capital Bikeshare's website 
-* Docs folder: contains htmls used for building the project website 
-* motivation.rmd: contains project motivation and overall details on the project and the data we use
-* vleanup.rmd: contains a description of all of the data cleaning we did
-* visualizatiom.rmd: contains all the visualizations run for EDA
+* Data folder: contains original data taken from Capital Bikeshare's website and .csv files generated from them
+* Docs folder: contains web content used for building the project's Svelte website
+* site-*.Rmd: Used to produce the individual pages on the website. They must knitted and copied to the docs folder when finalized.
+* visualizatiom.Rmd: contains all the visualizations run for EDA
 * lasso, random forest and decision tree contain the code for each individual model
-* random-forest-final: contains the evaluaiton of the best model for the discussion section of the websire
-* Functions R files: io.R (merging all csvs contained in data), mainipulate_data. R(all functions used to manipulate data), times.R (functions specific to manipulating time-related variables)
-* csv documents outside of Data folder were the result of the cleaning process 
-* Any document that starts with "site-" is a duplicate of an already existing document that only includes what we decided to show on the website 
+* Functions R files 
+  * io.R - merging all csvs contained in data
+  * mainipulate_data.R - all functions used to manipulate data
+  * times.R - functions specific to manipulating time-related variables
+* hour_data_3200.csv - Final common set of the hour_data variable, after data cleanup, filtered to 3200m from the Lincoln Memorial
+* lagged_data_3200.csv - Final set of lagged data used for modeling filtered to 3200m from the Lincoln Memorial
 
