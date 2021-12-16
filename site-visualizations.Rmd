@@ -56,10 +56,28 @@ train_data_date <- training(x = data_split)
 test_data_date  <- testing(x = data_split)
 ```
 
-### Visualizations by time at Lincoln Memorial
+### Density plot of the dependent variable  
+  
+  
+```{r ride density, include = TRUE}
 
-In this part, we use Lincoln Memorial as an example station to show the change in amount of rides over time.
+# density plot (no log)
+train_data_date %>%
+  filter(lincoln_memorial_departures != 0) %>% # notice that we here are dropping 0s
+  ggplot(aes(x = lincoln_memorial_departures)) +
+  geom_density() +
+  theme_minimal() +
+  labs(title = "The depature distribution at Libcoln Memorial is skewed", 
+       x = "Number of departures from Lincoln Memorial") +
+  theme(plot.title = element_text(face = "bold", size = 13))
+```
 
+
+### Visualizations by time at Lincoln Memorial  
+  
+
+In this part, we use Lincoln Memorial as an example station to show the change in amount of rides over time.  
+  
 
 
 ```{r date, include = TRUE}
@@ -111,11 +129,11 @@ train_data_date %>%
   ggplot(aes(x = factor(hour), y = lincoln_memorial_departures)) +
   geom_col(fill = "deepskyblue2", alpha = 0.8) +
   theme_minimal() +
-  labs(title = "At Lincoln Memorial, bikes are most demanded in the afternoon from 12pm-6pm",
-       subtitle = "The highest demand occurs at 2pm",
+  labs(title = "At Lincoln Memorial, bikes are mostly demanded in the afternoon from 12pm-6pm",
+       subtitle = "The highest demand usually occurs at 2pm",
        x = "Hour (Aggregate)", 
        y = "The Number of Departures at Lincoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 13, hjust = 1))
+  theme(plot.title = element_text(face = "bold", size = 12, hjust = 1))
 ```
 
 ```{r specific day, include = TRUE}
@@ -125,7 +143,7 @@ train_data_date %>%
   ggplot(aes(x = factor(hour), y = lincoln_memorial_departures)) +
   geom_col(fill = "Red", alpha = 0.5) + 
   theme_minimal() +
-  labs(title = "On August 15, the highest demand occured at 12pm and 2pm",
+  labs(title = "On August 15, the highest demand occured at 11pm and 3pm",
        x = "Hour",
        y = "The Number of Departures at Lincoln Memorial") +
   theme(plot.title = element_text(face = "bold", size = 13))
@@ -151,7 +169,7 @@ train_data_date %>%
 # by year
 train_data_date %>% 
   ggplot(aes(x = factor(year), y = lincoln_memorial_departures)) +
-  geom_col(width = 0.3, color = "pink") + 
+  geom_col(width = 0.2, color = "pink") + 
   theme_minimal() +
   labs(title = "At Lincoln Memorial, more people use the bike in 2021 than in 2020",
        x = "Year (Aggregate)",
@@ -159,7 +177,7 @@ train_data_date %>%
   theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
-```{r holidays, include = TRUE}
+```{r holidays, include = TRUE, message = FALSE}
 #prep training data for holiday barchart - 1 year of data from May 2020 to April 2021
 bar_date <- train_data_date %>%
   filter(year==2020 | year==2021 & month== "Jan" | year==2021 & month== "Feb"|year==2021 & month== "Mar"|year==2021 & month== "Apr") %>%
@@ -187,14 +205,14 @@ holidays_date %>%
   ggplot(aes(y= holiday, x= lincoln_memorial_departures , fill=lincoln_memorial_departures)) + 
   geom_col()+
   geom_vline(xintercept = 55.6, color = "red") + 
-  scale_fill_gradient(low = "#FFFFFFFF",
+  scale_fill_gradient(low = "lightblue",
                       high = "#012345") +
   guides(fill=guide_legend(title="Number of departures")) +
   theme_bw() +
   labs(title = "Demand is highest among holidays such as Independence Day, Labor Day and Memorial Day",
        x = "",
        y = "The number of departures from Licoln Memorial") +
-  theme(plot.title = element_text(face = "bold", size = 11, hjust = 0.5, vjust = 2))
+  theme(plot.title = element_text(face = "bold", size = 11, hjust = 0.5, vjust = 3))
 ```
 
 #### Visualizations by weather at Lincoln Memorial
@@ -219,12 +237,13 @@ train_data_date %>%
   theme(plot.title = element_text(face = "bold", size = 13))
 ```
 
-```{r temperatures_month, include = TRUE}
+```{r temperatures_month, include = TRUE, message = FALSE}
 # temperature in each month
 train_data_date %>%
   ggplot(aes(x = temperature, y = lincoln_memorial_departures))+
   geom_point(alpha = 0.07, color = "orange") +
-  geom_smooth() +
+  geom_smooth(method = 'gam',
+              formula = y ~ s(x, bs = "cs")) +
   facet_wrap(~month) +
   theme_light() +
   labs(title = "As the temperature goes up, demand for bikes also goes up",
