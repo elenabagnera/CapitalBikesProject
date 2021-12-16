@@ -187,7 +187,7 @@ lasso_coefs %>%
   coord_flip() +
   theme_minimal() + 
   labs(title = "Sunlights has the highest coefficient in predicting ridership") +
-  theme(plot.title = element_text(face = "bold", size = 12))
+  theme(plot.title = element_text(face = "bold", size = 12, hjust = 1))
 ```
 
 ```{r results, include = FALSE}
