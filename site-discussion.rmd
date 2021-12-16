@@ -111,8 +111,6 @@ mod <- rand_forest(mtry = 250, trees = 1000) %>%
   set_engine("ranger")
 ```
 
-Out of sample RMSE
-
 ```{r chosen_one, cache=TRUE}
 final_wf <- workflow() %>%
   add_recipe(recipe) %>%
@@ -128,6 +126,7 @@ p_test <- bind_cols(
   predict(object = final_wf, new_data = test))
 ```
 
+Out of sample RMSE: this is smaller than what we got when we ran random forest on the training data with folds.
 
 ```{r OOS_RMSE_lincoln}
 sqrt(mean((p_test$departures - p_test$.pred)^2))
