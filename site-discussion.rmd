@@ -166,7 +166,7 @@ This suggests that a lot trips go back and forth between Lincoln Memorial Statio
 p_test %>% summarize(mean(departures))
 ```
 
-The average departures per hour are `3.45`. Therefore an RMSE > 3.45 appears to not be very good. Lets look at the areas where the predicitions are poor.
+The average departures per hour are `3.45`. Therefore an RMSE > 3.45 appears to not be very good. Lets look at the areas where the predictions are poor.
 
 ### Top 20 hours of 12431 hours.
 
