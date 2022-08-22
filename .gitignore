@@ -48,8 +48,3 @@ po/*~
 
 #images
 *.jpg
-data/.202005-capitalbikeshare-tripdata.csv.icloud
-data/.202006-capitalbikeshare-tripdata.csv.icloud
-data/.202007-capitalbikeshare-tripdata.csv.icloud
-data/.202008-capitalbikeshare-tripdata.csv.icloud
-data/.202009-capitalbikeshare-tripdata.csv.icloud
